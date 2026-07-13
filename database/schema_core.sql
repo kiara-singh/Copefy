@@ -7,7 +7,11 @@ CREATE TABLE profiles (
     current_triage_tier INT DEFAULT 0, -- 0 = stable, higher numbers indicate distress
     subscription_tier VARCHAR(50) DEFAULT 'free',
     consent BOOLEAN NOT NULL DEFAULT FALSE,
-    legal_consent JSONB -- Stores specific flags: {terms_accepted: true, hipaa_acknowledged: true}
+    legal_consent JSONB, -- Stores specific flags: {terms_accepted: true, hipaa_acknowledged: true}
+    preferred_name VARCHAR(255),
+    communication_style TEXT,
+    wellness_goal TEXT,
+    onboarding_complete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- 2. SESSIONS

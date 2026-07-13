@@ -26,3 +26,6 @@ npm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# TypeScript Build Info
+*.tsbuildinfo
