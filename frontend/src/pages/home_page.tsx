@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { create_session, send_chat } from "../lib/api";
-import { supabase } from "../lib/supabase_client";
 
 const SESSION_STORAGE_KEY = "copefy_session_id";
 
@@ -39,17 +38,6 @@ function HomePage() {
     scroll_anchor_ref.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handle_logout = async () => {
-    try {
-      await supabase.auth.signOut();
-      localStorage.removeItem(SESSION_STORAGE_KEY);
-      set_session_id(null);
-      set_messages([]);
-    } catch (error) {
-      console.error("Failed to sign out:", error);
-    }
-  };
-
   const handle_submit = async (event: React.FormEvent) => {
     event.preventDefault();
     const trimmed = input.trim();
@@ -80,12 +68,8 @@ function HomePage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
+      <header className="flex shrink-0 items-center border-b border-slate-200 bg-white px-6 py-3">
         <span className="text-sm font-semibold text-slate-800">Chat</span>
-        <button
-          onClick={handle_logout}
-          className="flex items-center justify-center h-8 px-4 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 text-xs font-semibold leading-none transition-colors"
-        >Sign Out</button>
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
