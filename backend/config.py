@@ -4,20 +4,32 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Application settings loaded from environment variables / .env file."""
 
-    # Supabase project URL, e.g. https://xxxxxxxx.supabase.co
     supabase_url: str = ""
-
-    # Service role key (server-side only, never expose to the browser).
     supabase_service_key: str = ""
-
-    # Direct Postgres connection string for pgvector / RAG queries.
-    # e.g. postgresql://postgres:<password>@db.xxxx.supabase.co:5432/postgres
     database_url: str = ""
-
-    # Comma-separated list of allowed CORS origins for the frontend.
     cors_origins: str = "http://localhost:5173"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    gemini_api_key: str = ""
+    gemini_chat_model: str = "gemini-flash-latest"
+    gemini_embed_model: str = "gemini-embedding-2"
+
+    rag_top_k: int = 8
+    rag_match_count: int = 20
+    rag_debug: bool = False
+    rag_strategy: str = "baseline"
+    rag_min_similarity: float = 0.65
+
+    agent_router: str = "rule"
+    agent_router_model: str = "gemini-flash-latest"
+    # Optional: bill routing to a different project than chat/embeddings. Free-tier
+    # generateContent quotas are tiny, so a paid key here makes eval runs practical.
+    agent_router_api_key: str = ""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     @property
     def cors_origins_list(self) -> list[str]:

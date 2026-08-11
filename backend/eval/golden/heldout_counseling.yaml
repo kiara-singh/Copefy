@@ -1,0 +1,2457 @@
+# Held-out counseling questions from HuggingFace Amod/mental_health_counseling_conversations.
+# Labeled by product intent. Do NOT tune the rule router against this file.
+# Score with: python -m eval.layer1_eval --router rule --tag heldout
+
+- id: heldout_counsel_001_4e987ab0
+  query: I'm depressed and recently went through a break up. It’s like every guy I like only wants me
+    for sex. I think I'm ugly, and sometimes I just want to die. I have a son, and I got really big when
+    I was pregnant. I have stretch marks on my stomach.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_002_93bc471d
+  query: My roommate has had a drinking problem for a while. She goes out, gets trashed, and then expects
+    everyone to take care of her. The next morning, she apologizes constantly until she feels validated.
+    She also thinks everyone hates her all the time. If I don't seem anything other than happy, she asks
+    me "Do you hate me? You hate me. Tell me you love me," and I feel like I have to pity her because
+    she has also been suicidal before.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_003_3eb923c0
+  query: "I'm going through some things with my feelings and myself. I barely sleep and I do nothing but\
+    \ think about how I'm worthless and how I shouldn't be here.\n   I've never tried or contemplated\
+    \ suicide. I've always wanted to fix my issues, but I never get around to it.\n   How can I change\
+    \ my feeling of being worthless to everyone?"
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_004_cbd1946d
+  query: Whenever I don't tell my friends or anyone what I did or stuff that's not really important, I
+    feel terrible, like there’s a hole in my stomach. It only goes away when I hurt myself.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_005_9d7b55e0
+  query: A friend of mine taking psychology advised I go to my doctor to check if I have major depressive
+    disorder. I'm afraid of the consequences of doing so. If I do become diagnosed with major depressive
+    disorder, won’t that go on my records? I will never be able to become a counselor along with a list
+    of other things I may be prohibited from. I’m also afraid of taking any anti-depressants. This year,
+    my doctor gave me some for a "dislocated hip." I had a severe reaction and passed out moments after
+    taking them. Everyone I know who has taken anti-depressants says it’s a bad idea all around and you’re
+    better getting treatment without them. I’m concerned they might take me to a clinic and force me…
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_006_6ea344ac
+  query: I recently lost a friend to suicide. I'm smoking marijuana and drinking more to cope with it.
+    How can I handle this better?
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_007_09ecd586
+  query: Both of my parents committed suicide together, and I was the one who found them. I suffer from
+    overwhelming depression, which is having an extreme effect on me and my husband’s sex lives. He does
+    not understand at all and is always making me feel so uncomfortable about sex.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_008_2a31592d
+  query: I self-harm, and I stop for awhile. Then when I see something sad or depressing, I automatically
+    want to self-harm.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_009_1d3c127a
+  query: I don't know how to have emotions. I never had any from my birth. Being human, I think of myself
+    as a monster. I enjoy pain. I cut myself for my climax during sex. I think most of the time, I lie,
+    even when sometimes it would have been easy just to tell the truth. I was in rehabilitation for four
+    year. I have made love with both men and women, but it made no impact in my emotions. The books that
+    I enjoy reading H.P. Lovecraft and Edgar Allen Poe. I go hunting every Saturday. I feel powerful.
+    I don't enjoy the killing of the creature, but the hunt of it and to eat and drink the flesh and blood
+    of the creature.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_010_7bfcfb57
+  query: I'm 17 and I'm sick and tired of going back and forth. I'd like to stay at my mother's house.
+    This problem has really affected me. I've had anxiety attacks and suicidal thoughts and self-harm
+    in the past.    Currently I'm going through anxiety and my thearapist is not available. How do I handle
+    this?
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_011_573cdca5
+  query: I feel depressed even though I act like a happy with my family. I act like I’m happy so my son
+    doesn’t see me sad. I act like my life is a happy life, but I feel sad and depressed. I sometimes
+    think of killing myself and that my family deserve someone better than me. I just cry and write in
+    my book all these feelings.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_012_534409e8
+  query: When I'm sad and alone, I want to cut myself.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_013_ed58b4dd
+  query: I've been depressed for quite a while. I've been trying to work through it, and my boyfriend
+    has been my rock. He is honestly the only person I trust enough to talk to about anything, but he
+    decided to break up with me because of my depression. I cannot afford to see a therapist or anything,
+    so he saw no hope in staying with me. My insurance has a $5000 deductible, so I’m screwed. I've had
+    everything from suicidal thoughts to trying to quit my job. I have no one. My family doesn't care
+    about me; they kicked me out when I turned 18 a few years ago. I had friends, but they have all moved
+    on with their lives and have no time for me. My ex-boyfriend is trying to help but is making things
+    worse…
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_014_02dd8831
+  query: I am pretty sure I have depression and anxiety. I also have voices in my head. I have problems
+    sleeping too. I've already been diagnosed with attention-deficit disorder and obsessive-compulsive
+    disorder. I have self-harmed in the last and used to be suicidal. How do I tell them this and ask
+    for therapy?
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_015_40667dd4
+  query: "I'm a teenager and I I go through periods of moodiness. I have extreme feelings (but I bury\
+    \ them), and then I feel nothing - just empty and emotionless.\n   I have trust issues, low self esteem,ban\
+    \ extreme fear of abandonment, and I constantly reevaluate my relationships. I also don't know who\
+    \ I am as a person. I'm not happy overall, but I'm not suicidal. Can I just feel happy?"
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_016_e41a7257
+  query: My fiancée suffers from severe anxiety and depression. She has had it most of her life. Her anxiety
+    in public places is the worst. It gets to points where she can't breathe or move. Sometimes, she won't
+    even go to the restroom, so she will hold in her pee until her stomach hurts or she pees herself.
+    She curls up in corners at the mall and has panic attacks. She won't eat or drink in public. If she
+    isn't having a panic attack or crying, she's clinging to me and avoiding everything and everyone.
+    Her depression flares up out of nowhere and causes her to become very suicidal and self-harming. She
+    get really sick from anxiety and scared to the point that I can't even get her to eat, drink, leave…
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_017_d566acea
+  query: My boyfriend lost his dad to suicide. He says that because his dad died, so did his heart. He
+    says that he can't be there for me or love me anymore and wants nothing to do with me ever again.
+    Why is he doing this when we were very happy together? He says that I have done nothing wrong but
+    he just can't be with me.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_018_8e7f4fcf
+  query: I'm not suicidal and wouldn't take my own life, but sometimes, I've wished for an accident to
+    occur and take it. I feel like I just shouldn't be here and wish I wouldn't have been born so I didn't
+    have to go through life. For me, it's a chore, but I don't know if that's normal or a sign of something.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_019_a75386f5
+  query: The birth mother attempted suicide several times while pregnant. The adopted mother was terminally
+    ill upon adopting the baby and died when the child was just over one year old. The adopted father
+    then remarried to a physically, psychologically, and emotionally abusive woman. The child was placed
+    in foster care at 11 years old.    What might be the long term effects on an adult with this childhood
+    history?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_020_c702106f
+  query: My depression has been reoccurring for a long time. It all started when I was being bullied in
+    high school. In ninth grade, my principal told me I needed to stay home for a couple days to protect
+    myself while she spoke to my classmates. I needed professional help for my stress because I was having
+    crying spells from the stress of going to school and confronting my classmates. After that, I was
+    fine for a couple of years. I entered my first year of college in a really tough program with high
+    demands of expected work. I believe my depression re-booted from there with the stress. I began to
+    cut myself because a friend of mine at the time told me how she used to do the same and it used to
+    feel…
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_021_6d4da3cb
+  query: At school, it feels like I've lost all my friends, and I've been really weird with my sleeping
+    patterns. I used to cut myself, and I really want to again, but I change in the locker rooms because
+    I don’t want anybody to see. I get ticked off easy and overreact. At night, I’m very depressed and
+    listen to sad music and all that sort of stuff. Please help me. I just want to be happy again, and
+    I feel like I’m starting to fake a smile at school.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_022_529fb497
+  query: I have bipolar disorder, paranoid personality disorder, posttraumatic stress disorder, anxiety
+    and obsessive-compulsive disorder. I last self-harmed a week ago. When I am stressed, overwhelmed,
+    hurt, or angry, the urge to self-harm is all I can think of. I am trying to seek help.
+  type: crisis
+  expected_path: crisis
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_023_dd00c900
+  query: I've been bulimic for about 6 years now. I'm in my early 20s. I am about to start back to school
+    to become an RN, and I really need to get better once and for all.    I lose control of myself and
+    become angry and anxious and just eat and purge. Over and over. Can someone please point me in the
+    right direction for help?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_024_b26e9735
+  query: "I have so many issues to address. I have a history of sexual abuse, I’m a breast cancer survivor\
+    \ and I am a lifetime insomniac.    I have a long history of depression and I’m beginning to have\
+    \ anxiety. I have low self esteem but I’ve been happily married for almost 35 years.\n   I’ve never\
+    \ had counseling about any of this. Do I have too many issues to address in counseling?"
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_025_04fc9712
+  query: I haven't been feeling like myself lately. I've been upset for no reason and feeling anxious.
+    I'm feeling burnt out. What can help me feel better?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_026_979b6637
+  query: I have PTSD from childhood events and other traumas as an adult. I have panic attacks, nightmares,
+    anger, and at times depression. I feel like I'm always on the edge or just apathetic. Can I fix this
+    by myself?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_027_a3a10721
+  query: I've been having horrible anxiety for the last week. I can't sleep. I get a sense of doom, and
+    it's hard to breathe. I feel like nothing I do makes it better.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_028_141429b2
+  query: I feel really uncomfortable when I have people's attention. It makes me not want to talk in public
+    or answer questions in class. Can I get over this social anxiety?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_029_f0b78dfa
+  query: I have several issues that I need to work through. However, I am afraid of and do not trust therapists
+    after a horrible experience. I'm dealing with grief and guilt over losing my sons due to drug use.
+    I have a very complicated traumatic relationship issue that is causing me severe anxiety and fear.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_030_16850ecf
+  query: I am a teenager. I have been experiencing major episodes of depression (if that's even what it
+    is) for several years. It’s always getting worse. I have been having panic attacks, feeling like I
+    can't control my fears, and I can't even bring myself to care if I live or die anymore. The problem
+    is that I don't know who to ask for help. When I try to talk to my parents, I freeze completely and
+    can't do anything but make a joke because never once in my life have we talked about our feelings.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_031_8da85bc4
+  query: I get very nervous and anxious/scared before sex.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_032_d009bab1
+  query: I was anxious to go to middle school. I was afraid of what people might say about me, so when
+    school started, I wasn't acting like myself. I was quiet, which I'm usually not. I didn't talk to
+    anybody and didn't have any friends. Then a few years later, my grandma died. I really became depressed
+    and stop going to school for a little. I hated myself and still do. I just need help. I need someone
+    to care for me. I need someone to show that they care.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_033_63d8fa4e
+  query: My friend is abusing her prescription medicine. Even though she told me she didn't have any more
+    pills, I found she has prescriptions for anxiety medications.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_034_a4d73fa9
+  query: I have been feeling more and more down for over a month. I have started having trouble sleeping
+    due to panic attacks, but they are almost never triggered by something that I know of.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_035_14f7e837
+  query: I have secrets in my mind, and I don't know what to do with them. I don't want to tell my wife
+    and mom because I don't want to hurt them. But I'm not sure how long that I can keep the secret to
+    myself. What should I do? It's becoming annoying and making me anxious. Help me out
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_036_3abf3a64
+  query: I'm a teenager, and I struggle with going out and talking to people. I feel awful about leaving
+    home. I know I can't afford a therapist so I don't know what my problem is, but I think I might have
+    social anxiety.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_037_181793df
+  query: I’ve been on 0.5 mg of Xanax twice a day for the past month. It hasn't been helping me at all,
+    but when I take 1 mg during a big anxiety attack, it calms me down. I was wondering how I can ask
+    my psychologist to up the dose to 1 mg twice a day without her thinking I'm abusing them. I just have
+    very big anxiety attacks. Should I stay on the 0.5mg and deal with the attacks or should I ask to
+    up the dose? I'm afraid she will take me off them and put me on something else.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_038_c8833e69
+  query: I have been diagnosed with general anxiety and depression by my family doctor. They wrote a prescription
+    for me to have an emotional support dog, I have the paper work, and I gave it to my apartment manager.
+    They said I can't keep the ESD because I'm not disabled. What do you suggest I do?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_039_cb3f4c99
+  query: Whenever I leave my girlfriend I get panic attacks. I'm taking medications to control them, but
+    I'm thinking of moving in with her since I get so anxious.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_040_7d20dfae
+  query: I have been dealing with depression and anxiety for a number of years. I have been on medication,
+    but lately my depression has felt worse. Can counseling help?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_041_94b4a84c
+  query: I've been having this ongoing problem for most of my life now. I am a young adult, and right
+    now, driving and even being a passenger gives me terrible panic attacks and anxiety. I can't ride
+    in the backseat or the front seat with the safety belt on. I have to lean the seat back a bit because
+    the pressure on my back terrifies me. I miss so many opportunities to go places with friends and family
+    because of my fears of having a panic attack. My family offers little to no support. They think it's
+    fake or "all in my head." It makes me feel guilty and at times depressed to the point where I'd rather
+    never wake up anymore. I am not self-harming, I just feel meaningless. This constant fear has…
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_042_4f7cf513
+  query: "I have been with my boyfriend for more than a year. He recently got a new job and travels a\
+    \ lot. I’m not used to him being gone all the time. I feel as though he has forgotten about me because\
+    \ he does not talk with me as much and doesn’t keep me up to date on everything that he does throughout\
+    \ the day, which he used to.\n I feel lost, sad and unwanted. This is really a tough new challenge.\
+    \ I just want to break up with him, but I love him so much. I don’t know why he is acting this way\
+    \ lately. I believe I have separation anxiety. Is there anything that I can do to help me cope with\
+    \ this while he is out of town?"
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_043_cffad5fc
+  query: My motivation has gone away. It's hard to get out of bed. I really don't know what to do anymore.
+    I'm miserable. My anxiety and depression have taken over my life.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_044_60cf9a9c
+  query: I have major depression, severe, PTSD, anxiety disorder, and personality disorder. I had an appointment
+    with my doctor. I was very upset, and I shared with him about that particular drug.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_045_740fe94d
+  query: Sometimes I can't stop thinking about life after death. I was raised in a religion that teaches
+    that we will live on forever either in hell or in heaven.  When I think of living forever (even if
+    it is in heaven which should be good), I feel overwhelmed. I don't like the thought of living forever
+    and ever and ever. Sometimes I just can't get the thought out of my mind and the thoughts lead to
+    panic and anxiety.  Am I crazy? I don't think these thoughts are normal.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_046_507999e7
+  query: I have been having a lot of nightmares where I am being killed in different ways. I either wake
+    up in a panic or just crying and sweating. It has made me terrified of falling asleep and is now affecting
+    my daily life too. Can I make the nightmares stop?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_047_866f8a87
+  query: My wife and I are newly married, about 2 months. We've had some issues surrounding sex, particularly
+    her lack of libido. She's on an anxiety medication, of which diminished libido is a side effect, but
+    I think our issue is also partly one of a lack of intimacy/romance centered around my hectic schedule.
+    Our sex life has suffered as a result. Tonight she made a genuine effort to let me know she wanted
+    sex, which is a big deal. Once things started, she had the most obviously fake orgasm I've ever encountered.
+    I was honest with her about why, and told her that the most important thing to me in sex was knowing
+    that she was legitimately enjoying it. She responded angrily with a complete denial…
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_048_a9ad533a
+  query: My husband and I are in a terrible place. Part of me wants to fix it, but then I'm caught up
+    with not knowing how and not being able to communicate my feelings to him because he always feels
+    I'm blaming him. Sometimes I am because the feelings of distrust are so strong. I feel they must be
+    coming from something he's doing, but sometimes I know I'm being irrational. Still, that doesn't stop
+    the anxiety. The other half of the time, I just want to walk away, but I feel like that will only
+    be a temporary fix.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_049_99c0538d
+  query: My doctor thinks that seeing a psychiatrist will help with my depression and anxiety. Now my
+    anxiety is worse, what do I do? Writing on here has taken every bit of strength I have left.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_050_125d5885
+  query: I'm depressed often, and my mind goes a million miles a minute. Every once in a while, things
+    are okay for a few days. After a bit, I start noticing that I am picking at my skin profusely. After
+    roughly a week, the anxiety is back and still picking. Sometimes I find myself causing fights to have
+    change.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_051_0ea2609a
+  query: I am broke, but I am sure I have been depressed for the past couple of years. I have always had
+    anxiety. I just need someone to talk to right now. I don't have any friends or family I can talk to.
+    I'm on the verge of just giving up.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_052_b831b857
+  query: I feel angry, anxious, and depressed. The PTSD I suffer is from a past relationship.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_053_0a8bde5f
+  query: I've become so jaded that I can't control my thoughts. I cannot focus on anything and been having
+    anxiety attacks.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_054_9335b9b9
+  query: "I recently broke up with my boyfriend After being together for over 4 years. I truly believe\
+    \ I did the right thing, but omehow being single now has made me very needy and unsure of myself.\n\
+    \    I am seeing someone casually and I am losing my mind with anxiety about how he feels about me\
+    \ and this need for validation.\n   How can I learn to be content and at peace with myself regardless\
+    \ of my career, relationship status, etc?"
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_055_85c38337
+  query: For my whole life, I’ve been very unconfident, insecure, and self-questioning. I'm super quiet
+    because I'm scared of what people will think of me. I avoid all social situations as it causes me
+    great anxiety. It is how both of my parents have always been, and I feel like I'm doomed to that life
+    also. It makes it super hard for me at work as the other employees try to use me and walk all over
+    me because I’m too nice. It causes me depression and brings me down. I’m in my early twenties, and
+    I really need to create a better life for myself. I've been like this for so long, so how do I change?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_056_f4c3e07a
+  query: I don't have time to live or take care of myself at times. It's causing depression, stress, and
+    anxiety. I don't know what to do.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: heldout_counsel_057_8af600bc
+  query: I constantly have this urge to throw away all my stuff. It’s constantly on my mind and makes
+    me feel anxious. I don’t sleep because I’m thinking about something I can get rid of. I don’t know
+    why I do it. I started years ago when I lived with my dad then I stopped when I moved in with my mom.
+    Years later, it has started again.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_058_f2e6fe0b
+  query: I feel so irritated and frustrated because of it. I get so angry to the point that I feel like
+    I'm going to explode. I feel pathetic, stupid, and worthless. I just can't take this anymore.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_059_68e6ffb9
+  query: I have bipolar II disorder, I'm addicted to alcohol and weed, and I'm hopeless. I keep drinking
+    even though it's harming myself and others.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_060_941258f9
+  query: I don't know what's wrong with me. At times I can be really happy, excited, I'll talk fast, and
+    I want to do things. But lately I've been staying up way later and sleeping too much. I don't hang
+    out with friends, I don't really have them. I feel nothing, worthless. I want to do nothing, I have
+    no interest in anything.    All I usually do is stay in my room. I want to be happy, I want to be
+    nice. What's wrong with me?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_061_e83caaf0
+  query: I am the problem. I make my family argue because of me. My mom has even said it. It's constantly
+    like this. I cause problems. I am worthless. I can't stop crying. Sometimes I have to cry myself to
+    sleep. I can't even leave my room because my family can't stand me.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_062_74564c5c
+  query: I am in my mid 30s. I feel I have used only 5% of my potential. I am in film making, but everything
+    is stuck. I've never had a serious relationship. I had worthless jobs. I do a lot of meditation to
+    try to fix it.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_063_b0adc917
+  query: My dad makes me feel like shit and like I'm worthless. He calls me names and makes me feel depressed.
+    I want to move out because I swear if I stay here, I'm going to lose it. What can I do?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_064_213dca99
+  query: I'm in my late 20s, and I've never had a boyfriend or even been on a date. I have no friends.
+    I hate Facebook because everyone else has kids and a great husband and great paying jobs. I work in
+    retail, and I can't find a job. I have an Associate degree. No one is not giving me a chance, and
+    I'm getting upset and frustrated. I feel worthless and feel like everyone hates me. I feel like a
+    failure, and I still live with my Dad. It's very embarrassing!
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_065_fc5a4d5b
+  query: I have several issues like I don't like people. They make me sick. I have issues with talking
+    to people. I feel like they are talking about me and making fun of me. I have felt this way for years.
+    When I look people in the eyes I have voices that tell me to hurt them and if I don't stop looking
+    at who I am talking to it gets so loud I can't hear what they are saying. I just stay away from people
+    to avoid this. I look at people and think how I could hurt them. I feel like I am worthless and would
+    be better off not in this world where I don't fit in. Every day I wake up it's like another day. Any
+    info would be good.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_066_efbdf54d
+  query: I'm always told I'm not good enough or trying hard enough. I put 100% in to every thing. I'm
+    worn out, I've worked on all of my family relationships, I'm doing great in school, I'm kind to those
+    in need and otherwise. I stick to my religious beliefs and leave room for mistakes and learn from
+    others so I don't have to make as many and the ones I do I learn from.  Somehow it's still not good
+    enough and nothing I do works. Nothing has changed, and I feel hopeless. Any suggestions or ideas?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_067_9349db02
+  query: "I’m a senior high school student. I’m also five months pregnant. I got pregnant by my boyfriend\
+    \ of three years. My parents don’t want us to communicate with each other. He can’t even come to visit\
+    \ my gynecologist. My mom goes to attend all of my doctor’s appointments. She’s supportive of me.\
+    \ I wish, though, that my boyfriend was next to me and be able to see his daughter on a sonogram,\
+    \ at the very least. My family does not understand that he deserves that much. I cry all the time\
+    \ because I feel lost and hopeless.\n I need guidance and I believe that you can give it to me. Am\
+    \ I wrong for wanting him around? Are they right for keeping him away from the appointments and not\
+    \ letting us…"
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_068_4ff5a466
+  query: After he got home from the hospital he was angry, then for a time wonderful. Now he is depressed
+    and hopeless again.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_069_44c17498
+  query: Last year, I just always felt hopeless. I don't have a great relationship with my sister. I lost
+    my mother recently, and that really added to my sadness. My sister always brings up how I was never
+    close to my mother.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_070_d5ad87b3
+  query: I've been feeling worthless, unaccomplished, and so frustrated. I want to break things, hit myself,
+    run away, kick, scream, and cry. I just want to be happy and outgoing again. I want to be able to
+    take care of my daughter and live comfortably.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_071_8e96ce12
+  query: My dad refuses to acknowledge my anxieties about going to parties, dinners, etc. Whenever I have
+    an opinion it gets shut down. My mom and everyone else behaves likewise. For my father who heads a
+    company, this is normal. He has to be right all the time. He blatantly refuses to even try to see
+    it from my angle.    Recently however, it's been getting to the point where I feel pressured and unable
+    to speak my mind. It isn't possible for me to get professional one-on-one help. He tells me to grow
+    a pair and get over it. I recently have been developing more severe body image and self-confidence
+    issues, which I have had all my life. I feel invalidated by my dad. I have been more paranoid lately…
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_072_10275ef6
+  query: My daughter didn't see her biological father for the last three years. She doesn’t want to see
+    him because she remember really bad things from him such as domestic violence and child abuse. The
+    visitation is with supervision, but she refuses to see him. Is it better to take my daughter to the
+    therapist and try to see him after the therapy?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_073_2fc6f040
+  query: I'm a teenager, and throughout my entire life, I've never really had good parents, or parents
+    at all for that matter. I'm not exaggerating. I was living with my mom and grandparents until my father,
+    in prison for most of my life, got out when I was in middle school. His mom, my grandma, only lived
+    a mile down the road from my mom’s house, and I was so awe-stricken with my dad that I got to stay
+    with him for a long time. Meanwhile, I did not realize that my mom was doing hardcore drugs. My mom
+    went to prison for that and lost her café. We live in a very small town, so everyone knew about it,
+    and I was bullied because of who my parents were. My dad ended up getting in with the wrong people…
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_074_c6ad0b28
+  query: "There are issues from my past that have me very heavily burdened in my heart. I've been torn\
+    \ for so many years and I need help so I can move on with my life.\n   I experienced trauma when I\
+    \ was 8 years old and I did come out about it until I was 40.\n   Now I know this is what's holding\
+    \ me back on my happiness. I've met a very loving and caring man but because I'm holding on to these\
+    \ things from my past I’m pushing him away.\n   How can I get my life back?"
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_075_93a72457
+  query: "My dad doesn't like the fact that I'm a boy. He yells at me daily because of it and he tells\
+    \ me I'm extreme and over dramatic.\n   I get so depressed because of my dad's yelling. He keeps asking\
+    \ me why I can't just be happy the way I am and yells at me on a daily basis. Is this considered emotional\
+    \ abuse?"
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+  - ptsd
+- id: heldout_counsel_076_e011d026
+  query: I'm fine when we start becoming intimate, but out of nowhere, I will get a flashback of what
+    happened to me in the past. I start hysterically crying and freaking out when my boyfriend obviously
+    has done nothing to hurt me.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_077_708afee3
+  query: I have recently separated from my husband whom I have been with for 5 years.  Throughout our
+    5 years together, I have stood by him through 2 affairs, him talking to other women while I was pregnant,
+    his drug abuse and thru verbal and physical abuse.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_078_164eb6d4
+  query: "I've been with my husband for eight years now. We have split twice before, and the first time\
+    \ was because he cheated. I took him back months later, and he really tried making it up to me by\
+    \ making a lot of changes. However, we continued to have issues because of my lack of trust. My insecurities\
+    \ and trust issues lead to physical abuse, which lead to us separating again. During that separation,\
+    \ he consoled himself by talking to the same girl he cheated on me with. But we then ended up back\
+    \ together and worked it out for a while until I got pregnant with our second child.\n   The baby\
+    \ was a few months old, and he confessed to me about his secret relationship with her. He told me\
+    \ how he could…"
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_079_2e6ceea6
+  query: I have PTSD. The side effects are really bad and have impacts on sex, anger and my relationships.
+    I even lost my job month ago.    How can I get my life back?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_080_efd5d92d
+  query: I have an eating disorder of binging. I've had gastric sleeve surgery. I need help with issues
+    of abuse as a child, addiction, and abusive men. I have been in therapy for five months and get no
+    feedback from my therapist.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_081_807e4920
+  query: My dad is always, and I mean always, cussing and screaming at me for no reason at all. He makes
+    me feel stupid. He also compares me to my other siblings in a negative way and demeans me. Is this
+    abuse?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_082_bac995dd
+  query: "I want a secure relationship with someone that wants to be with me and who will actually put\
+    \ effort into it.\n I seem to gravitate toward unavailable men and those that want intimacy and no\
+    \ relationship. I let men dictate and control me because they accuse me of being controlling. I let\
+    \ men emotionally abuse me and I am at their beck and call.\n I am not comfortable being alone or\
+    \ doing anything by myself. I feel I need the security of someone being around just to survive. I\
+    \ know what I'm doing wrong and I do it anyway just hoping things will change. How do I stop this\
+    \ behavior and thought process?"
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_083_66b30da2
+  query: We're in an eight year relationship. My boyfriend drinks a lot. He experienced childhood trauma.
+    I don't know how to deal with violent outbursts.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_084_ee8663ed
+  query: Every time my partner gets angry for anything, she takes it out on me. Nothing I do is right,
+    and once she's mad, she calls me all kinds of names and is verbally abusive. She says it isn’t abuse,
+    it’s just angry verbal bashing, and that it’s different. It gets worse each time. The names are very
+    vulgar now.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_085_c841e167
+  query: "My boyfriend and I have a toxic relationship due to his emotional and verbal abuse but he makes\
+    \ me feel like I could never find someone better, and that I can't be happy without him.\n   How do\
+    \ I get away from this relationship?"
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_086_cc460de9
+  query: I am a heterosexual male in my late 20s. I find myself wearing pantyhose, heels, skirts and other
+    women's clothing in private. I am torn on how to feel about it. I enjoy it very much. I have had a
+    pantyhose/stocking fascination and other kinky fetish interests since I was young. I have no history
+    of sexual abuse growing up. I am currently single.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_087_bc58cb6b
+  query: After a domestic abuse situation, I went to a therapist, and then my husband went. The therapist
+    discussed her assessment of borderline personality disorder with me. She then told my abuser the results
+    of my tests.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_088_c36b4c03
+  query: My dad beat and mentally abused me so badly that I can't function properly. Letting go of the
+    past is important to moving on and getting better, but I’m terrified to get better because I don't
+    even know who I am without the trauma. I've never gotten to be myself. I don't even know who I am.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_089_ecf63461
+  query: I am a survivor of multiple sexual abuse/rape experiences. Triggers are having an effect on my
+    daily life and my sexual relationship with my partner. I'm trying to learn to cope with them.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_090_6b625859
+  query: I suffer from checking and cleaning OCD. Can counseling help me to get over it?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: heldout_counsel_091_b055b0db
+  query: I've been with him for a couple months. We will talk everyday and he will get mad over something
+    I will say and not talk to me. We have our great moments, but I just need to focus on my personal
+    situations, and I feel he is slowing me down with that. I still wanna be with him, but not now.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_092_a63ee097
+  query: 'It''s been almost a year since my ex-boyfriend broke up with me after he cheated on me many
+    times. I had found out about a month before, but I hadn''t told him I knew because I didn''t want
+    us to break up. I used to have very low self-esteem, and I think it might have to do with my dad being
+    an alcoholic. My father cheated on my mother when I was little. I wonder if this pain has to do with
+    that. My ex-boyfriend and I were only dating for five months, but I still can''t get over this betrayal.
+    I''m not sure what to feel to get over it: forgiveness? Hate? He helped me financially after our break
+    up by lending me $3000, so I''m grateful for that. I still hate him for what he did and still want
+    him…'
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_093_830ab1c5
+  query: I struggle with depression as well as pretty intense mood swings throughout the month. I experience
+    highs where I feel amazing and energetic and then lows where I lack focus, energy, and generally have
+    a more dark outlook on my life. How can I live a more balanced life?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_094_03b6df6c
+  query: I have been with my husband for almost 7 years. We got engaged a little after 5 years of being
+    together. I had always been clear that I wanted to get married and I sadly would drop hints about
+    how i wanted him to propose.  When he did propose it was during a random vacation that I had planned.
+    I was happy but I couldn't help feeling disappointed too. I had told him numerous times before that
+    I wanted him to do it in front of my friends and family. I know it sounds dumb to be upset but I couldn't
+    help how I was feeling. We are now married but the wedding and ring were also far from what I wanted
+    and it wasn't due to lack of funds. I know this is all material and the marriage is the most…
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_095_6beadaa3
+  query: I am a counselor at day camp where we have a child with severe autism. We try to keep him entertained
+    by carrying cards around for when he starts acting up so we can get him to focus on something else.
+    The day camp administrator has told us not to yell at him because he will zone out and not listen,
+    so we just talk in a calm voice. However, other kids see the treatment as unfair.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_096_171b318d
+  query: It's not entirely true to say I enjoy being sad, but I always find a way to feel that way. I
+    listen to sad music, read tragic stories, and, in a twisted way, like how bad it makes me feel. I
+    focus on negative aspects of my life even if they aren't legitimate or I just make it seem negative.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_097_871f5145
+  query: "I think adult life is making him depressed and we often sleep in on weekends untill 1 or 2 pm.\
+    \ We just eat, smoke weed, watch movies, and he'll go on his phone all day. He doesn't seem motivated\
+    \ to do much and he's often angry.\n    I have no clue how to help him take his mind off the negative,\
+    \ or to distract him into a different light. How do I help him?"
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+  - adhd
+- id: heldout_counsel_098_ee15dd23
+  query: I was the one who ended it, and I'm so glad I did. It was the best decision I made in my life.
+    But how do I stop the nightmares and flashbacks? It is creating a wall in my current relationship.
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: heldout_counsel_099_b1375272
+  query: I was in a relationship with him for three years. My mom doesn't like it because she thinks I'm
+    making a mistake. He got married a few months after we broke up, and now he is divorced. I forgave
+    him for what he did in the past, and he says he’s sorry and he really loves me. I love him too, but
+    is it bad that I'm giving him a second chance again?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_100_ac014d54
+  query: I blame my past relationship for it. I know it is bad to be this way. I want to get past it.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_101_8f8032a2
+  query: My mother-in-law is mentally ill. She has been for most of her life. She cuts herself. She has
+    been in and out of psychiatric hospitals for about 40 years. She has voices in her head that tell
+    her to cut herself. She has had multiple shock therapy treatments, and she’s on enough medication
+    to take down an elephant. Her parental rights for her two children were taken away from her when my
+    husband was a boy—he is now in his late 30s. She doesn’t even have custody of herself. She hasn’t
+    asked yet, but she has been insinuating that she wants to babysit my child. How do I go about saying
+    no without creating an issue?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_102_356fcd44
+  query: I met this girl in high school. She had switched schools at the end of the year, and I have not
+    seen her since. It's been a few years. We had a very good and friendly relationship, and we seemed
+    to have a lot in common. I never gained the courage to ask her out.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_103_5dfdbc9d
+  query: I am currently suffering from erectile dysfunction and have tried Viagra, Cialis, etc. Nothing
+    seemed to work. My girlfriend of 3 years is very sexually frustrated. I told her that it is okay for
+    her to have sex with other men. Is that really okay?
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_104_129a1245
+  query: My boyfriend can't get over my promiscuous past. He says he loves me but says the thought of
+    my past is disgusting and a sexual distraction. He says he should have had more sex with different
+    people. I don't know how to handle this.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: heldout_counsel_105_5e3c4404
+  query: "My wife and mother are having tense disagreements. In the past, they’ve had minor differences.\
+    \ For example, my wife would complain to me my mother is too overbearing; my mother would complain\
+    \ my wife is lazy.\n However, it’s intensified lately. I think the cause is my wife talked back to\
+    \ her once. Now, any little disagreement is magnified, leading to major disagreements. What can I\
+    \ do?"
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_106_9177ff10
+  query: I have been with a guy for 4 years, he's a great guy and we also have a son together. The problem
+    is that I'm in love with a guy that I've been talking to for about 2 years but I've never met him
+    in person. Honestly I'm bored with the relationship I have with the first guy and he makes want to
+    go after the second guy, I don't know how to tell him that. What should I do?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_107_91beae2b
+  query: My girlfriend and I have broken up and gotten back together numerous times in the past two years.
+    We recently just broke up again last night on New Year’s Eve. When we break up, the very next day,
+    she calls me and acts as if nothing has happened. She acts like everything is alright. This has been
+    going on for two years. I do love her and care about her and her children a lot, but she seems really
+    demanding as far as what she deserves from a man. She is always telling me that she deserves this
+    and that from a man. It makes me feel like crap because I cannot give her everything that she wants.
+    She told me one time that she wants a man who is going to be afraid to lose her. Is that a normal…
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_108_1aab02a2
+  query: My ex-boyfriend boyfriend and I lived together. He had a two year affair with a girl and had
+    three pregnancies with her. One was an abortion, another was a miscarriage, and then she had the third
+    baby. They are not together, but he continues to contact me and wants me back. He has nothing to offer
+    me.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_109_ec7cb8e2
+  query: My best friend and I've been really close for almost three years. She lives in the UK, and I
+    live in the US. Ever since her boyfriend flew from Oregon to Scotland, I've been angry at him. Ever
+    since he came into her life, he took her away from me. My best friend would always say sorry, and
+    I'm sick of it.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_110_46e3c415
+  query: My boyfriend and I have been dating for almost a year. We go to different schools, and we don't
+    see each other that often. I just feel very paranoid that there's someone else or that he could be
+    hiding something from me.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_111_c18cc7a5
+  query: 'I''ve been in a relationship for over a year. He''s cheated and lied. I heard he''s married,
+    but he says he''s not. Everything is very up and down; there''s no trust. Recently, he went on a trip,
+    and I promised him I''d behave and not drink because when I drink, I drink too much, and I tend to
+    make poor choices. This time, I made a huge mistake: I drank too much, and I cheated on him. I slept
+    with another man for about five minutes before realizing what I was doing is wrong. I told him and
+    he just got really rude. He called me names and threatened me. I feel bad as I do love him. We just
+    have so many issues. I''m not a bad person, I''ve just made a lot of bad mistakes. It’s unintentional,
+    and I…'
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_112_836990a7
+  query: My girlfriend remains friends with ex boyfriends/lovers on Facebook who actively like and comment
+    on posts. It causes me to get jealous because I'm afraid they might reconnect somehow. I've attempted
+    to talk to her about it, but she avoids it and doesn't seem to worry about how I feel about it.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_113_0a9fbe86
+  query: My fiancé doesn't think I trust him because I was cheated on before. However, he hides his phone
+    and has been texting his ex-girlfriend, who he has two kids with. What should I do?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_114_caec4586
+  query: I’ve been with my boyfriend for a year and a half. He loves me a lot, and I love him. It hurts
+    to be apart from him for so long. It hurts all over, and then I feel like it won't last.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_115_c951c46f
+  query: I have been experiencing a lot of sexual tension with a lot of the guys that I talk to nowadays.
+    I keep imagining having sex with them. I have never had sex before, nor have I had a boyfriend. I
+    feel lonely and empty. I feel like my body is not okay, and I am missing something. I talk to so many
+    boys in school, and I always fantasize about half of them. I want this feeling to stop because it
+    is interfering with my time to study since most of the time, I am busy thinking about sex.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_116_d84b9f37
+  query: My fiancé and I come from a strong Christian background but both went off the "straight and narrow"
+    once before. He is having a hard time accepting my past, especially that I'm not a virgin. He has
+    a hard time in general accepting himself and others.    His insecurities are hurting our relationship.
+    How can I help him let go of my past and decide to live in the present?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_117_245d2236
+  query: I keep getting into relationships with men that are in bad situations. I take them on and help
+    them and do all I can and the relationship still fails. How do I learn to not get in relationships
+    with men in bad situations? I see someone in need of help, I jump in. And it is getting me nowhere.
+    I am alone sad and frustrated.
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_118_e7742b40
+  query: My ex-girlfriend says she's bored and wants to experience life single. I treated her really badly
+    and caused meaningless fights when she didn't do anything, I feel remorseful, and I'm willing to do
+    whatever it takes to get her back. She's unhappy. When I called her, she was crying and said she will
+    text me when she's ready.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_119_42f8515e
+  query: My boyfriend called me a particular profanity and I broke up with him. This is the third time
+    he's called me this and I'm just completely done with giving him chances. He knows how much it bothers
+    me. I just want to know if I'm over reacting.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_120_e7d04a51
+  query: I'm in a long-distance relationship with my ideal man, but I'm not as attracted to him as I should
+    be. Everything else is perfect about him, but I find myself lusting over more attractive men. The
+    next step is marriage, but I want to marry someone who I can wake up to and fall in love with all
+    over again. However, I also don't want to throw away a great relationship over what might just be
+    lust. Am I asking for too much in the "perfect guy"? Is there such a thing? Am I truly in love?
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_121_da86ae41
+  query: My girlfriend just quit drinking and she became really depressed. She told me that she wants
+    to move. What can I do to help her? I want her to stay.
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_122_531feeac
+  query: I have dog obsession disorder and I am having problems with my girlfriend because I am placing
+    more importance to my two dogs over her. How do I get over this problem and prioritize my girlfriend
+    over my two dogs?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: heldout_counsel_123_b5760e6e
+  query: My husband and I are in our 40s. We’ve been married 17 years. Three weeks ago, he said he loves
+    me but is not in love with me. He was going to leave me, but he said he thought about it and decided
+    to stay. I don't know how to feel any more. How should I take what he said and not feel so hurt? He
+    has been very blunt, and hurtful words just come out of his mouth. He makes me feel like I'm nothing,
+    but I so dearly love him with everything in me. He said it wasn’t a mid-life crisis.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_124_c360f1b1
+  query: "I have high functioning autism and I have been on a lot of dating sites like meet me, match,\
+    \ and zoosk. I haven't had any luck on any of the dating sites I have been on.\n    I really want\
+    \ a boyfriend but I don't know what I should do. I just want to be in a relationship. How can I meet\
+    \ someone?"
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_125_7e6328d2
+  query: My boyfriend shows affection, but I just push him away. Every time my boyfriend tries to kiss,
+    hug, or touch me I almost always push him away. I'm on birth control and it has killed my sex drive.     I
+    love him so much. Why do I do this?
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_126_cad7f3af
+  query: A girl and I were madly in love. We dated for over a year and were even talking about marriage
+    and future plans together. She moved away for school, and we attempted a long distance relationship.
+    We eventually broke up. It's been a year now, and I still haven't lost my feelings for her. I still
+    love her the same way I did. I've suffered from depression ever since the breakup and have been unable
+    to connect with anyone else. It's damaging me and my life.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_127_9773582e
+  query: I'm 15 and my girlfriend is 14. Am I a pedophile because I'm attracted to her and she's under
+    18?
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_128_94f4a8e6
+  query: He had a sexual relationship with his sister and kept it from me for years, I confronted about
+    it and he finally told me what happened. But I dont think he is telling me the whole story. He works
+    with her and sees her every day.    I feel that I shouldn't stay with him , but he says he ended it
+    long time ago. Should I trust my husband and stay with him?
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_129_4c0d8f30
+  query: The eight months I've been dating my boyfriend, I have lied about a lot of things. I slept with
+    a couple guys to get back at my boyfriend for breaking up with me. Now anything I say to him he won't
+    believe, even if I'm being honest. I don't know what else to do at this point. He constantly criticizes
+    me.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_130_9f1f98b8
+  query: My friend’s husband is bipolar and refuses to take medication for it. He has taken the wheels
+    off her vehicle before to prevent her from leaving. He has held her a prisoner in her home. He has
+    choked her, hit her, etc. She has almost divorced him a couple of times but always makes up with him,
+    thinking that he is going to change. She and I went to a wedding out of town in September of 2014,
+    and ever since she has been back, he is convinced that she cheated on him while we were gone. Now
+    he is saying that I have also cheated on my boyfriend and has come to my house and told my boyfriend
+    this.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_131_b0564e77
+  query: I found out my boyfriend takes anti-depression medicine. Lately he's been saying he has a lot
+    on his mind, and he needs time to think about us. We've only been dating 3 weeks but I like him a
+    lot.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_132_d6d80c54
+  query: "I feel like I took our relationship for granted and he's now to the point that he's giving up.\n\
+    \   I have had trouble feeling like I could trust him but he's given me no reason not to trust him.\
+    \ I know my attitude is also a big issue for him. I have a lot of obligations at home so we don't\
+    \ spend a lot of time together.    How can I fix this relationship?"
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_133_1300c0ac
+  query: Ever since my ex-boyfriend and I broke up, I can't seem to get close to anyone else. I know I'm
+    completely over him, but I just can't break down my walls and let someone new into my life.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_134_8d71a127
+  query: I’ve known my boyfriend for several years. We were friends for a long time. In 2013 we started
+    a relationship, and he even asked me to move in with him since I lived out of state. I planned to
+    move in with him in 2014 after I finished school and he found a job. However, during this time we
+    had a few arguments and broke up with each other for a short period of time. We decided later to make
+    it work. Shortly after, I found out that I was pregnant. I wanted to tell him during his next visit.
+    However, he never came to see me and instead asked me for money. After I gave him money, he quit answering
+    my phone calls and texts.    Soon after, I experienced a miscarriage. I texted him about what had…
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_135_8022fe7c
+  query: I'm a female in my mid 20s. Lately I tend to over drink and I've become a very angry drunk.    In
+    the past, I have even cheated on my boyfriend while I was under the influence of alcohol.    But now,
+    even if I don't do anything wrong and don't embarrass myself, I still feel really guilty after a night
+    of drinking. I don't understand why I'm feeling this way. Does this mean I have a problem?
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_136_be3560f1
+  query: I just had a newborn. When I brought him home, my mom told me to leave. Now I'm in a women's
+    home. I don't see my boyfriend that often because he works. The women's place is helping me find an
+    apartment so I can go back to work and get child care.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_137_fd174934
+  query: My boyfriend says I'm nuts. I need to get help because I get an overwhelming feeling that he
+    is cheating on me. Whenever I try to talk with him about it, he always turns it around on me by telling
+    me what I'm doing wrong. I know that accusing him does not help. When his whole demeanor shifts towards
+    me, I can't help but think that something is wrong. Am I wrong for feeling this way? I try to talk
+    with him to make it better. I let him know when I am feeling down. But I am not confident in these
+    things.  Two weeks ago a girl texted his phone 3 times trying to hook up with him. He texted her back
+    with "Sorry, I've been working. I just read your message." The girl was trying to get him to call…
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_138_55ac2d58
+  query: However, it seems as though he is really talking to someone other than himself. I have even accused
+    him of having a secret phone. Is he trying to make me crazy on purpose, or is he really talking to
+    himself?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_139_cda6ca51
+  query: He wants to wear makeup and heels. He even tucks his penis away to resemble a vagina. He wants
+    me to wear a strap on and have anal sex with him. I have tried this for him, but I don’t like it and
+    have told him so. He keeps making comments about it and says he can't live without it.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_140_b4c487bf
+  query: She was diagnosed a type one diabetic two years ago and had a very tough time dealing with it.
+    She has an attachment issue also; her mother just moved to a much nicer home, and she gets angry and
+    demands to go back to her prior home. We do not understand what is going on, and it is driving us
+    crazy.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_141_9fcafe44
+  query: I have this weird fetish that I'm afraid to open up about it. What should I do?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_142_aa28ec62
+  query: "I've been abused emotionally all of my life and for some reason I keep getting with men that\
+    \ I let emotionally abused me.\n How can I stop it? I know the mistakes that I've made in my life.\
+    \ I'm having a really hard time getting back on my feet. Can you help me please?"
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_143_0153c3ab
+  query: They discontinued treatment for no apparent reason after they thought to diagnose me with schizophrenia.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_144_84032843
+  query: When I see something I don’t like, I go off like a ticking time bomb. I go from “0 to 100” really
+    quickly.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_145_dab3c4cc
+  query: What can I do to stop grieving my mother’s death? When I am awake I just cry every day. I don't
+    have anyone to talk to. I need help; I am still cry over her. Will I ever stop crying? It’s been 3
+    years.
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_146_a82c4838
+  query: I find myself crying over every little thing, like dropping a glass of water. Today, I got out
+    of the shower and noticed that I had forgotten a shirt. I instantly started to cry. When I made it
+    to my room, I began to shake a little, cry more, and I begged for it to stop.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_147_608d7bbf
+  query: I'm a teenage gay girl, and I'm in love with a girl a few years older than me. She loves me too,
+    but we're not physically together at the moment. I've been thinking about being transgender soon too,
+    but my family doesn't accept me, so I honestly don't know what to do about that because I feel like
+    I have to constantly hide the real me. It hurts so much to hide the real me. What can I do?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_148_5771eb25
+  query: We’ve been together almost three years. We argue and he ends it by telling me he doesn’t love
+    me. It's hurtful because I am all about resolving the problem, and he dwells on the issue even if
+    I drop what he's done and just swallow my pride and say I am sorry. How can this be resolved? We have
+    kids, and I don't want a broken family because we can't communicate.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_149_67937e30
+  query: Someone I care about told me I'm not teachable and I'm irritating. I just want to be happy and
+    wanted to please the person, but I always fall short it seems.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_150_2d3013ed
+  query: I feel like I hate myself physically and emotionally sometimes. How can I start accepting myself
+    and be more confident?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_151_8a0530d9
+  query: I am a young adult, and I was sexually assaulted by an older man when I was a teenager (which
+    has really intensified the guilt/shame). However, I've been attracted to much older men since I was
+    even younger than that.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_152_769903d1
+  query: I've been struggling with it for a test and I'm starting to believe it's something mental. What
+    could it be?
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_153_3e2411dd
+  query: I found the guy I’m dating on dating websites. He was telling women that they were beautiful.
+    He said it wasn’t him and that the phone was hacked. It has since happened two other times. He says
+    he loves me and I’m the only girl he wants to be with, but I feel he is not telling me the truth.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_154_f1a1bc40
+  query: I feel like my time is going too fast
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_155_9172b2e1
+  query: 'Current medications are: topamax, ativan, brintellix, lamictal, restoril, abilify, tx: long
+    term dbt, cbt'
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_156_d088e99d
+  query: How do I stop those thoughts?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_157_40e1bbcf
+  query: My daughter basically freaked out out of nowhere over me saying “calm down” when she dropped
+    her phone. Within seconds, the situation escalated to her kicking me out on the curb, saying horrifically
+    unspeakable things, and her calling the cops on me. She seems unable to stop herself at times.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_158_6b3ddcf0
+  query: I always feel like I'm not good enough and it literally is so hard living. I don't know how to
+    talk to my parents about it.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_159_5e2acf8d
+  query: He owns his own business. Sometimes, he stays out all night but doesn't tell me. We have a son
+    together, and I get to stay home with him. He says I complain too much about what he's doing. We've
+    been together a year and a half. I got pregnant after being together for a month. We moved in together
+    when I had my son in July. Everything was great, and then he started the staying out. He then started
+    not spending time with either of us. I just don't know if I'm doing something wrong. We've talked
+    and he says this is just how he is, but he wasn't like this before.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_160_bf331dc0
+  query: I have anxieties about everyday stressors, i.e. finances, work, relationships, kids, and maintaining
+    a household.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_161_8d026b51
+  query: I spent my whole life taking care of my dad, but left because of his verbally abusive behavior.
+    I was the only one that helped with his health issues. I feel if I hadn't left he might still be alive.
+    I need help dealing with my grief and guilty conscience.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_162_47c433bc
+  query: I need to speak to someone about sexual addiction and binge eating immediately.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_163_b6cc4be1
+  query: I have had a crush on this guy for years. I last talked to him a few years ago when we graduated
+    from high school. We left off on a good note. Should I message him and see how he is doing, or is
+    it too late?
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_164_d24183a1
+  query: We have tried gentle talking, counting to calm her and talking about it, sending her to her room
+    and then trying to talk when she’s calmer, and now calisthenics. However, nothing is working.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_165_66b74ae5
+  query: I have no self control over food. Most people stop when they've had enough, but I keep eating
+    for the pleasure of it. Especially with sweets - I'm never done eating dessert.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_166_68ae49c4
+  query: "I'm in my late teens and live with my dad. The only time I go out is for my college classes.\
+    \ Sometimes when I see my friends I want to talk with them, but sometimes I won't want to talk to\
+    \ them for days or even weeks.    Sometimes I feel i'm not worth knowing or i'm never going to do\
+    \ anything right.\n   Are they right, am I depressed?"
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_167_a5cf0d67
+  query: If I tell him I don't like certain things, he does when it pertains to me. He tells me it's not
+    like that. He never has anything to say about me until I tell him something about himself.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_168_9f454e11
+  query: I am lazy. I am very aware of the problem and try to talk myself out of it all the time, but
+    I never seem to shake the habits. I try to think of what it is doing to me and my future, but no matter
+    what, I keep creating excuses for myself to continue the procrastination. All I'm ever left with is
+    regrets and a low grade. I am at an all-time low in my life, and I'm not even that old. I've always
+    been a straight-A student, but now I'm getting C's and F's, and it hurts me to know that I am way
+    better than that. It's not even like the work is hard.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_169_a9ce8e3d
+  query: My spouse visited the red light district a couple of years back in Amsterdam. After he got back
+    from the trip he got me tested for stds. In the aftermath he has provided multiple versions of what
+    happened, from having a total blackout to being touched by a prostitute. How do I know if he had sex?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_170_66487eb5
+  query: My spouse decided he no longer wanted me six years ago. Things have deteriorated so badly that
+    we have separated but still live in the same house. He says he despises the sight of me, wants to
+    be with other women, and divorce. What I don't understand is that he says constantly that I have no
+    feelings for him and gets absurdly jealous if I speak to another male. Why does he constantly do these
+    behaviors? I might add he has been diagnosed with borderline personality disorder and as a narcissist.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_171_779908bd
+  query: I have been married for 20 years. He and I both cheated. I hid my cheating for 14 years. Over
+    that time, I let life stress me out. I became depressed. When I finally woke up, he felt I had pushed
+    him out.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_172_f5429ac6
+  query: Me and my adult daughter just do not get along. She's very belittling to me when I don't agree
+    with her. It's almost like she scolds me. We get into all out war. She's said I don't support her
+    in what she does and that I've never loved her. She calls me horrible names, and she pushes my buttons
+    to the point I call her names.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_173_b83cddc8
+  query: "I am having a problem with extended family members who are inappropriately urinating in my home.\
+    \ They are peeing in cat litter boxes, bottles, and directly on floors and in corners of my house.\n\
+    \ Is there any literature that supports why such adults would behave this way? This is not a joke.\
+    \ I am trying to understand."
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_174_9cd56dfa
+  query: I have a lot on my mind, but all I want to do is stay locked in my room and not socialize with
+    anyone. Why do I feel so alone?
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_175_fc0a933e
+  query: She works with a man and always looks at guys that check her out.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_176_65c550f2
+  query: I have a severe back problem. I've had 3 major and several minor operations, but I'm still in
+    constant pain. How can I deal with the depression from this chronic pain?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_177_1af7e6c9
+  query: I can't understand what I pay attention to.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_178_c3ec84f1
+  query: On the first day of school I wore a bra that was too big so that it would look like I had bigger
+    boobs. I did that the whole school year and my parents never found out. But now I can never hang out
+    with my friends at my house or invite them over because it would be around my parents and my friends
+    would see there is nothing there on my chest.    How do I fix this?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_179_e08826e8
+  query: I'm a little paranoid. My mind does get the best of me. One night, I put chairs under all of
+    my door knobs because I thought someone might break in. I also think a lot, which is probably the
+    reason for the paranoia. I can't stand loud noises, like the sound of cars going by. The grocery store
+    is too noisy, and I feel like people are looking at me.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_180_40e59ece
+  query: I no longer carry expressions on my face, and my emotions are decreasing the more I have fights
+    with my fiancée.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_181_c089bc43
+  query: That phrase makes me crazy. It happens anytime I point out something to my husband that he needs
+    to change, such as looking up from his iPad long enough for me to tell him the grandbaby almost pulled
+    the shelf unit over or explaining to him that I got all the things he needs to bake a pie. Another
+    example is when he opens the front door, the dog runs out if he doesn't pick him up. Over and over
+    again, he lets the dog run out, and I am afraid he will get hit by a car.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_182_31b381e1
+  query: He isn't violent, but he has anger issues and deep insecurities. He's working on them and has
+    improved. We started counseling, and he participated in one or two individual sessions, but we broke
+    up again shortly thereafter. Now his constant questions and accusations are getting really draining.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_183_b1e5ab88
+  query: I have an overwhelming desire to watch my wife have sex with another man. I talked to her about
+    it, and she said she will do it for me. The idea excites me to no end, but I don’t want to because
+    it disgusts me. How can I stop wanting it, or should I just give into it and do it? I’ve been struggling
+    for years with this. It won’t go away. By the way, I am in my mid 30s and my wife is in her mid 40s.
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_184_00d36e76
+  query: I recently went through a divorce. My ex-husband called my sister saying bad things about me.
+    My sister never defended me. Now that I showed the truth, she's shutting me up and saying she doesn't
+    care about the fight. Why didn't she convey that to him from the beginning?
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_185_660ca494
+  query: I've tried working out and eating fruits and vegetables, but I always seem to eat the junk in
+    the house.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_186_7cbaffe7
+  query: I'm always listening to my husband, but it feels like he never listens to me.    How do I get
+    my husband to listen to me instead of me listening to him all the time?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_187_27dee05d
+  query: I'm a teenage girl. I don't know if I'm straight, bisexual, or gay. I've been straight all my
+    life, but a sudden rush of questions have come over me, and I don't know anymore.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_188_cd28b3ef
+  query: I don't know if I'm normal. I'm really scared to touch a girl. I'm a young adult and a virgin.
+    My fiancée and I want to have sex soon, and this might mess everything up because she wants a baby
+    soon as well.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_189_b1a08f55
+  query: I'm having relationship problems and I want to fix them to make things right before I lose her.
+    How can I learn how to listen and get myself together?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_190_2ad3e438
+  query: Now that the other girl is out of the picture, our sex life isn't the same. Is it because he
+    is still thinking about the other girl?
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_191_1a8ca0db
+  query: I was married to a narcissist sociopath for 10 years. During that time I was a general manager.
+    I used to help him financially and in other ways when we were together. But things began to change.
+    He emotionally and sexually drained me. I lost my spirit. I used to be a very happy person but now
+    I am a loner. I left him and moved to another state. Currently, I'm working as a server which makes
+    me believe less in myself. I feel pity for myself a lot but don't know what to do. When I have money
+    problems, he does not help me. He actually enjoys seeing me have a hard time in my life. I need help.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_192_aa682af1
+  query: My mother is combative with me when I say I don't want to talk with her about my depression.    She
+    hasn't been supportive of me in the past and she isn't someone that I feel comfortable opening up
+    to. She constantly tries to instigate conversations where she asks me questions that I don't want
+    to or can't answer. I tell her I don't want to talk and she starts arguments with me.    How can I
+    get her to understand?
+  type: coping_request
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: heldout_counsel_193_132fcbfe
+  query: Recently, I had a close call after delivering my second child (blood clot followed by internal
+    bleeding and several blood transfusions). It was a close call. I am currently undergoing medical treatment
+    because of the event, and I am constantly afraid the whole ordeal will happen again. I have never
+    really had anxiety in the past, but I find now that it consumes my every day and night. With two beautiful
+    children to raise, I am most terrified of not being able to raise and protect them.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: heldout_counsel_194_c3730d34
+  query: I always need alcohol to feel better and use that as a excuse.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_195_5d18cc39
+  query: I used to be the funny guy of the group—the class clown, if you will. I used to laugh uncontrollably
+    all the time and be able to be social without it feeling awkward. Now I can't laugh at all, and I'm
+    dead inside.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_196_2940322e
+  query: I'm having a quinceañera, and the girls don't like their dresses. They never told me, and now
+    it's a week away. I don't know what to do.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_197_3bb10323
+  query: I’m in love with my friend who is also a girl. I fell in love with her in a few months. That
+    was my first love. We used to talk for the whole day and night over the phone and on Facebook. I thought
+    she had the same feelings for me, but I was wrong. I always wanted to touch her warmly and stay with
+    her all my life. But all my dreams get broken apart after she got into a relationship with a guy.
+    I’ve tried to be in relationship with guys, but I can’t be in love with them.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+- id: heldout_counsel_198_5c163cfa
+  query: My boyfriend and I have not had sex in a couple of weeks. He had to have a cyst removed on his
+    testicles. I have been wanting to have sex with him for a while now, and it drives me crazy not to
+    be able to make love to him. I'm scared to touch him and get close to him because I'm afraid that
+    I will hurt him.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  - relationship
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_199_9ec8759b
+  query: I feel like I'm ugly, stupid, useless, and that I can't make anyone happy.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+- id: heldout_counsel_200_deeb119a
+  query: My step nephew, a preteen, has begun masturbating. I also had to take away the internet because
+    he was caught looking up porn. I’m worried about him.
+  type: symptom_sharing
+  expected_path: search_database
+  tags:
+  - heldout
+  - counseling_hf
+  source: Amod/mental_health_counseling_conversations
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety

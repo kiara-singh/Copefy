@@ -3,3 +3,7 @@ uvicorn[standard]==0.31.0
 supabase==2.31.0
 pydantic-settings==2.5.2
 python-dotenv==1.0.1
+google-genai==2.12.1
+asyncpg==0.30.0
+PyYAML==6.0.3
+datasets>=2.14.0

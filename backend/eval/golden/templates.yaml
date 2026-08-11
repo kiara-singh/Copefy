@@ -1,0 +1,448 @@
+# Template groups expanded by generate_golden.py into the gen_* half of core.yaml
+
+symptom_sharing:
+  - id_prefix: gen_anxiety_symptom
+    query_template: "I can't stop worrying about {topic}."
+    topics:
+      - work deadlines
+      - my health
+      - what people think of me
+      - money problems
+      - my relationship
+      - school exams
+      - the future
+    expected_categories: [anxiety]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_depression_symptom
+    query_template: "I've been feeling {topic} for weeks and it's hard to get out of bed."
+    topics:
+      - empty inside
+      - hopeless
+      - numb
+      - worthless
+      - exhausted all the time
+      - like nothing matters
+    expected_categories: [depression]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_adhd_symptom
+    query_template: "I keep {behavior} and it's affecting my {area}."
+    pairs:
+      - behavior: losing track of conversations
+        area: relationships
+      - behavior: missing deadlines
+        area: job
+      - behavior: forgetting appointments
+        area: daily life
+      - behavior: getting distracted mid-task
+        area: school
+      - behavior: starting projects but never finishing
+        area: home
+    expected_categories: [adhd]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_ocd_symptom
+    query_template: "I have to {topic} or I feel like something terrible will happen."
+    topics:
+      - wash my hands over and over
+      - check the stove repeatedly
+      - count things in my head
+      - arrange items until they feel right
+      - ask people to confirm things
+    expected_categories: [ocd]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_ptsd_symptom
+    query_template: "Since {event}, I {symptom}."
+    pairs:
+      - event: the accident
+        symptom: jump at loud noises
+      - event: what happened last year
+        symptom: avoid certain places
+      - event: the incident
+        symptom: feel like it's happening again
+      - event: my deployment
+        symptom: can't relax even at home
+    expected_categories: [ptsd]
+    type: symptom_sharing
+    expected_path: search_database
+
+vague_checkins:
+  - id_prefix: gen_vague
+    queries:
+      - feeling off today
+      - not great
+      - stressed
+      - anxious
+      - down
+      - overwhelmed
+      - meh
+      - rough morning
+      - idk just weird
+      - low energy
+      - can't focus today
+      - on edge
+    expected_categories: []
+    type: vague_checkin
+    expected_path: direct_answer
+
+venting:
+  - id_prefix: gen_vent
+    queries:
+      - "Everything is too much right now."
+      - "I just need to vent, nothing specific."
+      - "Bad day. That's it."
+      - "I'm so done with today."
+      - "Don't even ask, it was awful."
+      - "I don't know where to start explaining."
+    expected_categories: []
+    type: venting
+    expected_path: direct_answer
+
+coping_requests:
+  - id_prefix: gen_coping
+    query_template: "What can I do when {topic}?"
+    topics:
+      - my mind won't stop racing at night
+      - I feel a panic attack coming on
+      - intrusive thoughts won't leave me alone
+      - I can't focus on studying
+      - I feel triggered by loud sounds
+      - I need to calm down before a presentation
+    expected_categories: [anxiety]
+    type: coping_request
+    expected_path: search_database
+
+normalization:
+  - id_prefix: gen_norm
+    query_template: "Is it normal to {topic}?"
+    topics:
+      - feel anxious before social events
+      - need reassurance from my partner
+      - replay embarrassing moments for days
+      - have intrusive thoughts that scare me
+      - struggle to concentrate at work
+      - feel numb after something traumatic
+    expected_categories: [anxiety]
+    type: seeks_normalization
+    expected_path: search_database
+
+chitchat:
+  - id_prefix: gen_chat
+    queries:
+      - "Hello"
+      - "Good morning"
+      - "What's up?"
+      - "Hey there"
+      - "Thanks for listening"
+      - "Ok got it"
+    expected_categories: []
+    type: general
+    expected_path: direct_answer
+
+fragment_followups:
+  - id_prefix: gen_fragment
+    query: "{fragment}"
+    fragments:
+      - "mm-hmm"
+      - "I guess"
+      - "not sure"
+      - "both"
+      - "the first one"
+      - "waves"
+      - "a little"
+      - "kind of"
+      - "yeah that"
+      - "maybe"
+      - "idk"
+      - "the buzzing"
+      - "school stuff"
+      - "work"
+      - "my mom"
+      - "last night"
+      - "since Tuesday"
+      - "that part"
+    history:
+      - role: user
+        content: "feeling stressed lately"
+      - role: assistant
+        content: "Can you tell me more about what that stress feels like?"
+    expected_categories: []
+    type: conversational_followup
+    expected_path: direct_answer
+
+multi_turn:
+  - id_prefix: gen_multi_school
+    query: "I'm scared I'll embarrass myself in front of everyone"
+    histories:
+      - - role: user
+          content: "school starts tomorrow"
+        - role: assistant
+          content: "New beginnings can bring up a lot. What's worrying you most?"
+      - - role: user
+          content: "first day jitters"
+        - role: assistant
+          content: "That's very common. What part feels hardest?"
+    expected_categories: [anxiety]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_multi_work
+    query: "My boss keeps piling things on and I can't keep up"
+    histories:
+      - - role: user
+          content: "work has been insane"
+        - role: assistant
+          content: "That sounds overwhelming. What's been the hardest part?"
+    expected_categories: [anxiety, adhd]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_multi_sleep
+    query: "I lie awake for hours replaying everything I said"
+    histories:
+      - - role: user
+          content: "I haven't been sleeping well"
+        - role: assistant
+          content: "Poor sleep can really wear you down. What happens when you try to sleep?"
+    expected_categories: [anxiety, ocd]
+    type: symptom_sharing
+    expected_path: search_database
+
+situational_anxiety:
+  - id_prefix: gen_situational
+    query_template: "I'm really nervous about {topic}."
+    topics:
+      - my doctor appointment
+      - flying next week
+      - meeting my partner's parents
+      - giving a speech
+      - starting a new job
+      - going to a party alone
+      - my therapy session tomorrow
+      - a performance review
+      - my wedding
+      - a job interview
+      - moving to a new city
+      - telling my family something important
+    expected_categories: [anxiety]
+    type: symptom_sharing
+    expected_path: search_database
+
+clinical_detail:
+  - id_prefix: gen_anxiety_detail
+    query_template: "My {topic} has gotten worse and I don't know if it's anxiety."
+    topics:
+      - chest tightness
+      - stomach aches before work
+      - racing heart in meetings
+      - dizziness in stores
+      - muscle tension
+      - trouble swallowing when stressed
+      - constant restlessness
+      - fear of losing control
+    expected_categories: [anxiety]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_depression_detail
+    query_template: "Lately I {topic} and people are starting to notice."
+    topics:
+      - cancel plans at the last minute
+      - cry for no clear reason
+      - struggle to shower or eat regularly
+      - feel guilty for being tired all the time
+      - snap at people I love
+      - can't concentrate on reading
+      - wake up early and can't fall back asleep
+    expected_categories: [depression]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_adhd_detail
+    query_template: "It's hard to {topic} even when I really care about it."
+    topics:
+      - finish assignments before the deadline
+      - listen in conversations without zoning out
+      - keep my space organized
+      - remember to take my medication
+      - follow multi-step instructions at work
+      - sit through long meetings
+    expected_categories: [adhd]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_ocd_detail
+    query_template: "I get stuck {topic} and it takes hours."
+    topics:
+      - re-reading emails before sending
+      - rewriting notes until they feel perfect
+      - checking locks and appliances
+      - mentally reviewing conversations
+      - avoiding certain numbers or words
+      - seeking reassurance from family
+    expected_categories: [ocd]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_ptsd_detail
+    query_template: "Since the trauma, {topic}."
+    topics:
+      - I feel disconnected from my body
+      - certain smells send me back there
+      - I can't trust people easily
+      - crowds make me panic
+      - I struggle to feel safe at home
+      - anniversaries wreck me for weeks
+    expected_categories: [ptsd]
+    type: symptom_sharing
+    expected_path: search_database
+
+comorbidity:
+  - id_prefix: gen_comorbid
+    query_template: "I deal with {primary} and {secondary} at the same time."
+    pairs:
+      - primary: constant worry
+        secondary: low motivation
+      - primary: hyperfocus bursts
+        secondary: crushing guilt afterward
+      - primary: intrusive thoughts
+        secondary: panic attacks
+      - primary: nightmares
+        secondary: avoiding sleep
+      - primary: trouble focusing
+        secondary: anxiety about failing
+      - primary: checking rituals
+        secondary: exhaustion and sadness
+    expected_categories: [anxiety]
+    type: symptom_sharing
+    expected_path: search_database
+
+extended_coping:
+  - id_prefix: gen_coping_dep
+    query_template: "What helps when {topic}?"
+    topics:
+      - I can't get out of bed in the morning
+      - everything feels pointless
+      - I have no appetite
+      - I isolate myself from everyone
+    expected_categories: [depression]
+    type: coping_request
+    expected_path: search_database
+
+  - id_prefix: gen_coping_ocd
+    query_template: "How do I cope when {topic}?"
+    topics:
+      - intrusive thoughts won't stop
+      - I feel compelled to check things
+      - I need constant reassurance
+      - rituals are taking over my day
+    expected_categories: [ocd]
+    type: coping_request
+    expected_path: search_database
+
+  - id_prefix: gen_coping_ptsd
+    query_template: "What can I do when {topic}?"
+    topics:
+      - I feel triggered in public
+      - flashbacks hit without warning
+      - I'm hypervigilant around my kids
+      - loud noises set me off
+    expected_categories: [ptsd]
+    type: coping_request
+    expected_path: search_database
+
+  - id_prefix: gen_coping_adhd
+    query_template: "Any tips for {topic}?"
+    topics:
+      - staying organized with ADHD
+      - managing time blindness
+      - finishing tasks I start
+      - reducing distractions while studying
+    expected_categories: [adhd]
+    type: coping_request
+    expected_path: search_database
+
+extended_normalization:
+  - id_prefix: gen_norm_dep
+    query_template: "Is it normal to {topic} when you're depressed?"
+    topics:
+      - not enjoy hobbies anymore
+      - feel numb instead of sad
+      - sleep way more than usual
+      - have trouble making simple decisions
+    expected_categories: [depression]
+    type: seeks_normalization
+    expected_path: search_database
+
+  - id_prefix: gen_norm_ptsd
+    query_template: "Is it normal to {topic} after trauma?"
+    topics:
+      - feel jumpy around family
+      - avoid places that remind you
+      - feel guilty for surviving
+      - struggle to remember parts of it
+    expected_categories: [ptsd]
+    type: seeks_normalization
+    expected_path: search_database
+
+extended_multi_turn:
+  - id_prefix: gen_multi_panic
+    query: "I thought I was having a heart attack but the ER said it was panic"
+    histories:
+      - - role: user
+          content: "I had a scary episode last night"
+        - role: assistant
+          content: "That sounds frightening. What happened?"
+    expected_categories: [anxiety]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_multi_compulsion
+    query: "I stayed up until 3am redoing my resume because it didn't feel right"
+    histories:
+      - - role: user
+          content: "job searching is destroying me"
+        - role: assistant
+          content: "That sounds exhausting. What's been the hardest part?"
+    expected_categories: [ocd, anxiety]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_multi_focus
+    query: "I read the same paragraph ten times and still don't remember it"
+    histories:
+      - - role: user
+          content: "finals are next week and I'm drowning"
+        - role: assistant
+          content: "That's a lot of pressure. What happens when you try to study?"
+    expected_categories: [adhd, anxiety]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_multi_grief
+    query: "Some days I'm fine and then a song comes on and I fall apart"
+    histories:
+      - - role: user
+          content: "I lost someone close to me recently"
+        - role: assistant
+          content: "I'm sorry you're going through that. How have the days been?"
+    expected_categories: [depression, ptsd]
+    type: symptom_sharing
+    expected_path: search_database
+
+  - id_prefix: gen_multi_relationship
+    query: "I need my partner to tell me they love me over and over or I spiral"
+    histories:
+      - - role: user
+          content: "my relationship anxiety is getting worse"
+        - role: assistant
+          content: "Relationship anxiety can be really draining. What triggers it most?"
+    expected_categories: [anxiety, ocd]
+    type: symptom_sharing
+    expected_path: search_database

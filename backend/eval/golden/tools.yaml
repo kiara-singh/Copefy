@@ -1,0 +1,475 @@
+# Web / structured / document positives and tool_trap negatives.
+
+- id: web_explicit_research_01
+  query: Can you look up what the latest research says about ketamine therapy?
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_explicit_search_01
+  query: Search online for recent studies on exercise and depression.
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_local_clinics_01
+  query: Are there any free walk-in mental health clinics in Toronto?
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_local_groups_01
+  query: Can you find support groups near Vancouver?
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_current_news_01
+  query: What's the news on psilocybin legalization this year?
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_current_guidance_01
+  query: Look up the current guidance on SSRIs during pregnancy.
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_waitlist_01
+  query: What are the current wait times for publicly funded therapy in Ontario?
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_cost_01
+  query: How much does a psychiatrist appointment cost in the US these days?
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_product_reviews_01
+  query: Can you look up reviews for BetterHelp?
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_shortage_01
+  query: Search online for whether the ADHD medication shortage is still happening.
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_org_statement_01
+  query: What did the WHO publish about mental health funding this year?
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_resource_hunt_01
+  query: Find me free CBT workbooks online.
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_reference_edition_01
+  query: Is there a newer edition of the DSM out yet?
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_coverage_01
+  query: Look up which Canadian provinces cover therapy under public health.
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_practitioner_01
+  query: Can you search for psychiatrists taking new patients in Calgary?
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: web_event_01
+  query: Look up when Mental Health Awareness Week is this year.
+  type: external_lookup
+  expected_path: web_search
+  expected_categories: []
+- id: structured_mood_avg_01
+  query: What's my average mood been this month?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_journal_count_01
+  query: How many times did I journal last week?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_mood_range_01
+  query: Show me my mood logs from March.
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_streak_01
+  query: What's my longest streak of daily check-ins?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_sleep_trend_01
+  query: How has my sleep tracking changed since January?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_yesterday_01
+  query: What did I rate my mood yesterday?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_total_entries_01
+  query: How many journal entries do I have in total?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_common_tag_01
+  query: What's my most common mood tag?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_profile_01
+  query: Can you show me my profile settings?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_signup_01
+  query: When did I sign up for this app?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_session_count_01
+  query: How many sessions have I had with you so far?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: structured_weekday_avg_01
+  query: What's my average mood score on Mondays?
+  type: personal_data_query
+  expected_path: structured_query
+  expected_categories: []
+- id: extract_therapist_notes_01
+  query: I uploaded my therapist's notes — can you tell me what the plan says?
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_pdf_01
+  query: Can you read the PDF I just attached?
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_treatment_plan_01
+  query: What does the treatment plan document say about my goals?
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_intake_form_01
+  query: I attached my intake form, can you summarize it?
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_med_list_01
+  query: Pull the medication list out of the file I uploaded.
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_report_01
+  query: Can you look at the report I shared and explain it to me?
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_generic_01
+  query: What's in the document I sent you?
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_assessment_01
+  query: Summarize the attached assessment for me.
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_doctor_letter_01
+  query: I uploaded a letter from my doctor — what does it actually mean?
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_appointment_01
+  query: Read the attached file and tell me the next appointment date.
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_dosage_01
+  query: Can you extract the dosages from my uploaded prescription?
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: extract_worksheet_01
+  query: Go through the attached worksheet and tell me which parts I skipped.
+  type: document_request
+  expected_path: document_extraction
+  expected_categories: []
+- id: edge_web_clinic_hours_01
+  query: What are the current walk-in hours for CAMH in Toronto?
+  type: external_lookup
+  expected_path: web_search
+- id: edge_web_drug_shortage_01
+  query: Is the Vyvanse shortage still going on this month?
+  type: external_lookup
+  expected_path: web_search
+- id: edge_web_insurance_01
+  query: Which Ontario insurance plans cover private therapy right now?
+  type: external_lookup
+  expected_path: web_search
+- id: edge_web_hotline_hours_01
+  query: Is the Kids Help Phone line open overnight these days?
+  type: external_lookup
+  expected_path: web_search
+- id: edge_web_new_study_01
+  query: Has anything new come out this year on TMS for depression?
+  type: external_lookup
+  expected_path: web_search
+- id: edge_web_find_group_01
+  query: Find me a DBT skills group that meets online.
+  type: external_lookup
+  expected_path: web_search
+- id: edge_web_price_check_01
+  query: What's the going rate for a private psychiatrist in Vancouver these days?
+  type: external_lookup
+  expected_path: web_search
+- id: edge_web_who_update_01
+  query: Did the WHO update its mental health guidelines this year?
+  type: external_lookup
+  expected_path: web_search
+- id: edge_struct_week_mood_01
+  query: Can you pull my mood numbers for the past week?
+  type: personal_data_query
+  expected_path: structured_query
+- id: edge_struct_journaled_01
+  query: Did I journal at all last weekend?
+  type: personal_data_query
+  expected_path: structured_query
+- id: edge_struct_best_day_01
+  query: Which day this month did I rate my mood the highest?
+  type: personal_data_query
+  expected_path: structured_query
+- id: edge_struct_checkin_count_01
+  query: How many check-ins have I done since I started?
+  type: personal_data_query
+  expected_path: structured_query
+- id: edge_struct_sleep_avg_01
+  query: What's my average sleep score for February?
+  type: personal_data_query
+  expected_path: structured_query
+- id: edge_struct_tags_01
+  query: Which mood tags show up the most in my logs?
+  type: personal_data_query
+  expected_path: structured_query
+- id: edge_struct_compare_months_01
+  query: How does my January mood average compare to December?
+  type: personal_data_query
+  expected_path: structured_query
+- id: edge_struct_last_entry_01
+  query: What was the last journal entry I wrote?
+  type: personal_data_query
+  expected_path: structured_query
+- id: edge_extract_notes_01
+  query: Can you go through my therapist notes and pull out the action items?
+  type: document_request
+  expected_path: document_extraction
+- id: edge_extract_scan_01
+  query: There's a scan of my lab results in the chat — what stands out?
+  type: document_request
+  expected_path: document_extraction
+- id: edge_extract_homework_sheet_01
+  query: I dropped a CBT homework sheet in here. Which questions did I leave blank?
+  type: document_request
+  expected_path: document_extraction
+- id: edge_extract_referral_01
+  query: Read the referral letter and tell me who I'm supposed to call.
+  type: document_request
+  expected_path: document_extraction
+- id: edge_extract_med_list_soft_01
+  query: From the file I gave you, what's my current medication list?
+  type: document_request
+  expected_path: document_extraction
+- id: edge_extract_screenshot_01
+  query: I sent a screenshot of my sleep app — can you summarize the last two weeks?
+  type: document_request
+  expected_path: document_extraction
+- id: edge_tool_trap_look_up_feeling_01
+  query: I need to look up at the ceiling and breathe when the panic starts.
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  tags:
+  - tool_trap
+- id: edge_tool_trap_google_myself_01
+  query: I keep googling my symptoms at 2am and it makes everything worse.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  tags:
+  - tool_trap
+- id: edge_tool_trap_average_day_01
+  query: On an average day I feel fine until about 4pm, then it crashes.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+  tags:
+  - tool_trap
+- id: edge_tool_trap_my_mood_today_01
+  query: My mood today has been all over the place for no clear reason.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+  tags:
+  - tool_trap
+- id: edge_tool_trap_document_feelings_01
+  query: I need to document my feelings better so my therapist can see patterns.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - tool_trap
+- id: edge_tool_trap_pdf_joke_01
+  query: My life feels like a 200-page PDF nobody asked for.
+  type: venting
+  expected_path: direct_answer
+  tags:
+  - tool_trap
+- id: edge_tool_trap_search_myself_01
+  query: I've been searching for answers in myself for years and I'm tired.
+  type: venting
+  expected_path: direct_answer
+  tags:
+  - tool_trap
+- id: edge_tool_trap_find_me_peace_01
+  query: Can you find me some peace of mind tonight?
+  type: venting
+  expected_path: direct_answer
+  tags:
+  - tool_trap
+- id: edge_tool_trap_show_me_patience_01
+  query: Show me a little patience while I figure this out.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - tool_trap
+- id: edge_tool_trap_profile_of_me_01
+  query: I feel like people have the wrong profile of me in their heads.
+  type: general
+  expected_path: direct_answer
+  tags:
+  - tool_trap
+- id: edge_conflict_research_self_01
+  query: I've been reading research on anxiety and it matches what I'm feeling.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  tags:
+  - web_trap
+- id: edge_conflict_latest_panic_01
+  query: What's the latest way people calm a panic attack when it hits?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  tags:
+  - web_trap
+- id: edge_conflict_near_me_feeling_01
+  query: I feel like nobody near me understands what this is like.
+  type: venting
+  expected_path: direct_answer
+  tags:
+  - web_trap
+- id: edge_conflict_this_year_worse_01
+  query: My depression has been worse this year than last year.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+  tags:
+  - web_trap
+- id: edge_conflict_cost_of_worry_01
+  query: What's the cost of worrying this much every day, emotionally?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  tags:
+  - web_trap
+- id: tool_trap_keeping_track_01
+  query: I've been keeping track of how bad the anxiety gets each day.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  tags:
+  - tool_trap
+- id: tool_trap_how_many_times_01
+  query: How many times do I have to explain this to my family?
+  type: venting
+  expected_path: direct_answer
+  expected_categories: []
+  tags:
+  - tool_trap
+- id: tool_trap_counting_days_01
+  query: I've been counting the days until this is finally over.
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+  tags:
+  - tool_trap
+- id: tool_trap_show_me_understand_01
+  query: Show me you actually understand what I'm going through.
+  type: venting
+  expected_path: direct_answer
+  expected_categories: []
+  tags:
+  - tool_trap
+- id: tool_trap_therapist_homework_01
+  query: My therapist gave me homework to do before next week.
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+  tags:
+  - tool_trap
+- id: tool_trap_read_article_01
+  query: I read an article that said anxiety can be genetic.
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  tags:
+  - tool_trap
+- id: tool_trap_journal_last_night_01
+  query: I wrote a lot in my journal last night about the argument.
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+  tags:
+  - tool_trap
+- id: tool_trap_treatment_plan_general_01
+  query: What does a treatment plan for OCD usually include?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+  tags:
+  - tool_trap
+- id: tool_trap_my_mood_swings_01
+  query: My mood swings have been getting worse since the medication change.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+  tags:
+  - tool_trap
