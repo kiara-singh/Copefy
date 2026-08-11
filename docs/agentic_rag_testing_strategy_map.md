@@ -151,11 +151,14 @@ python -m eval.import_counseling_heldout --n 200
 python -m eval.layer1_eval --router rule --tag heldout --no-gate
 ```
 
-### Partner handoff
+### Next layers
 
-- **Layer 1 (this work):** done — ship rule router; see `docs/LAYER1_HANDOFF.md`
-- **Layer 2 (partner):** corpus selection once journal retrieval exists (`expected_corpus` already on search cases)
-- **Layer 3 (next for you):** clinical retrieval strategy bake-off (`run_strategy_compare`)
+Layer 1 is complete — see `docs/LAYER1_HANDOFF.md` for a short onboarding note.
+
+| Layer | Focus |
+|-------|--------|
+| **2 — Corpus selection** | Clinical KB vs journal vs both once journal retrieval exists (`expected_corpus` already on search cases) |
+| **3 — Retrieval strategies** | Compare clinical retrieval strategies with `run_strategy_compare` |
 
 The 12 remaining failures are almost all one shape: someone describing a symptom in plain language with no clinical vocabulary to match on ("I keep forgetting to take my medication", "I cancel plans at the last minute"). That is the intrinsic ceiling of keyword matching and the main thing the AI router is expected to beat.
 
