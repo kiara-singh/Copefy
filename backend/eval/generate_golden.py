@@ -39,23 +39,39 @@ def _expand_symptom_template(group: dict) -> list[dict]:
 
     if "topics" in group and "query_template" in group:
         for topic in group["topics"]:
+            if isinstance(topic, dict):
+                text = str(topic["topic"])
+                labels = _labels(group)
+                if "expected_categories" in topic:
+                    labels["expected_categories"] = list(topic["expected_categories"])
+            else:
+                text = str(topic)
+                labels = _labels(group)
             cases.append(
                 {
-                    "id": f"{prefix}_{_slug(str(topic))}",
-                    "query": group["query_template"].format(topic=topic),
-                    **_labels(group),
+                    "id": f"{prefix}_{_slug(text)}",
+                    "query": group["query_template"].format(topic=text),
+                    **labels,
                 }
             )
         return cases
 
     if "pairs" in group and "query_template" in group:
         for idx, pair in enumerate(group["pairs"], start=1):
-            query = group["query_template"].format(**pair)
+            format_pair = {
+                key: value
+                for key, value in pair.items()
+                if key != "expected_categories"
+            }
+            labels = _labels(group)
+            if "expected_categories" in pair:
+                labels["expected_categories"] = list(pair["expected_categories"])
+            query = group["query_template"].format(**format_pair)
             cases.append(
                 {
                     "id": f"{prefix}_{idx:02d}",
                     "query": query,
-                    **_labels(group),
+                    **labels,
                 }
             )
         return cases

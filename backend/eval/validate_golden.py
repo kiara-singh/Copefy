@@ -130,10 +130,20 @@ def print_balance_report(cases: list[dict]) -> None:
     for case_type, count in sorted(by_type.items()):
         print(f"  {case_type:<24} {count}")
 
-    if by_tag:
-        print("\nBy tag:")
-        for tag, count in by_tag.most_common():
-            print(f"  {tag:<24} {count}")
+    unlabeled_search = [
+        case
+        for case in cases
+        if case.get("expected_path") == "search_database"
+        and "heldout" not in case.get("tags", [])
+        and not case.get("expected_categories")
+    ]
+    if unlabeled_search:
+        print(
+            f"\nUnlabeled regression search cases (skipped for category recall): "
+            f"{len(unlabeled_search)}"
+        )
+        for case in unlabeled_search[:8]:
+            print(f"  {case.get('id')}")
 
 
 def main() -> None:

@@ -193,7 +193,7 @@ def categories_for(text: str, path: str) -> list[str]:
 
 def stable_id(text: str, idx: int) -> str:
     digest = hashlib.sha1(text.encode("utf-8")).hexdigest()[:8]
-    return f"heldout_counsel_{idx:03d}_{digest}"
+    return f"heldout_counsel_{idx:04d}_{digest}"
 
 
 def sample_stratified(contexts: list[str], n: int, seed: str = "copefy-heldout") -> list[str]:
@@ -205,16 +205,17 @@ def sample_stratified(contexts: list[str], n: int, seed: str = "copefy-heldout")
     for key, items in by_bucket.items():
         items.sort(key=lambda t: hashlib.sha1(f"{seed}:{t}".encode()).hexdigest())
 
-    # Take all crisis-ish, then fill quotas.
+    # Quotas were authored for n=200; scale them so a 1000-case draw stays mixed.
+    scale = max(n, 1) / 200
     quotas = {
-        "crisisish": min(len(by_bucket["crisisish"]), 22),
-        "anxiety": 35,
-        "depression": 35,
-        "trauma": 20,
-        "ocd": min(len(by_bucket["ocd"]), 6),
-        "adhd": min(len(by_bucket["adhd"]), 7),
-        "relationship": 40,
-        "other": 40,
+        "crisisish": min(len(by_bucket["crisisish"]), max(1, round(22 * scale))),
+        "anxiety": max(1, round(35 * scale)),
+        "depression": max(1, round(35 * scale)),
+        "trauma": max(1, round(20 * scale)),
+        "ocd": min(len(by_bucket["ocd"]), max(1, round(6 * scale))),
+        "adhd": min(len(by_bucket["adhd"]), max(1, round(7 * scale))),
+        "relationship": max(1, round(40 * scale)),
+        "other": max(1, round(40 * scale)),
     }
     picked: list[str] = []
     for key, quota in quotas.items():
@@ -237,6 +238,8 @@ def build_cases(n: int) -> list[dict]:
         unique.setdefault(key, row["Context"].strip())
 
     sampled = sample_stratified(list(unique.values()), n=n)
+    if len(unique) < n:
+        print(f"Only {len(unique)} unique counseling questions available (requested {n})")
     cases: list[dict] = []
     for idx, text in enumerate(sampled, start=1):
         # Cap very long counseling essays — router input in chat is shorter.
@@ -262,7 +265,7 @@ def build_cases(n: int) -> list[dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n", type=int, default=200)
+    parser.add_argument("--n", type=int, default=1000)
     parser.add_argument("--out", type=Path, default=OUT_PATH)
     args = parser.parse_args()
 
@@ -279,9 +282,16 @@ def main() -> None:
     from collections import Counter
 
     paths = Counter(c["expected_path"] for c in cases)
+    labeled_search = sum(
+        1
+        for c in cases
+        if c.get("expected_path") == "search_database" and c.get("expected_categories")
+    )
+    search = paths.get("search_database", 0)
     print(f"Wrote {len(cases)} cases -> {args.out}")
     for path, count in paths.most_common():
         print(f"  {path:<22} {count}")
+    print(f"  search labeled cats   {labeled_search}/{search}")
 
 
 if __name__ == "__main__":

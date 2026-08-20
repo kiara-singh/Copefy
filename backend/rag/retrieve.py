@@ -5,7 +5,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from config import settings
 from rag.search import KBChunkHit
 
 # Common phone-keyboard misspellings of clinical words. Applied in _normalize so
@@ -567,6 +566,7 @@ async def retrieve_with_strategy(
     plan: RetrievalPlan | None = None,
 ) -> tuple[RetrievalPlan, list[RetrievedChunk]]:
     """Run retrieval using a named strategy (default from settings)."""
+    from config import settings
     from rag.strategies import get_strategy
 
     name = strategy_name or settings.rag_strategy

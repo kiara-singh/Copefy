@@ -5,8 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from db import get_pool
-
 
 @dataclass(frozen=True)
 class KBChunkHit:
@@ -31,6 +29,8 @@ async def search_kb_chunks(
     filter_category: str | None = None,
 ) -> list[KBChunkHit]:
     """Run match_kb_chunks and enrich results with document metadata."""
+    from db import get_pool
+
     pool = await get_pool()
     literal = _vector_literal(query_embedding)
 

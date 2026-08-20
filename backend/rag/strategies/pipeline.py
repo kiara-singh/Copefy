@@ -4,14 +4,13 @@ from __future__ import annotations
 
 import asyncio
 
-from rag.embed import embed_query
 from rag.retrieve import (
     RetrievalPlan,
     RetrievedChunk,
     _rerank_hits,
     build_retrieval_plan,
 )
-from rag.search import KBChunkHit, search_kb_chunks
+from rag.search import KBChunkHit
 from rag.strategies.base import StrategyConfig
 
 
@@ -20,6 +19,8 @@ async def _collect_hits(
     plan: RetrievalPlan,
     match_count: int,
 ) -> list[KBChunkHit]:
+    from rag.search import search_kb_chunks
+
     all_hits: list[KBChunkHit] = []
     seen_ids: set[str] = set()
 
@@ -92,6 +93,16 @@ def mmr_rerank_hits(
     return selected
 
 
+def apply_min_similarity(
+    hits: list[KBChunkHit],
+    min_similarity: float | None,
+) -> list[KBChunkHit]:
+    """Drop hits below a similarity cutoff. None means keep everything."""
+    if min_similarity is None:
+        return hits
+    return [hit for hit in hits if hit.similarity >= min_similarity]
+
+
 def hits_to_chunks(hits: list[KBChunkHit], inject_k: int) -> list[RetrievedChunk]:
     return [
         RetrievedChunk(
@@ -115,6 +126,8 @@ async def run_strategy_pipeline(
 ) -> tuple[RetrievalPlan, list[RetrievedChunk], dict]:
     # The router already decided to search; it passes the plan it built. Callers
     # without a router (the Layer 3 eval scripts) get one built here.
+    from rag.embed import embed_query
+
     plan = plan or build_retrieval_plan(user_message, history)
 
     embedding = await asyncio.to_thread(embed_query, plan.search_query)
@@ -125,8 +138,7 @@ async def run_strategy_pipeline(
     else:
         ranked = _rerank_hits(plan.search_query, all_hits, config.top_k)
 
-    if config.min_similarity is not None and ranked:
-        ranked = [hit for hit in ranked if hit.similarity >= config.min_similarity]
+    ranked = apply_min_similarity(ranked, config.min_similarity)
 
     chunks = hits_to_chunks(ranked, config.inject_k)
     meta = {

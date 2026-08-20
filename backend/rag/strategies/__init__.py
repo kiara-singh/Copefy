@@ -14,7 +14,7 @@ STRATEGIES: dict[str, object] = {
     WideThenNarrowStrategy.name: WideThenNarrowStrategy(),
 }
 
-DEFAULT_STRATEGY = BaselineStrategy.name
+DEFAULT_STRATEGY = MmrStrategy.name
 
 
 def get_strategy(name: str):

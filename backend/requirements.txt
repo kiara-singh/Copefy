@@ -7,3 +7,4 @@ google-genai==2.12.1
 asyncpg==0.30.0
 PyYAML==6.0.3
 datasets>=2.14.0
+pytest>=8.0.0

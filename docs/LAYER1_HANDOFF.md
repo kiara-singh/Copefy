@@ -15,7 +15,7 @@ An AI router is implemented and can be swapped in for experiments, but it is not
 | Production default | `AGENT_ROUTER=rule` |
 | AI router | Built under `agent/routers/ai.py`; optional via config |
 | Regression suite | 529 cases at 100% accuracy; crisis and web trap false positives at 0 |
-| Held-out check | 200 external counseling questions at 75.5%; crisis recall 100% |
+| Held-out check | 831 external counseling questions at 64.1%; crisis recall 95.8% |
 | Safety gates | Eval exits non-zero if crisis recall drops or trap false positives appear |
 
 The 100% regression score is for cases authored with the router. The held-out score is the honest generalization check. **Do not add keywords to chase the held-out file** — treat it as measurement only.
@@ -68,7 +68,7 @@ These layers are described in more detail in `docs/agentic_rag_testing_strategy_
 | Layer | Focus | Notes |
 |-------|--------|------|
 | **2 — Corpus selection** | After `search_database`, choose clinical KB vs journal vs both | `expected_corpus` is already on search cases; blocked on journal retrieval existing |
-| **3 — Retrieval strategies** | How to fetch and rank chunks inside a corpus | Four strategies exist; compare with `python -m eval.run_strategy_compare` |
+| **3 — Retrieval strategies** | How to fetch and rank chunks inside a corpus | Clinical bake-off done; production default `mmr` — see `docs/LAYER3_HANDOFF.md` |
 | **Tool backends** | Implement web / structured / document tools | Router already selects these paths |
 
 ## Code map
@@ -79,4 +79,5 @@ These layers are described in more detail in `docs/agentic_rag_testing_strategy_
 | Orchestrator | `backend/agent/orchestrator.py` |
 | Clinical vocabulary used by the rule router | `backend/rag/retrieve.py` (`CATEGORY_KEYWORDS`, `CLINICAL_SIGNALS`) |
 | Layer 1 eval | `backend/eval/layer1_eval.py`, `backend/eval/validate_golden.py` |
+| Layer 3 eval | `backend/eval/run_strategy_compare.py`, `backend/eval/retrieval_scoring.py` |
 | Full strategy map | `docs/agentic_rag_testing_strategy_map.md` |

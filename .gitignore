@@ -16,6 +16,11 @@ __pycache__/
 venv/
 .venv/
 env/
+.pytest_cache/
+pytest-cache-files*/
+
+# Layer 3 bake-off dumps (summaries live in docs/)
+backend/eval/results/
 
 # Logs
 *.log

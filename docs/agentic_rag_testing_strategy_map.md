@@ -54,7 +54,7 @@ Labeled cases live in `backend/eval/golden/`. Everything except `templates.yaml`
 | `heldout_counseling.yaml` | External counseling questions (HuggingFace), independent labels | **No** — measure only |
 | `templates.yaml` | Generators for the `gen_*` half of `core.yaml` | N/A |
 
-Regression size is **529** cases (`--exclude-tag heldout`). Held-out adds **200** more.
+Regression size is **529** cases (`--exclude-tag heldout`). Held-out adds **831** more (all unique questions in the HF counseling set).
 
 **Why negative cases matter.** A path can score perfect recall by over-firing. For crisis that replaces the conversation with a hotline message. Tags `crisis_trap` / `web_trap` / `tool_trap` are enforced by `validate_golden`.
 
@@ -137,17 +137,17 @@ Ship decision: keep `AGENT_ROUTER=rule`. Routing is free and fast; spend model b
 
 ### Held-out check (generalization)
 
-200 questions from HuggingFace `Amod/mental_health_counseling_conversations` were labeled independently (`heldout_counseling.yaml`). Clinical vocabulary was expanded **once** from failure *themes* (abuse/trauma, grief, loneliness, “how do I handle…”), not by chasing case IDs.
+The HuggingFace counseling corpus has **831 unique questions** after dedupe (requested 1000). They are labeled independently (`heldout_counseling.yaml`). Clinical vocabulary was expanded **once** from failure *themes* (abuse/trauma, grief, loneliness, “how do I handle…”), not by chasing case IDs. Do not retune against this file.
 
 | Suite | Cases | Rule accuracy | Crisis recall |
 |-------|-------|---------------|---------------|
 | Regression (ours) | 529 | 100% | 100% |
-| Held-out counseling | 200 | **75.5%** | 100% |
+| Held-out counseling | 831 | **64.1%** | 95.8% |
 
-Most remaining held-out misses are long relationship/life questions with no clinical vocabulary our KB covers. Do not retune keywords against this file.
+The drop from the old 200-case 75.5% is mix, not a router regression: the extra rows are mostly long relationship/life posts with no clinical vocabulary. One crisis label on the larger set is missed. Do not add keywords to chase this file.
 
 ```bash
-python -m eval.import_counseling_heldout --n 200
+python -m eval.import_counseling_heldout --n 1000
 python -m eval.layer1_eval --router rule --tag heldout --no-gate
 ```
 
@@ -214,10 +214,10 @@ The golden schema already carries an `expected_corpus` field so this layer becom
 
 | Strategy | Approach | Key difference |
 |----------|----------|----------------|
-| **Baseline** | Standard search width with heuristic reranking | Default — balances relevance with coping-keyword boosting |
-| **Similarity threshold** | Drop results below a confidence cutoff (0.65) | Fewer but higher-confidence chunks |
-| **MMR (diversity)** | Balance relevance against redundancy | Avoids returning near-duplicate chunks |
-| **Wide-then-narrow** | Search a larger pool, then narrow to best results | More candidates considered before final selection |
+| **Baseline** | Standard search width with heuristic reranking | Comparable runner-up |
+| **Similarity threshold** | Drop results below a confidence cutoff (0.65) | No-op on current KB (identical to baseline) |
+| **MMR (diversity)** | Balance relevance against redundancy | **Production default** |
+| **Wide-then-narrow** | Search a larger pool, then narrow to best results | Slightly worse category recall |
 
 All strategies share the same pipeline: detect clinical categories → embed the query → vector search (category-filtered, with fallback) → rerank → optionally filter → return top chunks for the prompt.
 
@@ -353,7 +353,7 @@ All tools the orchestrator can invoke, with their role in the system:
 1. ~~**Consolidate orchestration and gating**~~ — done: one router interface, one decision per message
 2. ~~**Lock down routing accuracy**~~ — done: 303-case suite, 96% overall, crisis and web-safety gates enforced
 3. **Score the AI router on the full suite** — blocked on a billing-enabled API key; run the bake-off and pick a production default once available
-4. **Pick a clinical retrieval strategy** — run the Layer 3 bake-off, choose a winner, set as production default
+4. ~~**Pick a clinical retrieval strategy**~~ — done: `RAG_STRATEGY=mmr` (regression recall 0.948 after fixing mislabeled `gen_*` rows; 0.919 before). See `docs/LAYER3_HANDOFF.md`.
 5. **Implement journal entry retrieval** — embed journal entries, extend database search to both corpora, add corpus selection cases
 6. **Build response evaluation** — AI-as-judge on core test cases; expand suite with expected behaviors
 7. **Activate external tools** — real backends for web search, structured query, document extraction
@@ -369,7 +369,7 @@ All tools the orchestrator can invoke, with their role in the system:
 | Crisis handling | Yes | Automated, 100% recall | Keep the case set growing as new phrasings appear |
 | Rule vs AI router comparison | Both built | Rule scored; AI smoke-tested | Full AI run, then choose a default |
 | Corpus selection (clinical vs journal) | No | Not testable | Implement journal retrieval, add labels |
-| Retrieval strategies — clinical KB (4 options) | Yes | Automated bake-off | Pick winner, finer relevance metrics |
+| Retrieval strategies — clinical KB (4 options) | Yes | Automated bake-off | Winner: `mmr`. Finer relevance metrics still later |
 | Retrieval strategies — journal entries | No | — | Build and evaluate |
 | Generation / prompting | Yes | Manual only | Prompt testing, model comparison |
 | Response quality evaluation | No | — | AI-as-judge, safety checks |

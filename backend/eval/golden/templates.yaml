@@ -108,12 +108,18 @@ coping_requests:
   - id_prefix: gen_coping
     query_template: "What can I do when {topic}?"
     topics:
-      - my mind won't stop racing at night
-      - I feel a panic attack coming on
-      - intrusive thoughts won't leave me alone
-      - I can't focus on studying
-      - I feel triggered by loud sounds
-      - I need to calm down before a presentation
+      - topic: my mind won't stop racing at night
+        expected_categories: [anxiety]
+      - topic: I feel a panic attack coming on
+        expected_categories: [anxiety]
+      - topic: intrusive thoughts won't leave me alone
+        expected_categories: [ocd]
+      - topic: I can't focus on studying
+        expected_categories: [adhd]
+      - topic: I feel triggered by loud sounds
+        expected_categories: [ptsd]
+      - topic: I need to calm down before a presentation
+        expected_categories: [anxiety]
     expected_categories: [anxiety]
     type: coping_request
     expected_path: search_database
@@ -122,12 +128,18 @@ normalization:
   - id_prefix: gen_norm
     query_template: "Is it normal to {topic}?"
     topics:
-      - feel anxious before social events
-      - need reassurance from my partner
-      - replay embarrassing moments for days
-      - have intrusive thoughts that scare me
-      - struggle to concentrate at work
-      - feel numb after something traumatic
+      - topic: feel anxious before social events
+        expected_categories: [anxiety]
+      - topic: need reassurance from my partner
+        expected_categories: [ocd, anxiety]
+      - topic: replay embarrassing moments for days
+        expected_categories: [anxiety]
+      - topic: have intrusive thoughts that scare me
+        expected_categories: [ocd]
+      - topic: struggle to concentrate at work
+        expected_categories: [adhd, anxiety]
+      - topic: feel numb after something traumatic
+        expected_categories: [ptsd]
     expected_categories: [anxiety]
     type: seeks_normalization
     expected_path: search_database
@@ -258,7 +270,8 @@ clinical_detail:
       - struggle to shower or eat regularly
       - feel guilty for being tired all the time
       - snap at people I love
-      - can't concentrate on reading
+      - topic: can't concentrate on reading
+        expected_categories: [depression, adhd]
       - wake up early and can't fall back asleep
     expected_categories: [depression]
     type: symptom_sharing
@@ -309,16 +322,22 @@ comorbidity:
     pairs:
       - primary: constant worry
         secondary: low motivation
+        expected_categories: [anxiety, depression]
       - primary: hyperfocus bursts
         secondary: crushing guilt afterward
+        expected_categories: [adhd, depression]
       - primary: intrusive thoughts
         secondary: panic attacks
+        expected_categories: [ocd, anxiety]
       - primary: nightmares
         secondary: avoiding sleep
+        expected_categories: [ptsd]
       - primary: trouble focusing
         secondary: anxiety about failing
+        expected_categories: [adhd, anxiety]
       - primary: checking rituals
         secondary: exhaustion and sadness
+        expected_categories: [ocd, depression]
     expected_categories: [anxiety]
     type: symptom_sharing
     expected_path: search_database

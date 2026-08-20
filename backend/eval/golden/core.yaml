@@ -10,7 +10,8 @@
   - ocd
   - anxiety
 - id: depression_mood_01
-  query: Lately nothing feels worth doing and I'm sleeping all day. I don't know what's wrong with me.
+  query: Lately nothing feels worth doing and I'm sleeping all day. I don't know what's
+    wrong with me.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
@@ -112,7 +113,8 @@
   expected_categories:
   - ocd
 - id: adhd_procrastination_01
-  query: I know what I need to do but I just can't start. I stare at the screen for hours.
+  query: I know what I need to do but I just can't start. I stare at the screen for
+    hours.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
@@ -165,7 +167,8 @@
   - role: user
     content: I have a big interview next week
   - role: assistant
-    content: Interviews can bring up a lot of pressure. What's on your mind about it?
+    content: Interviews can bring up a lot of pressure. What's on your mind about
+      it?
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
@@ -239,7 +242,8 @@
   expected_categories:
   - ptsd
 - id: normalization_intrusive_01
-  query: Do other people with OCD get violent intrusive thoughts they would never act on?
+  query: Do other people with OCD get violent intrusive thoughts they would never
+    act on?
   type: seeks_normalization
   expected_path: search_database
   expected_corpus: clinical
@@ -251,7 +255,8 @@
   - role: user
     content: My doctor suggested antidepressants for my anxiety
   - role: assistant
-    content: Starting medication can bring up a lot of questions. What's weighing on you?
+    content: Starting medication can bring up a lot of questions. What's weighing
+      on you?
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
@@ -356,14 +361,16 @@
   expected_categories:
   - depression
 - id: gen_depression_symptom_exhausted_all_the_time
-  query: I've been feeling exhausted all the time for weeks and it's hard to get out of bed.
+  query: I've been feeling exhausted all the time for weeks and it's hard to get out
+    of bed.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
   - depression
 - id: gen_depression_symptom_like_nothing_matters
-  query: I've been feeling like nothing matters for weeks and it's hard to get out of bed.
+  query: I've been feeling like nothing matters for weeks and it's hard to get out
+    of bed.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
@@ -405,35 +412,40 @@
   expected_categories:
   - adhd
 - id: gen_ocd_symptom_wash_my_hands_over_and_over
-  query: I have to wash my hands over and over or I feel like something terrible will happen.
+  query: I have to wash my hands over and over or I feel like something terrible will
+    happen.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
   - ocd
 - id: gen_ocd_symptom_check_the_stove_repeatedly
-  query: I have to check the stove repeatedly or I feel like something terrible will happen.
+  query: I have to check the stove repeatedly or I feel like something terrible will
+    happen.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
   - ocd
 - id: gen_ocd_symptom_count_things_in_my_head
-  query: I have to count things in my head or I feel like something terrible will happen.
+  query: I have to count things in my head or I feel like something terrible will
+    happen.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
   - ocd
 - id: gen_ocd_symptom_arrange_items_until_they_feel_right
-  query: I have to arrange items until they feel right or I feel like something terrible will happen.
+  query: I have to arrange items until they feel right or I feel like something terrible
+    will happen.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
   - ocd
 - id: gen_ocd_symptom_ask_people_to_confirm_things
-  query: I have to ask people to confirm things or I feel like something terrible will happen.
+  query: I have to ask people to confirm things or I feel like something terrible
+    will happen.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
@@ -577,21 +589,21 @@
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
-  - anxiety
+  - ocd
 - id: gen_coping_i_can_t_focus_on_studying
   query: What can I do when I can't focus on studying?
   type: coping_request
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
-  - anxiety
+  - adhd
 - id: gen_coping_i_feel_triggered_by_loud_sounds
   query: What can I do when I feel triggered by loud sounds?
   type: coping_request
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
-  - anxiety
+  - ptsd
 - id: gen_coping_i_need_to_calm_down_before_a_presentatio
   query: What can I do when I need to calm down before a presentation?
   type: coping_request
@@ -612,6 +624,7 @@
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
+  - ocd
   - anxiety
 - id: gen_norm_replay_embarrassing_moments_for_days
   query: Is it normal to replay embarrassing moments for days?
@@ -626,13 +639,14 @@
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
-  - anxiety
+  - ocd
 - id: gen_norm_struggle_to_concentrate_at_work
   query: Is it normal to struggle to concentrate at work?
   type: seeks_normalization
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
+  - adhd
   - anxiety
 - id: gen_norm_feel_numb_after_something_traumatic
   query: Is it normal to feel numb after something traumatic?
@@ -640,7 +654,7 @@
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
-  - anxiety
+  - ptsd
 - id: gen_chat_01
   query: Hello
   type: general
@@ -1017,7 +1031,8 @@
   expected_categories:
   - anxiety
 - id: gen_anxiety_detail_trouble_swallowing_when_stressed
-  query: My trouble swallowing when stressed has gotten worse and I don't know if it's anxiety.
+  query: My trouble swallowing when stressed has gotten worse and I don't know if
+    it's anxiety.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
@@ -1059,7 +1074,8 @@
   expected_categories:
   - depression
 - id: gen_depression_detail_feel_guilty_for_being_tired_all_the_time
-  query: Lately I feel guilty for being tired all the time and people are starting to notice.
+  query: Lately I feel guilty for being tired all the time and people are starting
+    to notice.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
@@ -1079,22 +1095,26 @@
   expected_corpus: clinical
   expected_categories:
   - depression
+  - adhd
 - id: gen_depression_detail_wake_up_early_and_can_t_fall_back_asleep
-  query: Lately I wake up early and can't fall back asleep and people are starting to notice.
+  query: Lately I wake up early and can't fall back asleep and people are starting
+    to notice.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
   - depression
 - id: gen_adhd_detail_finish_assignments_before_the_deadline
-  query: It's hard to finish assignments before the deadline even when I really care about it.
+  query: It's hard to finish assignments before the deadline even when I really care
+    about it.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
   - adhd
 - id: gen_adhd_detail_listen_in_conversations_without_zoning_o
-  query: It's hard to listen in conversations without zoning out even when I really care about it.
+  query: It's hard to listen in conversations without zoning out even when I really
+    care about it.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
@@ -1108,14 +1128,16 @@
   expected_categories:
   - adhd
 - id: gen_adhd_detail_remember_to_take_my_medication
-  query: It's hard to remember to take my medication even when I really care about it.
+  query: It's hard to remember to take my medication even when I really care about
+    it.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
   - adhd
 - id: gen_adhd_detail_follow_multi_step_instructions_at_work
-  query: It's hard to follow multi-step instructions at work even when I really care about it.
+  query: It's hard to follow multi-step instructions at work even when I really care
+    about it.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
@@ -1219,19 +1241,22 @@
   expected_corpus: clinical
   expected_categories:
   - anxiety
+  - depression
 - id: gen_comorbid_02
   query: I deal with hyperfocus bursts and crushing guilt afterward at the same time.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
-  - anxiety
+  - adhd
+  - depression
 - id: gen_comorbid_03
   query: I deal with intrusive thoughts and panic attacks at the same time.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
+  - ocd
   - anxiety
 - id: gen_comorbid_04
   query: I deal with nightmares and avoiding sleep at the same time.
@@ -1239,13 +1264,14 @@
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
-  - anxiety
+  - ptsd
 - id: gen_comorbid_05
   query: I deal with trouble focusing and anxiety about failing at the same time.
   type: symptom_sharing
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
+  - adhd
   - anxiety
 - id: gen_comorbid_06
   query: I deal with checking rituals and exhaustion and sadness at the same time.
@@ -1253,7 +1279,8 @@
   expected_path: search_database
   expected_corpus: clinical
   expected_categories:
-  - anxiety
+  - ocd
+  - depression
 - id: gen_coping_dep_i_can_t_get_out_of_bed_in_the_morning
   query: What helps when I can't get out of bed in the morning?
   type: coping_request

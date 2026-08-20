@@ -32,14 +32,8 @@ def case_files() -> list[Path]:
     ]
 
 
-def load_golden_cases(*, include_generated: bool = True) -> list[dict]:
+def load_golden_cases() -> list[dict]:
     cases: list[dict] = []
     for path in case_files():
         cases.extend(_load_yaml_list(path))
-    if not include_generated:
-        cases = [
-            case
-            for case in cases
-            if not str(case.get("id", "")).startswith("gen_")
-        ]
     return cases

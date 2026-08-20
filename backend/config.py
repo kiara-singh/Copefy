@@ -13,11 +13,8 @@ class Settings(BaseSettings):
     gemini_chat_model: str = "gemini-flash-latest"
     gemini_embed_model: str = "gemini-embedding-2"
 
-    rag_top_k: int = 8
-    rag_match_count: int = 20
     rag_debug: bool = False
-    rag_strategy: str = "baseline"
-    rag_min_similarity: float = 0.65
+    rag_strategy: str = "mmr"
 
     agent_router: str = "rule"
     agent_router_model: str = "gemini-flash-latest"
