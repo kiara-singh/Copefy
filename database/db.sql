@@ -1,3 +1,7 @@
+-- DEPRECATED / LEGACY SCHEMA FILE
+-- This file contains legacy SQL definitions (e.g. unlinked users table and raw_text column).
+-- The authoritative schema definition for new setups is schema_core.sql.
+
 -- Enable the pgvector extension for RAG capabilities
 CREATE EXTENSION IF NOT EXISTS vector;
 

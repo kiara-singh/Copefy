@@ -4,6 +4,7 @@ import HomePage from "./pages/home_page";
 import JournalPage from "./pages/journal_page";
 import LoginPage from "./pages/login_page";
 import OnboardingPage from "./pages/onboarding_page";
+import PersonasPage from "./pages/personas_page";
 import SettingsPage from "./pages/settings_page";
 import { ProtectedRoute } from "./components/protected_route";
 import { PublicRoute } from "./components/public_route";
@@ -22,6 +23,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/journal" element={<JournalPage />} />
+          <Route path="/personas" element={<PersonasPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

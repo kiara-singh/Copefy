@@ -61,6 +61,19 @@ CREATE TABLE ai_personas (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 6. JOURNAL ENTRIES (Vector Table)
+-- Text and vector embeddings for semantic retrieval (RAG)
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE journal_entries (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    tags VARCHAR(50)[],
+    embedding vector(768), -- Dimension size (768) configured for Gemini embeddings
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 7. MEDICAL DOCUMENTS
 -- Metadata and storage references for uploaded health records
 -- Path or public URL to the file stored in Supabase Storage

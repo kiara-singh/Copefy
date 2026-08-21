@@ -4,6 +4,13 @@ import { supabase } from "../lib/supabase_client";
 import { CommunicationStyleType } from "../constants/quiz_constants";
 import { CommunicationStyleQuiz } from "../components/communication_style_quiz";
 
+import {
+  MedicalDocument,
+  get_medical_documents,
+  upload_medical_document,
+  delete_medical_document,
+} from "../lib/api";
+
 const SESSION_STORAGE_KEY = "copefy_session_id";
 
 const COMMUNICATION_STYLES: {
@@ -82,6 +89,103 @@ function SettingsPage() {
 
   // Account state
   const [logout_loading, set_logout_loading] = useState(false);
+
+  // Medical Documents state
+  const [medical_docs, set_medical_docs] = useState<MedicalDocument[]>([]);
+  const [docs_loading, set_docs_loading] = useState(true);
+  const [docs_error, set_docs_error] = useState<string | null>(null);
+  const [selected_file, set_selected_file] = useState<File | null>(null);
+  const [uploading, set_uploading] = useState(false);
+  const [upload_error, set_upload_error] = useState<string | null>(null);
+  const [upload_success, set_upload_success] = useState<string | null>(null);
+  const [deleting_doc, set_deleting_doc] = useState<MedicalDocument | null>(null);
+  const [is_deleting, set_is_deleting] = useState(false);
+
+  const fetch_docs = async () => {
+    set_docs_loading(true);
+    set_docs_error(null);
+    try {
+      const data = await get_medical_documents();
+      set_medical_docs(data);
+    } catch (err) {
+      console.error("Failed to load medical documents:", err);
+      set_docs_error("Failed to load medical documents.");
+    } finally {
+      set_docs_loading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetch_docs();
+  }, []);
+
+  const handle_file_select = (e: React.ChangeEvent<HTMLInputElement>) => {
+    set_upload_error(null);
+    set_upload_success(null);
+    const file = e.target.files?.[0];
+    if (!file) {
+      set_selected_file(null);
+      return;
+    }
+
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
+      set_upload_error("Invalid file type. Only PDF documents (.pdf) are supported.");
+      set_selected_file(null);
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      set_upload_error("File size exceeds 10 MB maximum limit.");
+      set_selected_file(null);
+      e.target.value = "";
+      return;
+    }
+
+    set_selected_file(file);
+  };
+
+  const handle_upload_doc = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selected_file || uploading) return;
+
+    set_upload_error(null);
+    set_upload_success(null);
+    set_uploading(true);
+
+    try {
+      const created = await upload_medical_document(selected_file);
+      set_medical_docs((prev) => [created, ...prev]);
+      set_upload_success(`Successfully uploaded "${created.file_name}"!`);
+      set_selected_file(null);
+      setTimeout(() => set_upload_success(null), 4000);
+    } catch (err: unknown) {
+      console.error("Failed to upload document:", err);
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Failed to upload medical document. Ensure it is a valid PDF under 10 MB.";
+      set_upload_error(msg);
+    } finally {
+      set_uploading(false);
+    }
+  };
+
+  const handle_confirm_delete_doc = async () => {
+    if (!deleting_doc || is_deleting) return;
+
+    set_is_deleting(true);
+    try {
+      await delete_medical_document(deleting_doc.id);
+      set_medical_docs((prev) => prev.filter((d) => d.id !== deleting_doc.id));
+      set_deleting_doc(null);
+    } catch (err) {
+      console.error("Failed to delete document:", err);
+      alert("Failed to delete document. Please try again.");
+    } finally {
+      set_is_deleting(false);
+    }
+  };
 
   // Sync state when profile loads/updates
   useEffect(() => {
@@ -493,7 +597,146 @@ function SettingsPage() {
             </form>
           </section>
 
-          {/* SECTION 4: ACCOUNT */}
+          {/* SECTION 4: MEDICAL DOCUMENTS */}
+          <section className="rounded-2xl bg-white p-6 shadow-xs ring-1 ring-slate-200">
+            <h2 className="text-base font-bold text-slate-900">Medical Documents</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Securely upload PDF medical records, lab results, or clinical notes that may later be used to personalize your Copefy companion experience.
+            </p>
+
+            {upload_error && (
+              <div className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3 text-xs text-red-600">
+                {upload_error}
+              </div>
+            )}
+            {upload_success && (
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800 font-medium">
+                {upload_success}
+              </div>
+            )}
+
+            {/* File Upload Form */}
+            <form onSubmit={handle_upload_doc} className="mt-5 flex flex-col gap-4">
+              <div>
+                <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2 px-1">
+                  Upload New Document (PDF, max 10 MB)
+                </label>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <input
+                    id="settings_medical_doc_input"
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={handle_file_select}
+                    className="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border border-slate-200 rounded-xl p-1"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!selected_file || uploading}
+                    className="shrink-0 rounded-full bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white transition-all hover:bg-indigo-700 disabled:opacity-50 shadow-xs"
+                  >
+                    {uploading ? "Uploading PDF..." : "Upload Document"}
+                  </button>
+                </div>
+                {selected_file && (
+                  <p className="mt-2 text-xs text-slate-600 font-medium px-1">
+                    Selected file: <span className="text-indigo-600">{selected_file.name}</span> ({(selected_file.size / (1024 * 1024)).toFixed(2)} MB)
+                  </p>
+                )}
+              </div>
+            </form>
+
+            {/* Document List */}
+            <div className="mt-6 border-t border-slate-100 pt-5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                Uploaded Documents ({medical_docs.length})
+              </h3>
+
+              {docs_loading ? (
+                <div className="flex py-6 justify-center">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"></div>
+                </div>
+              ) : docs_error ? (
+                <div className="rounded-xl border border-red-100 bg-red-50 p-3 text-xs text-red-600">
+                  {docs_error}
+                </div>
+              ) : medical_docs.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center">
+                  <p className="text-xs text-slate-500">
+                    No medical documents uploaded yet.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  {medical_docs.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 transition-all hover:border-slate-300"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600 font-bold text-xs">
+                          PDF
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-semibold text-slate-900 truncate">
+                            {doc.file_name}
+                          </h4>
+                          <p className="text-[10px] text-slate-500">
+                            Uploaded on {new Date(doc.uploaded_at).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => set_deleting_doc(doc)}
+                        className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* DELETE MEDICAL DOC MODAL */}
+          {deleting_doc && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
+              <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-200">
+                <h3 className="text-base font-bold text-slate-900">
+                  Delete "{deleting_doc.file_name}"?
+                </h3>
+                <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                  Are you sure you want to delete this medical document? The file will be permanently removed from storage.
+                </p>
+                <div className="mt-5 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => set_deleting_doc(null)}
+                    disabled={is_deleting}
+                    className="rounded-full px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handle_confirm_delete_doc}
+                    disabled={is_deleting}
+                    className="rounded-full bg-red-600 px-5 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50 transition-colors shadow-xs"
+                  >
+                    {is_deleting ? "Deleting..." : "Delete Document"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SECTION 5: ACCOUNT */}
           <section className="rounded-2xl bg-white p-6 shadow-xs ring-1 ring-slate-200">
             <h2 className="text-base font-bold text-slate-900">Account</h2>
             <p className="mt-1 text-xs text-slate-500">
