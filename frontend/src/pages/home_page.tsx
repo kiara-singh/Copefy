@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { create_session, send_chat } from "../lib/api";
+import ChatTracePanel from "../components/chat_trace_panel";
+import {
+  create_session,
+  is_rag_debug_enabled,
+  send_chat,
+  type ChatTrace,
+} from "../lib/api";
 
 const SESSION_STORAGE_KEY = "copefy_session_id";
 
@@ -8,6 +14,7 @@ type ChatRole = "user" | "assistant";
 interface ChatMessage {
   role: ChatRole;
   content: string;
+  trace?: ChatTrace;
 }
 
 function HomePage() {
@@ -50,15 +57,26 @@ function HomePage() {
     set_is_sending(true);
 
     try {
-      const reply = await send_chat(session_id, trimmed);
-      set_messages((prev) => [...prev, { role: "assistant", content: reply }]);
-    } catch (error) {
-      console.error("Failed to send message", error);
+      const data = await send_chat(session_id, trimmed);
       set_messages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "Sorry, something went wrong. Please try again.",
+          content: data.response,
+          trace: data.trace,
+        },
+      ]);
+    } catch (error) {
+      console.error("Failed to send message", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Sorry, something went wrong. Please try again.";
+      set_messages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: message,
         },
       ]);
     } finally {
@@ -68,8 +86,13 @@ function HomePage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex shrink-0 items-center border-b border-slate-200 bg-white px-6 py-3">
+      <header className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
         <span className="text-sm font-semibold text-slate-800">Chat</span>
+        {is_rag_debug_enabled && (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+            Trace on
+          </span>
+        )}
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
@@ -83,21 +106,25 @@ function HomePage() {
             </div>
           ) : (
             messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+              <div key={index}>
                 <div
-                  className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm ${
-                    message.role === "user"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white text-slate-800 shadow-sm ring-1 ring-slate-200"
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {message.content}
+                  <div
+                    className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm ${
+                      message.role === "user"
+                        ? "bg-indigo-600 text-white"
+                        : "bg-white text-slate-800 shadow-sm ring-1 ring-slate-200"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
                 </div>
+                {message.role === "assistant" && message.trace && (
+                  <ChatTracePanel trace={message.trace} />
+                )}
               </div>
             ))
           )}

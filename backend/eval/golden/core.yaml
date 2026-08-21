@@ -1,0 +1,1451 @@
+# Everyday Layer 1 coverage: hand seeds + template-generated cases.
+# Regenerate the gen_* half via: python -m eval.generate_golden
+
+- id: ocd_checking_01
+  query: I can't stop checking if I locked the door before I leave. It's exhausting.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+  - anxiety
+- id: depression_mood_01
+  query: Lately nothing feels worth doing and I'm sleeping all day. I don't know what's
+    wrong with me.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: anxiety_worry_01
+  query: I can't stop worrying about everything, even small things.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: adhd_focus_01
+  query: I keep losing focus at work and forgetting what people just told me.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: ptsd_edge_01
+  query: Is it normal to feel on edge all the time after something scary happened?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+  - anxiety
+- id: venting_01
+  query: Today was just really hard. I don't even know where to start.
+  type: venting
+  expected_path: direct_answer
+  expected_categories: []
+- id: venting_02
+  query: I'm so exhausted. Rough day.
+  type: venting
+  expected_path: direct_answer
+  expected_categories: []
+- id: vague_checkin_01
+  query: feeling anxious today
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: coping_01
+  query: When my thoughts start racing at night, what can I do to calm down?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: normalization_01
+  query: Sometimes I wonder if it's normal to need so much reassurance from people.
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - ocd
+- id: chitchat_01
+  query: Hi, how are you?
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+- id: fragment_followup_01
+  query: background buzz,
+  history:
+  - role: user
+    content: feeling stressed
+  - role: assistant
+    content: Does it feel like a constant background buzz, or sudden waves?
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+- id: contextual_class_01
+  query: its first day of class tomorrow and i'm nervous
+  history:
+  - role: user
+    content: feeling stressed
+  - role: assistant
+    content: Does it feel like a constant background buzz, or sudden waves?
+  - role: user
+    content: background buzz,
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: crisis_hint_01
+  query: I don't want to be here anymore. Everything feels pointless.
+  type: crisis
+  expected_path: crisis
+  expected_categories: []
+  tags:
+  - indirect_phrasing
+- id: ocd_intrusive_01
+  query: These horrible thoughts keep popping into my head and I can't make them stop.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: adhd_procrastination_01
+  query: I know what I need to do but I just can't start. I stare at the screen for
+    hours.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: ptsd_nightmare_01
+  query: I keep having nightmares about what happened and I wake up panicking.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: depression_anhedonia_01
+  query: Things I used to enjoy don't feel fun anymore. I go through the motions.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: anxiety_panic_01
+  query: My heart races and I feel like I can't breathe when I'm in crowds.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: fragment_yeah_01
+  query: yeah
+  history:
+  - role: user
+    content: I've been really anxious about my job interview
+  - role: assistant
+    content: That sounds stressful. What part worries you most?
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+- id: fragment_sudden_waves_01
+  query: sudden waves
+  history:
+  - role: user
+    content: feeling stressed
+  - role: assistant
+    content: Does it feel like a constant background buzz, or sudden waves?
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+- id: multi_turn_interview_01
+  query: I'm worried I'll blank out and forget everything
+  history:
+  - role: user
+    content: I have a big interview next week
+  - role: assistant
+    content: Interviews can bring up a lot of pressure. What's on your mind about
+      it?
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: vague_checkin_tired_01
+  query: just tired
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: chitchat_thanks_01
+  query: Thanks, that helped.
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+- id: coping_breathing_01
+  query: Can you walk me through a breathing exercise for when I feel panicky?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: anxiety_social_01
+  query: I dread social events and spend days worrying about what I'll say wrong.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: depression_isolation_01
+  query: I've been pulling away from friends and I don't know how to reach out again.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: adhd_time_01
+  query: I'm always late and underestimate how long things take. It's becoming a problem.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: ocd_contamination_01
+  query: I avoid touching doorknobs and wash my hands until they crack.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: ptsd_startle_01
+  query: Sudden loud sounds make me hit the floor. I hate that I react that way.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: comorbid_anx_dep_01
+  query: I'm anxious all day and then crash into this heavy sadness at night.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: coping_grounding_01
+  query: What grounding techniques help when flashbacks hit?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: normalization_intrusive_01
+  query: Do other people with OCD get violent intrusive thoughts they would never
+    act on?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: multi_turn_medication_01
+  query: I'm scared of side effects and whether it will actually help
+  history:
+  - role: user
+    content: My doctor suggested antidepressants for my anxiety
+  - role: assistant
+    content: Starting medication can bring up a lot of questions. What's weighing
+      on you?
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: contextual_breakup_01
+  query: I can't eat and I keep checking their social media
+  history:
+  - role: user
+    content: my partner and I broke up last week
+  - role: assistant
+    content: Breakups can shake your whole routine. How has this week been for you?
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+  - anxiety
+- id: coping_adhd_focus_01
+  query: How do people with ADHD get through boring tasks without giving up?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_anxiety_symptom_work_deadlines
+  query: I can't stop worrying about work deadlines.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_symptom_my_health
+  query: I can't stop worrying about my health.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_symptom_what_people_think_of_me
+  query: I can't stop worrying about what people think of me.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_symptom_money_problems
+  query: I can't stop worrying about money problems.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_symptom_my_relationship
+  query: I can't stop worrying about my relationship.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_symptom_school_exams
+  query: I can't stop worrying about school exams.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_symptom_the_future
+  query: I can't stop worrying about the future.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_depression_symptom_empty_inside
+  query: I've been feeling empty inside for weeks and it's hard to get out of bed.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_depression_symptom_hopeless
+  query: I've been feeling hopeless for weeks and it's hard to get out of bed.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_depression_symptom_numb
+  query: I've been feeling numb for weeks and it's hard to get out of bed.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_depression_symptom_worthless
+  query: I've been feeling worthless for weeks and it's hard to get out of bed.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_depression_symptom_exhausted_all_the_time
+  query: I've been feeling exhausted all the time for weeks and it's hard to get out
+    of bed.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_depression_symptom_like_nothing_matters
+  query: I've been feeling like nothing matters for weeks and it's hard to get out
+    of bed.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_adhd_symptom_01
+  query: I keep losing track of conversations and it's affecting my relationships.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_adhd_symptom_02
+  query: I keep missing deadlines and it's affecting my job.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_adhd_symptom_03
+  query: I keep forgetting appointments and it's affecting my daily life.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_adhd_symptom_04
+  query: I keep getting distracted mid-task and it's affecting my school.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_adhd_symptom_05
+  query: I keep starting projects but never finishing and it's affecting my home.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_ocd_symptom_wash_my_hands_over_and_over
+  query: I have to wash my hands over and over or I feel like something terrible will
+    happen.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ocd_symptom_check_the_stove_repeatedly
+  query: I have to check the stove repeatedly or I feel like something terrible will
+    happen.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ocd_symptom_count_things_in_my_head
+  query: I have to count things in my head or I feel like something terrible will
+    happen.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ocd_symptom_arrange_items_until_they_feel_right
+  query: I have to arrange items until they feel right or I feel like something terrible
+    will happen.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ocd_symptom_ask_people_to_confirm_things
+  query: I have to ask people to confirm things or I feel like something terrible
+    will happen.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ptsd_symptom_01
+  query: Since the accident, I jump at loud noises.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_ptsd_symptom_02
+  query: Since what happened last year, I avoid certain places.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_ptsd_symptom_03
+  query: Since the incident, I feel like it's happening again.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_ptsd_symptom_04
+  query: Since my deployment, I can't relax even at home.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_vague_01
+  query: feeling off today
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_02
+  query: not great
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_03
+  query: stressed
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_04
+  query: anxious
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_05
+  query: down
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_06
+  query: overwhelmed
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_07
+  query: meh
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_08
+  query: rough morning
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_09
+  query: idk just weird
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_10
+  query: low energy
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_11
+  query: can't focus today
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vague_12
+  query: on edge
+  type: vague_checkin
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vent_01
+  query: Everything is too much right now.
+  type: venting
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vent_02
+  query: I just need to vent, nothing specific.
+  type: venting
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vent_03
+  query: Bad day. That's it.
+  type: venting
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vent_04
+  query: I'm so done with today.
+  type: venting
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vent_05
+  query: Don't even ask, it was awful.
+  type: venting
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_vent_06
+  query: I don't know where to start explaining.
+  type: venting
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_coping_my_mind_won_t_stop_racing_at_night
+  query: What can I do when my mind won't stop racing at night?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_coping_i_feel_a_panic_attack_coming_on
+  query: What can I do when I feel a panic attack coming on?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_coping_intrusive_thoughts_won_t_leave_me_alone
+  query: What can I do when intrusive thoughts won't leave me alone?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_coping_i_can_t_focus_on_studying
+  query: What can I do when I can't focus on studying?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_coping_i_feel_triggered_by_loud_sounds
+  query: What can I do when I feel triggered by loud sounds?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_coping_i_need_to_calm_down_before_a_presentatio
+  query: What can I do when I need to calm down before a presentation?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_norm_feel_anxious_before_social_events
+  query: Is it normal to feel anxious before social events?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_norm_need_reassurance_from_my_partner
+  query: Is it normal to need reassurance from my partner?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+  - anxiety
+- id: gen_norm_replay_embarrassing_moments_for_days
+  query: Is it normal to replay embarrassing moments for days?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_norm_have_intrusive_thoughts_that_scare_me
+  query: Is it normal to have intrusive thoughts that scare me?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_norm_struggle_to_concentrate_at_work
+  query: Is it normal to struggle to concentrate at work?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+  - anxiety
+- id: gen_norm_feel_numb_after_something_traumatic
+  query: Is it normal to feel numb after something traumatic?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_chat_01
+  query: Hello
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_chat_02
+  query: Good morning
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_chat_03
+  query: What's up?
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_chat_04
+  query: Hey there
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_chat_05
+  query: Thanks for listening
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_chat_06
+  query: Ok got it
+  type: general
+  expected_path: direct_answer
+  expected_categories: []
+- id: gen_fragment_mm_hmm
+  query: mm-hmm
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: &id001
+  - role: user
+    content: feeling stressed lately
+  - role: assistant
+    content: Can you tell me more about what that stress feels like?
+- id: gen_fragment_i_guess
+  query: I guess
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_not_sure
+  query: not sure
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_both
+  query: both
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_the_first_one
+  query: the first one
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_waves
+  query: waves
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_a_little
+  query: a little
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_kind_of
+  query: kind of
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_yeah_that
+  query: yeah that
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_maybe
+  query: maybe
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_idk
+  query: idk
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_the_buzzing
+  query: the buzzing
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_school_stuff
+  query: school stuff
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_work
+  query: work
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_my_mom
+  query: my mom
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_last_night
+  query: last night
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_since_tuesday
+  query: since Tuesday
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_fragment_that_part
+  query: that part
+  type: conversational_followup
+  expected_path: direct_answer
+  expected_categories: []
+  history: *id001
+- id: gen_multi_school_01
+  query: I'm scared I'll embarrass myself in front of everyone
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  history:
+  - role: user
+    content: school starts tomorrow
+  - role: assistant
+    content: New beginnings can bring up a lot. What's worrying you most?
+- id: gen_multi_school_02
+  query: I'm scared I'll embarrass myself in front of everyone
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  history:
+  - role: user
+    content: first day jitters
+  - role: assistant
+    content: That's very common. What part feels hardest?
+- id: gen_multi_work_01
+  query: My boss keeps piling things on and I can't keep up
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - adhd
+  history:
+  - role: user
+    content: work has been insane
+  - role: assistant
+    content: That sounds overwhelming. What's been the hardest part?
+- id: gen_multi_sleep_01
+  query: I lie awake for hours replaying everything I said
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - ocd
+  history:
+  - role: user
+    content: I haven't been sleeping well
+  - role: assistant
+    content: Poor sleep can really wear you down. What happens when you try to sleep?
+- id: gen_multi_panic_01
+  query: I thought I was having a heart attack but the ER said it was panic
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  history:
+  - role: user
+    content: I had a scary episode last night
+  - role: assistant
+    content: That sounds frightening. What happened?
+- id: gen_multi_compulsion_01
+  query: I stayed up until 3am redoing my resume because it didn't feel right
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+  - anxiety
+  history:
+  - role: user
+    content: job searching is destroying me
+  - role: assistant
+    content: That sounds exhausting. What's been the hardest part?
+- id: gen_multi_focus_01
+  query: I read the same paragraph ten times and still don't remember it
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+  - anxiety
+  history:
+  - role: user
+    content: finals are next week and I'm drowning
+  - role: assistant
+    content: That's a lot of pressure. What happens when you try to study?
+- id: gen_multi_grief_01
+  query: Some days I'm fine and then a song comes on and I fall apart
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+  - ptsd
+  history:
+  - role: user
+    content: I lost someone close to me recently
+  - role: assistant
+    content: I'm sorry you're going through that. How have the days been?
+- id: gen_multi_relationship_01
+  query: I need my partner to tell me they love me over and over or I spiral
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - ocd
+  history:
+  - role: user
+    content: my relationship anxiety is getting worse
+  - role: assistant
+    content: Relationship anxiety can be really draining. What triggers it most?
+- id: gen_situational_my_doctor_appointment
+  query: I'm really nervous about my doctor appointment.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_flying_next_week
+  query: I'm really nervous about flying next week.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_meeting_my_partner_s_parents
+  query: I'm really nervous about meeting my partner's parents.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_giving_a_speech
+  query: I'm really nervous about giving a speech.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_starting_a_new_job
+  query: I'm really nervous about starting a new job.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_going_to_a_party_alone
+  query: I'm really nervous about going to a party alone.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_my_therapy_session_tomorrow
+  query: I'm really nervous about my therapy session tomorrow.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_a_performance_review
+  query: I'm really nervous about a performance review.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_my_wedding
+  query: I'm really nervous about my wedding.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_a_job_interview
+  query: I'm really nervous about a job interview.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_moving_to_a_new_city
+  query: I'm really nervous about moving to a new city.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_situational_telling_my_family_something_important
+  query: I'm really nervous about telling my family something important.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_detail_chest_tightness
+  query: My chest tightness has gotten worse and I don't know if it's anxiety.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_detail_stomach_aches_before_work
+  query: My stomach aches before work has gotten worse and I don't know if it's anxiety.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_detail_racing_heart_in_meetings
+  query: My racing heart in meetings has gotten worse and I don't know if it's anxiety.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_detail_dizziness_in_stores
+  query: My dizziness in stores has gotten worse and I don't know if it's anxiety.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_detail_muscle_tension
+  query: My muscle tension has gotten worse and I don't know if it's anxiety.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_detail_trouble_swallowing_when_stressed
+  query: My trouble swallowing when stressed has gotten worse and I don't know if
+    it's anxiety.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_detail_constant_restlessness
+  query: My constant restlessness has gotten worse and I don't know if it's anxiety.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_anxiety_detail_fear_of_losing_control
+  query: My fear of losing control has gotten worse and I don't know if it's anxiety.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+- id: gen_depression_detail_cancel_plans_at_the_last_minute
+  query: Lately I cancel plans at the last minute and people are starting to notice.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_depression_detail_cry_for_no_clear_reason
+  query: Lately I cry for no clear reason and people are starting to notice.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_depression_detail_struggle_to_shower_or_eat_regularly
+  query: Lately I struggle to shower or eat regularly and people are starting to notice.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_depression_detail_feel_guilty_for_being_tired_all_the_time
+  query: Lately I feel guilty for being tired all the time and people are starting
+    to notice.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_depression_detail_snap_at_people_i_love
+  query: Lately I snap at people I love and people are starting to notice.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_depression_detail_can_t_concentrate_on_reading
+  query: Lately I can't concentrate on reading and people are starting to notice.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+  - adhd
+- id: gen_depression_detail_wake_up_early_and_can_t_fall_back_asleep
+  query: Lately I wake up early and can't fall back asleep and people are starting
+    to notice.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_adhd_detail_finish_assignments_before_the_deadline
+  query: It's hard to finish assignments before the deadline even when I really care
+    about it.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_adhd_detail_listen_in_conversations_without_zoning_o
+  query: It's hard to listen in conversations without zoning out even when I really
+    care about it.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_adhd_detail_keep_my_space_organized
+  query: It's hard to keep my space organized even when I really care about it.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_adhd_detail_remember_to_take_my_medication
+  query: It's hard to remember to take my medication even when I really care about
+    it.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_adhd_detail_follow_multi_step_instructions_at_work
+  query: It's hard to follow multi-step instructions at work even when I really care
+    about it.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_adhd_detail_sit_through_long_meetings
+  query: It's hard to sit through long meetings even when I really care about it.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_ocd_detail_re_reading_emails_before_sending
+  query: I get stuck re-reading emails before sending and it takes hours.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ocd_detail_rewriting_notes_until_they_feel_perfect
+  query: I get stuck rewriting notes until they feel perfect and it takes hours.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ocd_detail_checking_locks_and_appliances
+  query: I get stuck checking locks and appliances and it takes hours.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ocd_detail_mentally_reviewing_conversations
+  query: I get stuck mentally reviewing conversations and it takes hours.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ocd_detail_avoiding_certain_numbers_or_words
+  query: I get stuck avoiding certain numbers or words and it takes hours.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ocd_detail_seeking_reassurance_from_family
+  query: I get stuck seeking reassurance from family and it takes hours.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_ptsd_detail_i_feel_disconnected_from_my_body
+  query: Since the trauma, I feel disconnected from my body.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_ptsd_detail_certain_smells_send_me_back_there
+  query: Since the trauma, certain smells send me back there.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_ptsd_detail_i_can_t_trust_people_easily
+  query: Since the trauma, I can't trust people easily.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_ptsd_detail_crowds_make_me_panic
+  query: Since the trauma, crowds make me panic.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_ptsd_detail_i_struggle_to_feel_safe_at_home
+  query: Since the trauma, I struggle to feel safe at home.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_ptsd_detail_anniversaries_wreck_me_for_weeks
+  query: Since the trauma, anniversaries wreck me for weeks.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_comorbid_01
+  query: I deal with constant worry and low motivation at the same time.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - anxiety
+  - depression
+- id: gen_comorbid_02
+  query: I deal with hyperfocus bursts and crushing guilt afterward at the same time.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+  - depression
+- id: gen_comorbid_03
+  query: I deal with intrusive thoughts and panic attacks at the same time.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+  - anxiety
+- id: gen_comorbid_04
+  query: I deal with nightmares and avoiding sleep at the same time.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_comorbid_05
+  query: I deal with trouble focusing and anxiety about failing at the same time.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+  - anxiety
+- id: gen_comorbid_06
+  query: I deal with checking rituals and exhaustion and sadness at the same time.
+  type: symptom_sharing
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+  - depression
+- id: gen_coping_dep_i_can_t_get_out_of_bed_in_the_morning
+  query: What helps when I can't get out of bed in the morning?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_coping_dep_everything_feels_pointless
+  query: What helps when everything feels pointless?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_coping_dep_i_have_no_appetite
+  query: What helps when I have no appetite?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_coping_dep_i_isolate_myself_from_everyone
+  query: What helps when I isolate myself from everyone?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_coping_ocd_intrusive_thoughts_won_t_stop
+  query: How do I cope when intrusive thoughts won't stop?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_coping_ocd_i_feel_compelled_to_check_things
+  query: How do I cope when I feel compelled to check things?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_coping_ocd_i_need_constant_reassurance
+  query: How do I cope when I need constant reassurance?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_coping_ocd_rituals_are_taking_over_my_day
+  query: How do I cope when rituals are taking over my day?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ocd
+- id: gen_coping_ptsd_i_feel_triggered_in_public
+  query: What can I do when I feel triggered in public?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_coping_ptsd_flashbacks_hit_without_warning
+  query: What can I do when flashbacks hit without warning?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_coping_ptsd_i_m_hypervigilant_around_my_kids
+  query: What can I do when I'm hypervigilant around my kids?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_coping_ptsd_loud_noises_set_me_off
+  query: What can I do when loud noises set me off?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_coping_adhd_staying_organized_with_adhd
+  query: Any tips for staying organized with ADHD?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_coping_adhd_managing_time_blindness
+  query: Any tips for managing time blindness?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_coping_adhd_finishing_tasks_i_start
+  query: Any tips for finishing tasks I start?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_coping_adhd_reducing_distractions_while_studying
+  query: Any tips for reducing distractions while studying?
+  type: coping_request
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - adhd
+- id: gen_norm_dep_not_enjoy_hobbies_anymore
+  query: Is it normal to not enjoy hobbies anymore when you're depressed?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_norm_dep_feel_numb_instead_of_sad
+  query: Is it normal to feel numb instead of sad when you're depressed?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_norm_dep_sleep_way_more_than_usual
+  query: Is it normal to sleep way more than usual when you're depressed?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_norm_dep_have_trouble_making_simple_decisions
+  query: Is it normal to have trouble making simple decisions when you're depressed?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - depression
+- id: gen_norm_ptsd_feel_jumpy_around_family
+  query: Is it normal to feel jumpy around family after trauma?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_norm_ptsd_avoid_places_that_remind_you
+  query: Is it normal to avoid places that remind you after trauma?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_norm_ptsd_feel_guilty_for_surviving
+  query: Is it normal to feel guilty for surviving after trauma?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd
+- id: gen_norm_ptsd_struggle_to_remember_parts_of_it
+  query: Is it normal to struggle to remember parts of it after trauma?
+  type: seeks_normalization
+  expected_path: search_database
+  expected_corpus: clinical
+  expected_categories:
+  - ptsd

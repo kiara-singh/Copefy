@@ -1,6 +1,36 @@
 import { supabase } from "./supabase_client";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const REQUEST_TIMEOUT_MS = 120_000;
+const RAG_DEBUG = import.meta.env.VITE_RAG_DEBUG === "true";
+
+export interface ChatSource {
+  title: string | null;
+  source_url: string | null;
+  category: string | null;
+  similarity: number;
+  preview: string;
+  excerpt: string;
+}
+
+export interface ChatTrace {
+  path: string;
+  router: string;
+  route_reason: string;
+  tools_used: string[];
+  kb_used: boolean;
+  search_query: string | null;
+  categories: string[];
+  model: string | null;
+  tool_status: string | null;
+  chunk_count: number;
+  sources: ChatSource[];
+}
+
+export interface ChatResponse {
+  response: string;
+  trace?: ChatTrace;
+}
 
 export interface AIPersona {
   id: string;
@@ -54,27 +84,42 @@ async function api_request<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
-    method,
-    headers,
-    body: req_body,
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  if (!response.ok) {
-    let error_message = `Request to ${path} failed with status ${response.status}`;
-    try {
-      const err_json = await response.json();
-      if (err_json && err_json.detail) {
-        error_message =
-          typeof err_json.detail === "string"
-            ? err_json.detail
-            : JSON.stringify(err_json.detail);
-      }
-    } catch {}
-    throw new Error(error_message);
+  try {
+    const response = await fetch(`${API_URL}${path}`, {
+      method,
+      headers,
+      body: req_body,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      let error_message = `Request to ${path} failed with status ${response.status}`;
+      try {
+        const err_json = (await response.json()) as { detail?: string };
+        if (err_json && err_json.detail) {
+          error_message =
+            typeof err_json.detail === "string"
+              ? err_json.detail
+              : JSON.stringify(err_json.detail);
+        }
+      } catch {}
+      throw new Error(error_message);
+    }
+
+    return (await response.json()) as T;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error(
+        "Request timed out. The server may still be thinking — try again."
+      );
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return (await response.json()) as T;
 }
 
 export async function create_session(): Promise<string> {
@@ -85,12 +130,12 @@ export async function create_session(): Promise<string> {
 export async function send_chat(
   session_id: string,
   message: string
-): Promise<string> {
-  const data = await api_request<{ response: string }>("/chat", "POST", {
+): Promise<ChatResponse> {
+  return await api_request<ChatResponse>("/chat", "POST", {
     session_id,
     message,
+    debug: RAG_DEBUG,
   });
-  return data.response;
 }
 
 export async function submit_journal(text: string): Promise<void> {
@@ -137,3 +182,5 @@ export async function upload_medical_document(
 export async function delete_medical_document(id: string): Promise<void> {
   await api_request<{ status: string }>(`/medical-documents/${id}`, "DELETE");
 }
+
+export const is_rag_debug_enabled = RAG_DEBUG;

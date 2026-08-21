@@ -1,0 +1,27 @@
+from __future__ import annotations
+
+from rag.retrieve import RetrievalPlan
+from rag.strategies.base import StrategyConfig, StrategyResult
+from rag.strategies.pipeline import run_strategy_pipeline
+
+WIDE_CONFIG = StrategyConfig(match_count=40, top_k=12, inject_k=3)
+
+
+class WideThenNarrowStrategy:
+    name = "wide_then_narrow"
+
+    async def retrieve(
+        self,
+        user_message: str,
+        *,
+        history: list[dict[str, str]] | None = None,
+        plan: RetrievalPlan | None = None,
+    ) -> StrategyResult:
+        plan, chunks, meta = await run_strategy_pipeline(
+            user_message,
+            history=history,
+            config=WIDE_CONFIG,
+            rerank_mode="heuristic",
+            plan=plan,
+        )
+        return StrategyResult(plan=plan, chunks=chunks, metadata=meta)
