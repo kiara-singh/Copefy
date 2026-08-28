@@ -1,6 +1,6 @@
 # Layer 3 handoff (clinical KB)
 
-Layer 3 is **how** we search the clinical knowledge base after Layer 1 chooses `search_database`. Journal search is Layer 2 and is not in this bake-off.
+Layer 3 is **how** we search the clinical knowledge base after Layer 1 chooses `search_database`. Production journal search is still Layer 2 (not wired into the orchestrator). An **in-memory journal judge pipeline** can score the four rerankers against live `journal_entries`.
 
 ## Status
 
@@ -10,7 +10,7 @@ Layer 3 is **how** we search the clinical knowledge base after Layer 1 chooses `
 |-------|----------------|
 | Strategies | `baseline`, `threshold_0.65`, `mmr`, `wide_then_narrow` |
 | Production default | **`mmr`** (locked 2026-08-20) |
-| Offline unit tests | 15 passing |
+| Offline unit tests | 30 passing |
 | KB under test | 1,123 `kb_documents` |
 | Regression | 273 search cases (271 labeled), 0 empty retrieves |
 | Held-out | 831 counseling questions (509 search, 171 labeled), measure only |
@@ -54,7 +54,11 @@ python -m eval.validate_golden
 python -m eval.run_strategy_compare --strategies mmr --limit 5
 python -m eval.run_strategy_compare --output eval/results/regression.json --csv eval/results/regression.csv
 python -m eval.run_strategy_compare --split heldout --output eval/results/heldout.json
+python -m eval.run_judge_compare --sample 50 --output eval/results/judge_clinical.json
+python -m eval.run_judge_compare --corpus journal --output eval/results/judge_journal.json
 ```
+
+LLM-as-judge scores **retrieved snippets** (top 3), not the full chat reply. Clinical default is a stratified 50-case labeled regression sample (always includes the 7 known category-recall misses). Journal eval loads live `journal_entries`, dedupes identical texts, embeds in memory, and applies the same four rerankers. The live seed corpus is not under `DEV_USER_ID`. **Measure only — do not retune `RAG_STRATEGY` from these runs.** Tiny journal corpus: wide-then-narrow ≈ baseline.
 
 ## Env
 
@@ -62,7 +66,8 @@ python -m eval.run_strategy_compare --split heldout --output eval/results/heldou
 |----------|---------|
 | `RAG_STRATEGY` | Production strategy. Default **`mmr`**. |
 | `GEMINI_API_KEY` | Query embeddings |
-| `DATABASE_URL` | Direct Postgres for `match_kb_chunks` |
+| `AGENT_ROUTER_API_KEY` | Optional. Judge `generateContent` uses this when set, else `GEMINI_API_KEY`. |
+| `DATABASE_URL` | Direct Postgres for `match_kb_chunks` and journal eval |
 
 ## Code map
 
@@ -72,4 +77,6 @@ python -m eval.run_strategy_compare --split heldout --output eval/results/heldou
 | Shared pipeline | `backend/rag/strategies/pipeline.py` |
 | Scoring | `backend/eval/retrieval_scoring.py` |
 | Bake-off | `backend/eval/run_strategy_compare.py` |
-| Offline tests | `backend/tests/test_retrieval_subdecisions.py`, `backend/tests/test_retrieval_scoring.py` |
+| LLM-as-judge | `backend/eval/run_judge_compare.py`, `backend/eval/judge.py` |
+| Journal eval (in-memory) | `backend/eval/journal_retrieve.py`, `backend/eval/golden/journal_eval.yaml` |
+| Offline tests | `backend/tests/test_retrieval_subdecisions.py`, `backend/tests/test_retrieval_scoring.py`, `backend/tests/test_judge.py`, `backend/tests/test_journal_retrieve.py` |

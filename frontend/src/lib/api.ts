@@ -7,7 +7,6 @@ export interface ChatSource {
   source_url: string | null;
   category: string | null;
   similarity: number;
-  preview: string;
   excerpt: string;
 }
 

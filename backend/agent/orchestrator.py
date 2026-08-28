@@ -19,7 +19,6 @@ from agent.tools.structured_db import query_structured_db
 from agent.tools.web_search import web_search
 from agent.types import AgentResult
 from config import settings
-from debug_trace import debug_log
 from rag.retrieve import RetrievalPlan, RetrievedChunk, retrieve_with_strategy
 
 logger = logging.getLogger(__name__)
@@ -73,7 +72,6 @@ def _chunks_to_sources(chunks: list[RetrievedChunk]) -> list[dict]:
             "source_url": chunk.source_url,
             "category": chunk.category,
             "similarity": round(chunk.similarity, 4),
-            "preview": chunk.content[:200].strip(),
             "excerpt": chunk.content[:400].strip(),
         }
         for chunk in chunks
@@ -195,18 +193,6 @@ async def run_agent(
 
     router = get_router(settings.agent_router)
     decision = await router.decide(user_message, history=history)
-    # region agent log
-    debug_log(
-        "orchestrator.py:run_agent",
-        "run_agent_start",
-        data={
-            "path": decision.path.value,
-            "router": decision.router,
-            "reason": decision.reason,
-        },
-        hypothesis_id="H-D",
-    )
-    # endregion
 
     if decision.path is Path.CRISIS:
         return AgentResult(
@@ -232,19 +218,6 @@ async def run_agent(
             user_message, history=history, plan=plan
         )
         chunks = all_chunks[:3]
-        # region agent log
-        debug_log(
-            "orchestrator.py:run_agent",
-            "after_retrieve",
-            data={
-                "chunk_count": len(chunks),
-                "categories": list(decision.categories),
-                "reason": decision.reason,
-                "search_query": decision.search_query,
-            },
-            hypothesis_id="H-D",
-        )
-        # endregion
     elif decision.path is not Path.DIRECT_ANSWER:
         tools_used.append(decision.path.value)
         tool_result = await _run_stub_tool(decision, user_message)
@@ -252,18 +225,7 @@ async def run_agent(
         tool_status = tool_result["status"]
 
     prompt = _build_user_prompt(user_message, history, chunks, tool_note)
-    # region agent log
-    debug_log("orchestrator.py:run_agent", "before_generate", hypothesis_id="H-E")
-    # endregion
     reply, model = await asyncio.to_thread(_generate_reply, prompt)
-    # region agent log
-    debug_log(
-        "orchestrator.py:run_agent",
-        "after_generate",
-        data={"reply_len": len(reply)},
-        hypothesis_id="H-E",
-    )
-    # endregion
 
     result = AgentResult(
         response=reply,
