@@ -286,18 +286,32 @@ async def chat(
 
 
 @app.post("/journal")
-def create_journal_entry(
+async def create_journal_entry(
     payload: JournalRequest,
     user_id: str = Depends(get_current_user),
 ) -> dict[str, str]:
-    """Store a raw journal entry for the authenticated user. Vector embeddings are skipped for now."""
+    """Store a raw journal entry for the authenticated user and ingest its chunks for RAG retrieval."""
     client = _require_supabase()
 
-    client.table("journal_entries").insert(
-        {"user_id": user_id, "content": payload.text}
-    ).execute()
+    res = (
+        client.table("journal_entries")
+        .insert({"user_id": user_id, "content": payload.text})
+        .execute()
+    )
+
+    if res.data:
+        journal_id = str(res.data[0]["id"])
+        try:
+            from rag.journal_ingestion import ingest_journal_entry
+
+            await ingest_journal_entry(journal_id, user_id, payload.text)
+        except Exception as err:
+            logger.warning(
+                "Journal ingestion failed for entry %s: %s", journal_id, err
+            )
 
     return {"status": "success"}
+
 
 
 class PersonaPayload(BaseModel):

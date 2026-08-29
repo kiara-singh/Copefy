@@ -20,6 +20,7 @@ from agent.tools.web_search import web_search
 from agent.types import AgentResult
 from config import settings
 from debug_trace import debug_log
+from rag.journal_retrieve import search_journal_chunks
 from rag.retrieve import RetrievalPlan, RetrievedChunk, retrieve_with_strategy
 
 logger = logging.getLogger(__name__)
@@ -89,10 +90,20 @@ def _build_user_prompt(
     sections = [_format_history(history), f"USER: {user_message}"]
 
     if chunks:
-        sections.append(
-            "Background reference (generic — not about this user):\n"
-            + format_chunks_for_prompt(chunks)
-        )
+        clinical_chunks = [c for c in chunks if c.category != "journal"]
+        journal_chunks = [c for c in chunks if c.category == "journal"]
+
+        if clinical_chunks:
+            sections.append(
+                "Background reference (generic — not about this user):\n"
+                + format_chunks_for_prompt(clinical_chunks)
+            )
+
+        if journal_chunks:
+            sections.append(
+                "User's past journal entries (personal memory):\n"
+                + format_chunks_for_prompt(journal_chunks)
+            )
 
     if tool_note:
         sections.append(f"Tool note: {tool_note}")
@@ -203,6 +214,7 @@ async def run_agent(
             "path": decision.path.value,
             "router": decision.router,
             "reason": decision.reason,
+            "corpus": decision.corpus,
         },
         hypothesis_id="H-D",
     )
@@ -222,16 +234,36 @@ async def run_agent(
     tools_used: list[str] = []
 
     if decision.path is Path.SEARCH_DATABASE:
-        tools_used.append("semantic_search_kb")
-        plan = RetrievalPlan(
-            search_query=decision.search_query,
-            categories=decision.categories,
-            reason=decision.reason,
-        )
-        _, all_chunks = await retrieve_with_strategy(
-            user_message, history=history, plan=plan
-        )
-        chunks = all_chunks[:3]
+        corpus = decision.corpus or "clinical"
+
+        if corpus == "journal":
+            tools_used.append("search_journal_entries")
+            query = decision.search_query or user_message
+            chunks = await search_journal_chunks(user_id, query, top_k=3)
+        elif corpus == "both":
+            tools_used.extend(["semantic_search_kb", "search_journal_entries"])
+            plan = RetrievalPlan(
+                search_query=decision.search_query,
+                categories=decision.categories,
+                reason=decision.reason,
+            )
+            query = decision.search_query or user_message
+            kb_task = retrieve_with_strategy(user_message, history=history, plan=plan)
+            j_task = search_journal_chunks(user_id, query, top_k=3)
+            (plan, kb_chunks), journal_chunks = await asyncio.gather(kb_task, j_task)
+            chunks = kb_chunks[:2] + journal_chunks[:2]
+        else:  # "clinical"
+            tools_used.append("semantic_search_kb")
+            plan = RetrievalPlan(
+                search_query=decision.search_query,
+                categories=decision.categories,
+                reason=decision.reason,
+            )
+            _, all_chunks = await retrieve_with_strategy(
+                user_message, history=history, plan=plan
+            )
+            chunks = all_chunks[:3]
+
         # region agent log
         debug_log(
             "orchestrator.py:run_agent",
@@ -241,6 +273,7 @@ async def run_agent(
                 "categories": list(decision.categories),
                 "reason": decision.reason,
                 "search_query": decision.search_query,
+                "corpus": corpus,
             },
             hypothesis_id="H-D",
         )
@@ -280,3 +313,4 @@ async def run_agent(
     )
     _log_retrieval(result)
     return result
+

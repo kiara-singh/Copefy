@@ -74,6 +74,21 @@ CREATE TABLE journal_entries (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 6b. JOURNAL CHUNKS (Derived RAG Retrieval Units)
+CREATE TABLE IF NOT EXISTS journal_chunks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    journal_entry_id UUID NOT NULL REFERENCES journal_entries(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    chunk_index INT NOT NULL,
+    content TEXT NOT NULL,
+    embedding vector(768) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_journal_chunks_user_id ON journal_chunks(user_id);
+CREATE INDEX IF NOT EXISTS idx_journal_chunks_entry_id ON journal_chunks(journal_entry_id);
+
+
 -- 7. MEDICAL DOCUMENTS
 -- Metadata and storage references for uploaded health records
 -- Path or public URL to the file stored in Supabase Storage

@@ -83,9 +83,19 @@ class TestAuthEndpoints(unittest.TestCase):
         self.assertEqual(res.status_code, 403)
         self.assertIn("Access denied", res.json()["detail"])
 
+    @patch("main.run_agent")
     @patch("main.get_supabase")
-    def test_chat_owned_session_success(self, mock_get_supabase):
+    def test_chat_owned_session_success(self, mock_get_supabase, mock_run_agent):
         """Sending a message to an owned session succeeds and records messages."""
+        from agent.types import AgentResult
+
+        mock_run_agent.return_value = AgentResult(
+            response="Hello! How can I help you?",
+            path="direct_answer",
+            router="rule",
+            route_reason="conversational",
+        )
+
         mock_supabase = MagicMock()
         mock_user = MagicMock()
         mock_user.id = TEST_USER_ID
