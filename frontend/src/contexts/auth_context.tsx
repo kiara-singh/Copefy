@@ -13,6 +13,7 @@ export interface Profile {
   preferred_name: string | null;
   communication_style: string | null;
   wellness_goal: string | null;
+  coaching_preferences: string | null;
   onboarding_complete: boolean;
 }
 
@@ -65,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       .update(updates)
       .eq("id", user.id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Failed to update profile:", error.message);
@@ -74,6 +75,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (data) {
       setProfile(data as Profile);
+      return;
+    }
+
+    // Profile row missing (trigger may not have run) — create it.
+    const { data: inserted, error: insert_error } = await supabase
+      .from("profiles")
+      .insert({ id: user.id, ...updates })
+      .select()
+      .single();
+
+    if (insert_error) {
+      console.error("Failed to create profile:", insert_error.message);
+      throw insert_error;
+    }
+
+    if (inserted) {
+      setProfile(inserted as Profile);
     }
   };
 

@@ -4,13 +4,23 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from functools import lru_cache
 
 from google import genai
 from google.genai import types
-from google.genai.errors import ClientError
+from google.genai.errors import APIError
 
-from agent.prompts import CRISIS_RESPONSE, SYSTEM_PROMPT
+from agent.persona import (
+    UserPersona,
+    build_system_instruction,
+    closing_instruction,
+    normalize_style,
+    resolve_coaching_preferences,
+    wants_structured_format,
+)
+from agent.pipeline_trace import PipelineTrace
+from agent.prompts import CRISIS_RESPONSE
 from agent.routers import Path, get_router
 from agent.routers.base import RouteDecision
 from agent.tools.extract_docs import extract_unstructured
@@ -23,16 +33,18 @@ from rag.retrieve import RetrievalPlan, RetrievedChunk, retrieve_with_strategy
 
 logger = logging.getLogger(__name__)
 
-CHAT_MODEL_FALLBACKS = (
-    "gemini-flash-latest",
-)
+# HTTP codes where we should try the next model instead of failing the request.
+RETRYABLE_API_CODES = frozenset({429, 500, 502, 503, 504})
 
 
-def _generation_configs() -> list[types.GenerateContentConfig]:
-    """Flash models spend hundreds of tokens on internal thinking — budget for both."""
+def _should_try_next_model(exc: APIError) -> bool:
+    return exc.code in RETRYABLE_API_CODES
+
+
+def _generation_configs(system_instruction: str) -> list[types.GenerateContentConfig]:
     return [
         types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
+            system_instruction=system_instruction,
             temperature=0.7,
             max_output_tokens=1024,
         ),
@@ -47,7 +59,10 @@ def _client() -> genai.Client:
 
 
 def _chat_models() -> list[str]:
-    models = [settings.gemini_chat_model, *CHAT_MODEL_FALLBACKS]
+    models = [
+        settings.gemini_chat_model,
+        *settings.gemini_chat_model_fallbacks_list,
+    ]
     seen: set[str] = set()
     ordered: list[str] = []
     for model in models:
@@ -72,6 +87,7 @@ def _chunks_to_sources(chunks: list[RetrievedChunk]) -> list[dict]:
             "source_url": chunk.source_url,
             "category": chunk.category,
             "similarity": round(chunk.similarity, 4),
+            "preview": chunk.content[:200].strip(),
             "excerpt": chunk.content[:400].strip(),
         }
         for chunk in chunks
@@ -83,7 +99,8 @@ def _build_user_prompt(
     history: list[dict[str, str]],
     chunks: list[RetrievedChunk],
     tool_note: str | None,
-) -> str:
+    persona: UserPersona | None,
+) -> tuple[str, bool]:
     sections = [_format_history(history), f"USER: {user_message}"]
 
     if chunks:
@@ -95,23 +112,24 @@ def _build_user_prompt(
     if tool_note:
         sections.append(f"Tool note: {tool_note}")
 
+    anti_repeat = False
     if history:
         last_assistant = next(
             (m["content"] for m in reversed(history) if m["role"] == "assistant"),
             "",
         )
         if last_assistant:
+            anti_repeat = True
             sections.append(
                 f"Your last reply was: \"{last_assistant[:200]}\"\n"
                 "Use a different opening and structure — do not repeat the same pattern."
             )
 
-    sections.append("Reply as Copefy.")
-    return "\n\n".join(section for section in sections if section)
+    sections.append(closing_instruction(persona))
+    return "\n\n".join(section for section in sections if section), anti_repeat
 
 
 def _extract_response_text(response) -> str:
-    """Return visible reply text; warn if the model hit the output token cap."""
     text = (response.text or "").strip()
     if response.candidates:
         finish = response.candidates[0].finish_reason
@@ -124,12 +142,14 @@ def _extract_response_text(response) -> str:
     return text
 
 
-def _generate_reply(prompt: str) -> tuple[str, str | None]:
+def _generate_reply(prompt: str, system_instruction: str) -> tuple[str, str | None]:
     client = _client()
-    last_error: ClientError | None = None
+    last_error: APIError | None = None
+    models_tried: list[str] = []
 
     for model in _chat_models():
-        for config in _generation_configs():
+        models_tried.append(model)
+        for config in _generation_configs(system_instruction):
             try:
                 response = client.models.generate_content(
                     model=model,
@@ -138,18 +158,35 @@ def _generate_reply(prompt: str) -> tuple[str, str | None]:
                 )
                 text = _extract_response_text(response)
                 if text:
-                    logger.info("chat model=%s", model)
+                    if model != settings.gemini_chat_model:
+                        logger.info(
+                            "chat fallback model=%s (primary=%s)",
+                            model,
+                            settings.gemini_chat_model,
+                        )
+                    else:
+                        logger.info("chat model=%s", model)
                     return text, model
-            except ClientError as exc:
+            except APIError as exc:
                 last_error = exc
-                logger.warning("gemini model=%s code=%s", model, exc.code)
-                if exc.code == 429:
-                    break  # daily/minute quota — try next model
+                logger.warning(
+                    "gemini model=%s code=%s status=%s",
+                    model,
+                    exc.code,
+                    exc.status,
+                )
+                if _should_try_next_model(exc):
+                    break  # try next model
                 if exc.code == 400:
-                    continue  # e.g. thinking mode unsupported — try next config
+                    continue  # try next config for same model
                 raise
 
     if last_error is not None:
+        logger.error(
+            "all chat models failed models=%s last_code=%s",
+            models_tried,
+            last_error.code,
+        )
         raise last_error
 
     return (
@@ -159,22 +196,30 @@ def _generate_reply(prompt: str) -> tuple[str, str | None]:
     )
 
 
-def _log_retrieval(result: AgentResult) -> None:
+def _corpus_reason(decision: RouteDecision) -> str:
+    if decision.corpus:
+        return f"router selected {decision.corpus}"
+    return "journal retrieval not wired; default clinical"
+
+
+def _log_pipeline(result: AgentResult) -> None:
     trace = result.to_debug_dict()
     logger.info(
-        "agent trace path=%s router=%s tools=%s kb=%s reason=%s model=%s sources=%s",
+        "agent trace path=%s router=%s tools=%s kb=%s reason=%s model=%s style=%s sources=%s",
         trace["path"],
         trace["router"],
         trace["tools_used"],
         trace["kb_used"],
         trace["route_reason"],
-        trace["model"],
+        trace.get("model"),
+        trace.get("communication_style"),
         [s.get("source_url") for s in trace["sources"]],
     )
+    if result.pipeline is not None and settings.rag_debug:
+        result.pipeline.log_to_terminal()
 
 
 async def _run_stub_tool(decision: RouteDecision, user_message: str) -> dict:
-    """Paths whose backends aren't built yet still report what they would have done."""
     if decision.path is Path.WEB_SEARCH:
         return await web_search(decision.web_query or user_message)
     if decision.path is Path.STRUCTURED_QUERY:
@@ -187,25 +232,50 @@ async def run_agent(
     *,
     user_id: str,
     history: list[dict[str, str]] | None = None,
+    persona: UserPersona | None = None,
 ) -> AgentResult:
     """Run the therapy companion agent for one user turn."""
     history = history or []
+    persona = persona or UserPersona()
+    pipeline = PipelineTrace()
 
     router = get_router(settings.agent_router)
+    l1_start = time.perf_counter()
     decision = await router.decide(user_message, history=history)
+    pipeline.add_timed(
+        1,
+        "routing",
+        decision.path.value,
+        l1_start,
+        router=decision.router,
+        reason=decision.reason,
+    )
+
+    corpus = decision.corpus or "clinical"
+    pipeline.add_timed(
+        2,
+        "corpus",
+        corpus,
+        l1_start,
+        reason=_corpus_reason(decision),
+    )
 
     if decision.path is Path.CRISIS:
-        return AgentResult(
+        result = AgentResult(
             response=CRISIS_RESPONSE,
             path=decision.path.value,
             router=decision.router,
             route_reason=decision.reason,
+            pipeline=pipeline,
         )
+        _log_pipeline(result)
+        return result
 
     chunks: list[RetrievedChunk] = []
     tool_note: str | None = None
     tool_status: str | None = None
     tools_used: list[str] = []
+    retrieval_meta: dict = {}
 
     if decision.path is Path.SEARCH_DATABASE:
         tools_used.append("semantic_search_kb")
@@ -214,18 +284,55 @@ async def run_agent(
             categories=decision.categories,
             reason=decision.reason,
         )
-        _, all_chunks = await retrieve_with_strategy(
+        l3_start = time.perf_counter()
+        _, all_chunks, retrieval_meta = await retrieve_with_strategy(
             user_message, history=history, plan=plan
         )
         chunks = all_chunks[:3]
+        top_similarity = round(chunks[0].similarity, 4) if chunks else None
+        pipeline.add_timed(
+            3,
+            "retrieval",
+            retrieval_meta.get("strategy", settings.rag_strategy),
+            l3_start,
+            strategy=retrieval_meta.get("strategy", settings.rag_strategy),
+            search_query=decision.search_query or plan.search_query,
+            categories=list(decision.categories),
+            candidates=retrieval_meta.get("candidates", 0),
+            returned=len(chunks),
+            top_similarity=top_similarity,
+            sources=_chunks_to_sources(chunks),
+        )
     elif decision.path is not Path.DIRECT_ANSWER:
         tools_used.append(decision.path.value)
         tool_result = await _run_stub_tool(decision, user_message)
         tool_note = tool_result["message"]
         tool_status = tool_result["status"]
 
-    prompt = _build_user_prompt(user_message, history, chunks, tool_note)
-    reply, model = await asyncio.to_thread(_generate_reply, prompt)
+    system_instruction = build_system_instruction(persona)
+    prompt, anti_repeat = _build_user_prompt(
+        user_message, history, chunks, tool_note, persona
+    )
+
+    l4_start = time.perf_counter()
+    reply, model = await asyncio.to_thread(_generate_reply, prompt, system_instruction)
+    style = normalize_style(persona.communication_style)
+    coaching_preferences = resolve_coaching_preferences(persona)
+    pipeline.add_timed(
+        4,
+        "generation",
+        style,
+        l4_start,
+        communication_style=style,
+        preferred_name_set=bool(persona.preferred_name),
+        wellness_goal_set=bool(persona.wellness_goal),
+        coaching_preferences_set=bool(coaching_preferences),
+        structured_format_requested=wants_structured_format(coaching_preferences),
+        model=model,
+        history_turns=min(len(history), 6),
+        kb_chunks_in_prompt=len(chunks),
+        anti_repeat=anti_repeat,
+    )
 
     result = AgentResult(
         response=reply,
@@ -239,6 +346,8 @@ async def run_agent(
         search_query=decision.search_query or None,
         model=model,
         tool_status=tool_status,
+        communication_style=style,
+        pipeline=pipeline,
     )
-    _log_retrieval(result)
+    _log_pipeline(result)
     return result

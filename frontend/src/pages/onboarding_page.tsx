@@ -139,20 +139,27 @@ function OnboardingPage() {
 
     try {
       const style_to_save = communication_style || custom_communication_style.trim();
-      const goal_to_save = additional_context.trim()
-        ? `${wellness_goal.trim()}\n\nAdditional Context:\n${additional_context.trim()}`
-        : wellness_goal.trim();
-
       await updateProfile({
         preferred_name: preferred_name.trim() || null,
         communication_style: style_to_save,
-        wellness_goal: goal_to_save,
+        wellness_goal: wellness_goal.trim(),
+        coaching_preferences: additional_context.trim() || null,
         onboarding_complete: true,
       });
       navigate("/", { replace: true });
     } catch (err: unknown) {
       console.error("Failed to complete onboarding:", err);
-      set_error("An unexpected error occurred while saving your preferences. Please try again.");
+      const message =
+        err && typeof err === "object" && "message" in err && typeof err.message === "string"
+          ? err.message
+          : "An unexpected error occurred while saving your preferences. Please try again.";
+      if (message.toLowerCase().includes("jwt") || message.toLowerCase().includes("api key")) {
+        set_error(
+          "Supabase is misconfigured. In frontend/.env use the anon PUBLIC key (not the service secret), then restart npm run dev."
+        );
+      } else {
+        set_error(message);
+      }
     } finally {
       set_is_submitting(false);
     }

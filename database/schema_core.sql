@@ -11,6 +11,7 @@ CREATE TABLE profiles (
     preferred_name VARCHAR(255),
     communication_style TEXT,
     wellness_goal TEXT,
+    coaching_preferences TEXT,
     onboarding_complete BOOLEAN NOT NULL DEFAULT FALSE
 );
 

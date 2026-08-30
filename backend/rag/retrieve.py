@@ -564,7 +564,7 @@ async def retrieve_with_strategy(
     history: list[dict[str, str]] | None = None,
     strategy_name: str | None = None,
     plan: RetrievalPlan | None = None,
-) -> tuple[RetrievalPlan, list[RetrievedChunk]]:
+) -> tuple[RetrievalPlan, list[RetrievedChunk], dict]:
     """Run retrieval using a named strategy (default from settings)."""
     from config import settings
     from rag.strategies import get_strategy
@@ -572,4 +572,6 @@ async def retrieve_with_strategy(
     name = strategy_name or settings.rag_strategy
     strategy = get_strategy(name)
     result = await strategy.retrieve(user_message, history=history, plan=plan)
-    return result.plan, result.chunks
+    metadata = dict(result.metadata)
+    metadata["strategy"] = name
+    return result.plan, result.chunks, metadata
