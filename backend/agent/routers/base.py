@@ -33,10 +33,6 @@ class RouteDecision:
     # WEB_SEARCH only: a sanitized factual query, never the user's raw message.
     web_query: str = ""
 
-    @property
-    def searches_database(self) -> bool:
-        return self.path is Path.SEARCH_DATABASE
-
 
 class Router(Protocol):
     name: str

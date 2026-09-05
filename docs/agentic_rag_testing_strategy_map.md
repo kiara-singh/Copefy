@@ -274,8 +274,10 @@ The same strategy framework should extend to journal entry retrieval once that c
 
 | Test | Status | Approach |
 |------|--------|----------|
-| Manual QA via debug trace | Available | Inspect sources and response side by side |
-| Prompt consistency | Not built | Verify prompt assembly doesn't regress across changes |
+| Manual QA via debug trace | Available | Layer timeline (L1–L4) under each reply when `VITE_RAG_DEBUG=true` |
+| Persona from profile | Built | Four preset styles + custom text from Settings |
+| Terminal pipeline logs | Built | `[pipeline]` lines when `RAG_DEBUG=true` |
+| Prompt consistency | Built (offline) | `tests/test_persona_prompt.py` |
 | Response quality | Not built | See Layer 5 |
 | Groundedness | Not built | Does the response align with retrieved sources? |
 | Safety compliance | Not built | No diagnosis, no medical advice, crisis handled correctly |
@@ -371,7 +373,7 @@ All tools the orchestrator can invoke, with their role in the system:
 | Corpus selection (clinical vs journal) | No | Not testable | Implement journal retrieval, add labels |
 | Retrieval strategies — clinical KB (4 options) | Yes | Automated bake-off | Winner: `mmr`. Finer relevance metrics still later |
 | Retrieval strategies — journal entries | No | — | Build and evaluate |
-| Generation / prompting | Yes | Manual only | Prompt testing, model comparison |
+| Generation / prompting | Yes (persona-aware) | Offline prompt tests + manual trace | Layer 5 answer judge still open |
 | Response quality evaluation | No | — | AI-as-judge, safety checks |
 | Web search / structured query / doc extraction | Routing only | Routing tested | Build the backends |
 | Multi-step agent loop | No | — | Design after single-pass is measured |

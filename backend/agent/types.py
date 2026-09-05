@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from agent.pipeline_trace import PipelineTrace
+
 
 @dataclass
 class AgentResult:
@@ -19,9 +21,11 @@ class AgentResult:
     search_query: str | None = None
     model: str | None = None
     tool_status: str | None = None
+    communication_style: str | None = None
+    pipeline: PipelineTrace | None = None
 
     def to_debug_dict(self) -> dict[str, Any]:
-        return {
+        payload: dict[str, Any] = {
             "path": self.path,
             "router": self.router,
             "route_reason": self.route_reason,
@@ -34,3 +38,8 @@ class AgentResult:
             "chunk_count": len(self.sources),
             "sources": self.sources,
         }
+        if self.communication_style:
+            payload["communication_style"] = self.communication_style
+        if self.pipeline is not None:
+            payload["pipeline"] = self.pipeline.to_dict()
+        return payload

@@ -13,6 +13,36 @@ export interface ChatSource {
   excerpt: string;
 }
 
+export interface PipelineLayer {
+  layer: number;
+  name: string;
+  decision: string;
+  ms: number;
+  router?: string;
+  reason?: string;
+  strategy?: string;
+  search_query?: string;
+  categories?: string[];
+  candidates?: number;
+  returned?: number;
+  top_similarity?: number;
+  sources?: ChatSource[];
+  communication_style?: string;
+  preferred_name_set?: boolean;
+  wellness_goal_set?: boolean;
+  coaching_preferences_set?: boolean;
+  structured_format_requested?: boolean;
+  model?: string;
+  history_turns?: number;
+  kb_chunks_in_prompt?: number;
+  anti_repeat?: boolean;
+}
+
+export interface PipelineTrace {
+  total_ms: number;
+  layers: PipelineLayer[];
+}
+
 export interface ChatTrace {
   path: string;
   router: string;
@@ -25,6 +55,8 @@ export interface ChatTrace {
   tool_status: string | null;
   chunk_count: number;
   sources: ChatSource[];
+  communication_style?: string;
+  pipeline?: PipelineTrace;
 }
 
 export interface ChatResponse {
@@ -56,6 +88,16 @@ export interface MedicalDocument {
   file_name: string;
   storage_url: string;
   uploaded_at: string;
+}
+
+async function auth_headers(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
 }
 
 async function api_request<T>(
@@ -120,6 +162,10 @@ async function api_request<T>(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export async function post_json<T>(path: string, body: unknown): Promise<T> {
+  return await api_request<T>(path, "POST", body);
 }
 
 export async function create_session(): Promise<string> {

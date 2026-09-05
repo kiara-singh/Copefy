@@ -4,9 +4,14 @@ const supabase_url = import.meta.env.VITE_SUPABASE_URL;
 const supabase_anon_key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabase_url || !supabase_anon_key) {
-  // Surfaced early so a missing .env is obvious during development.
   console.warn(
-    "Supabase env vars are missing. Copy .env.example to .env and fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY."
+    "Supabase env vars are missing. Copy frontend/.env.example to .env and set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (anon public key only)."
+  );
+}
+
+if (supabase_anon_key?.startsWith("sb_secret_")) {
+  console.error(
+    "VITE_SUPABASE_ANON_KEY is set to a service-role secret. Use the anon PUBLIC key from Supabase -> Project Settings -> API instead. Profile save will fail until this is fixed."
   );
 }
 

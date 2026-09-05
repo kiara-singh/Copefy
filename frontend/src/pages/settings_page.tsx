@@ -204,10 +204,12 @@ function SettingsPage() {
         set_custom_style(profile.communication_style || "");
       }
 
-      // Parse wellness goal and context
+      // Parse wellness goal and coaching prefs (column first, legacy merged string fallback)
       const parsed = parse_wellness_goal(profile.wellness_goal);
       set_primary_goal(parsed.primary_goal);
-      set_additional_context(parsed.additional_context);
+      set_additional_context(
+        profile.coaching_preferences?.trim() || parsed.additional_context
+      );
     }
   }, [profile]);
 
@@ -296,13 +298,12 @@ function SettingsPage() {
       return;
     }
 
-    const goal_to_save = additional_context.trim()
-      ? `${trimmed_primary}\n\nAdditional Context:\n${additional_context.trim()}`
-      : trimmed_primary;
-
     set_saving_goal(true);
     try {
-      await updateProfile({ wellness_goal: goal_to_save });
+      await updateProfile({
+        wellness_goal: trimmed_primary,
+        coaching_preferences: additional_context.trim() || null,
+      });
       set_goal_success("Wellness goal saved successfully!");
       setTimeout(() => set_goal_success(null), 3000);
     } catch (err) {

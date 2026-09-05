@@ -1,35 +1,16 @@
-"""Semantic search over the medical knowledge base."""
+"""Format retrieved KB chunks for the chat prompt."""
 
 from __future__ import annotations
 
-from rag.retrieve import RetrievedChunk, retrieve_with_strategy
+from rag.retrieve import RetrievedChunk
 
 
-async def semantic_search_kb(
-    user_message: str,
+def format_chunks_for_prompt(
+    chunks: list[RetrievedChunk],
     *,
-    history: list[dict[str, str]] | None = None,
-) -> dict:
-    plan, chunks = await retrieve_with_strategy(user_message, history=history)
-    return {
-        "status": "ok",
-        "retrieved": bool(chunks),
-        "reason": plan.reason,
-        "categories": list(plan.categories),
-        "chunks": [
-            {
-                "content": chunk.content,
-                "source_url": chunk.source_url,
-                "title": chunk.title,
-                "category": chunk.category,
-                "similarity": round(chunk.similarity, 4),
-            }
-            for chunk in chunks
-        ],
-    }
-
-
-def format_chunks_for_prompt(chunks: list[RetrievedChunk], *, max_chunks: int = 3, max_chars: int = 400) -> str:
+    max_chunks: int = 3,
+    max_chars: int = 400,
+) -> str:
     if not chunks:
         return "No reference material retrieved."
 

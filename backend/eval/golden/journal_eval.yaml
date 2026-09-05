@@ -1,0 +1,77 @@
+# Chat-like queries over live journal_entries.
+# Do not paste diary text here. expected_contains is the stable label
+# (rows are duplicated; expected_entry_ids are one representative UUID each).
+# Corpus user: 938c6dc2-bab8-44d9-b732-8bbd308fd838 (DEV_USER_ID has none).
+
+- id: journal_exam_stress_01
+  query: that organic chemistry exam stress is back
+  expected_contains:
+    - organic chemistry
+  expected_entry_ids:
+    - 9a1cbf23-7036-456f-a5f3-c18b51159a63
+- id: journal_presentation_01
+  query: I have to present in seminar again and I'm already shaking
+  expected_contains:
+    - public speaking
+  expected_entry_ids:
+    - 2357e2b6-be12-4a0b-95d3-c50b70341c2a
+- id: journal_insomnia_deadlines_01
+  query: my mind won't shut off at night with all these deadlines
+  expected_contains:
+    - 3am
+  expected_entry_ids:
+    - 2e651d53-439e-47ad-aa62-6333161c3db8
+- id: journal_roommate_dishes_01
+  query: my roommate still isn't doing the dishes
+  expected_contains:
+    - dirty dishes
+  expected_entry_ids:
+    - 4b9b7599-3c96-4c9c-9f33-05e88a6864bd
+- id: journal_homesick_01
+  query: I'm homesick again this week
+  expected_contains:
+    - homesick
+  expected_entry_ids:
+    - 132f4a95-c30d-4c76-92bc-0c16369662c2
+- id: journal_assignment_pile_01
+  query: I have too many assignments due Friday and I don't know where to start
+  expected_contains:
+    - lab report
+  expected_entry_ids:
+    - b1b0e6ee-6adc-4da9-8e33-6ffdcb45eb50
+- id: journal_morning_run_01
+  query: did that morning run actually help last time?
+  expected_contains:
+    - 30-minute run
+  expected_entry_ids:
+    - 27bb394e-fb25-461d-8185-25876f675cfd
+- id: journal_box_breathing_01
+  query: should I try that breathing thing before my meeting?
+  expected_contains:
+    - box breathing
+  expected_entry_ids:
+    - 15dc2a53-6cec-4aa6-8f7d-8e8ad0760de6
+- id: journal_chem_grade_01
+  query: I keep thinking about how I did on the chemistry test
+  expected_contains:
+    - B+
+  expected_entry_ids:
+    - 9377b104-aa02-4ba8-92f2-d507af5bf112
+- id: journal_phone_bed_01
+  query: I should get my phone out of the bedroom tonight
+  expected_contains:
+    - phone in another room
+  expected_entry_ids:
+    - 4e700a9e-9dea-4035-b074-2b3e54640c4d
+- id: journal_freeze_on_exam_01
+  query: I freeze up when I see the test questions
+  expected_contains:
+    - freeze
+  expected_entry_ids:
+    - 9a1cbf23-7036-456f-a5f3-c18b51159a63
+- id: journal_hate_presenting_01
+  query: I still hate standing up in front of the class
+  expected_contains:
+    - presentation
+  expected_entry_ids:
+    - 2357e2b6-be12-4a0b-95d3-c50b70341c2a

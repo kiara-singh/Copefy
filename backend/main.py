@@ -1,18 +1,17 @@
 import asyncio
 import logging
-import time
 import uuid
 
-from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile, status
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from agent.orchestrator import run_agent
+from auth import resolve_user_id
 from config import settings
 from db import get_supabase
-from debug_trace import debug_log
+from profiles import load_user_persona
 
 logger = logging.getLogger(__name__)
 
@@ -31,37 +30,6 @@ app.add_middleware(
 )
 
 security = HTTPBearer()
-
-
-class DebugRequestMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        # region agent log
-        debug_log(
-            "main.py:middleware",
-            "request_received",
-            data={"method": request.method, "path": request.url.path},
-            hypothesis_id="H-A",
-        )
-        # endregion
-        started = time.perf_counter()
-        response = await call_next(request)
-        # region agent log
-        debug_log(
-            "main.py:middleware",
-            "request_completed",
-            data={
-                "method": request.method,
-                "path": request.url.path,
-                "status": response.status_code,
-                "ms": round((time.perf_counter() - started) * 1000, 1),
-            },
-            hypothesis_id="H-A",
-        )
-        # endregion
-        return response
-
-
-app.add_middleware(DebugRequestMiddleware)
 
 
 class ChatRequest(BaseModel):
@@ -128,6 +96,19 @@ def _load_session_history(client, session_id: str) -> list[dict[str, str]]:
     return [{"role": row["role"], "content": row["content"]} for row in result.data]
 
 
+def _get_session_user_id(client, session_id: str) -> str:
+    result = (
+        client.table("sessions")
+        .select("user_id")
+        .eq("id", session_id)
+        .maybe_single()
+        .execute()
+    )
+    if result.data and result.data.get("user_id"):
+        return str(result.data["user_id"])
+    return DEV_USER_ID
+
+
 @app.get("/")
 def root() -> dict[str, str]:
     return {"message": "Copefy API is running."}
@@ -135,23 +116,36 @@ def root() -> dict[str, str]:
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    # region agent log
-    debug_log("main.py:health", "health_ok", hypothesis_id="H-A")
-    # endregion
     return {"status": "ok"}
+
+
+DEV_USER_ID = "78b0cc86-0b60-4220-8127-4430b1f3cd9e"
 
 
 @app.post("/session")
 def create_session(
     user_id: str = Depends(get_current_user),
 ) -> dict[str, str]:
-    """Create a new chat session for the authenticated user and return its id."""
+    """Create a new chat session and return its id."""
     client = _require_supabase()
     session_id = str(uuid.uuid4())
 
-    client.table("sessions").insert(
-        {"id": session_id, "user_id": user_id}
-    ).execute()
+    try:
+        client.table("sessions").insert(
+            {"id": session_id, "user_id": user_id}
+        ).execute()
+    except Exception as exc:
+        from postgrest.exceptions import APIError
+
+        if isinstance(exc, APIError) and exc.code == "23503":
+            raise HTTPException(
+                status_code=401,
+                detail=(
+                    "Could not create a chat session for this account. "
+                    "Try logging out and back in."
+                ),
+            ) from exc
+        raise
 
     return {"session_id": session_id}
 
@@ -163,14 +157,6 @@ async def chat(
 ) -> dict:
     """Store the user message, run the agent, and return the reply."""
     logger.info("chat start session=%s user_id=%s", payload.session_id, user_id)
-    # region agent log
-    debug_log(
-        "main.py:chat",
-        "chat_start",
-        data={"session_id": payload.session_id, "user_id": user_id, "msg_len": len(payload.message)},
-        hypothesis_id="H-A",
-    )
-    # endregion
     client = _require_supabase()
 
     # Verify session ownership
@@ -194,46 +180,24 @@ async def chat(
             detail="Access denied: You do not own this chat session.",
         )
 
+    persona = await asyncio.to_thread(load_user_persona, user_id)
+
     await asyncio.to_thread(
         _insert_message, client, payload.session_id, "user", payload.message
     )
-    # region agent log
-    debug_log("main.py:chat", "after_user_insert", hypothesis_id="H-C")
-    # endregion
     history = await asyncio.to_thread(_load_session_history, client, payload.session_id)
-    # region agent log
-    debug_log(
-        "main.py:chat",
-        "after_load_history",
-        data={"history_len": len(history)},
-        hypothesis_id="H-C",
-    )
-    # endregion
 
     try:
-        # region agent log
-        debug_log("main.py:chat", "before_run_agent", hypothesis_id="H-F")
-        # endregion
         result = await asyncio.wait_for(
             run_agent(
                 payload.message,
                 user_id=user_id,
                 history=history[:-1],
+                persona=persona,
             ),
-            timeout=90.0,
+            timeout=120.0,
         )
-        # region agent log
-        debug_log(
-            "main.py:chat",
-            "after_run_agent",
-            data={"kb_used": result.kb_used},
-            hypothesis_id="H-F",
-        )
-        # endregion
     except asyncio.TimeoutError as exc:
-        # region agent log
-        debug_log("main.py:chat", "chat_timeout", hypothesis_id="H-E")
-        # endregion
         logger.warning("chat timeout session=%s", payload.session_id)
         raise HTTPException(
             status_code=504,
@@ -242,26 +206,26 @@ async def chat(
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:
-        from google.genai.errors import ClientError
+        from google.genai.errors import APIError
 
-        # region agent log
-        debug_log(
-            "main.py:chat",
-            "chat_exception",
-            data={"type": type(exc).__name__},
-            hypothesis_id="H-E",
-        )
-        # endregion
         logger.exception("chat failed session=%s", payload.session_id)
-        if isinstance(exc, ClientError) and exc.code == 429:
-            raise HTTPException(
-                status_code=503,
-                detail=(
-                    "The AI service hit its free-tier limit for today. "
-                    "Wait a bit and try again, or switch GEMINI_CHAT_MODEL "
-                    "to gemini-flash-latest in backend/.env."
-                ),
-            ) from exc
+        if isinstance(exc, APIError):
+            if exc.code == 429:
+                raise HTTPException(
+                    status_code=503,
+                    detail=(
+                        "The AI service hit its rate limit. "
+                        "Wait a moment and try again."
+                    ),
+                ) from exc
+            if exc.code in {500, 502, 503, 504}:
+                raise HTTPException(
+                    status_code=503,
+                    detail=(
+                        "The AI service is temporarily busy. "
+                        "We tried several models — please try again in a minute."
+                    ),
+                ) from exc
         raise HTTPException(
             status_code=500,
             detail="Failed to generate a response. Please try again.",
@@ -271,17 +235,15 @@ async def chat(
         _insert_message, client, payload.session_id, "assistant", result.response
     )
     logger.info(
-        "chat done session=%s kb_used=%s",
+        "chat done session=%s kb_used=%s style=%s",
         payload.session_id,
         result.kb_used,
+        result.communication_style,
     )
 
     body: dict = {"response": result.response}
     if payload.debug or settings.rag_debug:
         body["trace"] = result.to_debug_dict()
-    # region agent log
-    debug_log("main.py:chat", "chat_done", hypothesis_id="H-A")
-    # endregion
     return body
 
 
@@ -290,7 +252,7 @@ async def create_journal_entry(
     payload: JournalRequest,
     user_id: str = Depends(get_current_user),
 ) -> dict[str, str]:
-    """Store a raw journal entry for the authenticated user and ingest its chunks for RAG retrieval."""
+    """Store a raw journal entry and ingest its chunks for RAG retrieval."""
     client = _require_supabase()
 
     res = (
