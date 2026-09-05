@@ -6,8 +6,9 @@ from dataclasses import dataclass
 
 from agent.prompts import (
     DEFAULT_COMMUNICATION_STYLE,
+    DEFAULT_SYSTEM_PROMPT_VERSION,
     STYLE_OVERLAYS,
-    build_shared_safety_prompt,
+    get_core_system_prompt,
 )
 
 PRESET_STYLES = frozenset(STYLE_OVERLAYS.keys())
@@ -83,11 +84,14 @@ def resolve_primary_goal(persona: UserPersona) -> str | None:
     return primary
 
 
-def build_system_instruction(persona: UserPersona | None = None) -> str:
+def build_system_instruction(
+    persona: UserPersona | None = None,
+    version: str = DEFAULT_SYSTEM_PROMPT_VERSION,
+) -> str:
     """Build the Gemini system instruction for one chat turn."""
     persona = persona or UserPersona()
     style = normalize_style(persona.communication_style)
-    parts = [build_shared_safety_prompt(), _style_overlay(style)]
+    parts = [get_core_system_prompt(version), _style_overlay(style)]
 
     primary_goal = resolve_primary_goal(persona)
     coaching_preferences = resolve_coaching_preferences(persona)

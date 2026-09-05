@@ -10,12 +10,13 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
 
     gemini_api_key: str = ""
-    gemini_chat_model: str = "gemini-2.5-flash"
+    gemini_chat_model: str = "gemini-flash-latest"
     # Comma-separated fallbacks tried in order when the primary model is unavailable.
     gemini_chat_model_fallbacks: str = (
-        "gemini-2.5-flash,gemini-2.0-flash,gemini-2.5-flash-lite,gemini-2.0-flash-lite"
+        "gemini-flash-latest,gemini-3-flash-preview,gemini-flash-lite-latest,gemini-3.1-flash-lite-preview"
     )
     gemini_embed_model: str = "gemini-embedding-2"
+    system_prompt_version: str = "v1"
 
     rag_debug: bool = False
     rag_strategy: str = "mmr"

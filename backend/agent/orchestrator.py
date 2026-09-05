@@ -20,7 +20,7 @@ from agent.persona import (
     wants_structured_format,
 )
 from agent.pipeline_trace import PipelineTrace
-from agent.prompts import CRISIS_RESPONSE
+from agent.prompts import CRISIS_RESPONSE, DEFAULT_SYSTEM_PROMPT_VERSION
 from agent.routers import Path, get_router
 from agent.routers.base import RouteDecision
 from agent.tools.extract_docs import extract_unstructured
@@ -35,7 +35,7 @@ from rag.retrieve import RetrievalPlan, RetrievedChunk, retrieve_with_strategy
 logger = logging.getLogger(__name__)
 
 # HTTP codes where we should try the next model instead of failing the request.
-RETRYABLE_API_CODES = frozenset({429, 500, 502, 503, 504})
+RETRYABLE_API_CODES = frozenset({404, 429, 500, 502, 503, 504})
 
 
 def _should_try_next_model(exc: APIError) -> bool:
@@ -341,7 +341,8 @@ async def run_agent(
         tool_note = tool_result["message"]
         tool_status = tool_result["status"]
 
-    system_instruction = build_system_instruction(persona)
+    prompt_version = getattr(settings, "system_prompt_version", DEFAULT_SYSTEM_PROMPT_VERSION)
+    system_instruction = build_system_instruction(persona, version=prompt_version)
     prompt, anti_repeat = _build_user_prompt(
         user_message, history, chunks, tool_note, persona
     )
@@ -355,6 +356,7 @@ async def run_agent(
         "generation",
         style,
         l4_start,
+        system_prompt_version=prompt_version,
         communication_style=style,
         preferred_name_set=bool(persona.preferred_name),
         wellness_goal_set=bool(persona.wellness_goal),

@@ -16,6 +16,7 @@ Copefy is an early-stage web application scaffold for an AI mental health and we
   - **Layer 1 Router**: Production default `AGENT_ROUTER=rule` pattern-based router (100.0% accuracy on 529 golden regression cases, 0 crisis/web false positives, 0.2 ms/case latency).
   - **Layer 3 Clinical KB Retrieval**: Production default `RAG_STRATEGY=mmr` diversity-reranked vector search over 1,123 clinical KB documents using 768-dimensional Gemini embeddings (`gemini-embedding-2` / `text-embedding-004`).
   - **Layer 2 User Journal Corpus**: Derived RAG retrieval system (`journal_chunks` table) using structure-aware paragraph/sentence-boundary chunking, 768-dim Gemini embeddings, idempotent ingestion, strict database-level user isolation (`WHERE user_id = authenticated_user_id`), MMR reranking, synthetic dataset seeder, and multi-corpus orchestration (`clinical`, `journal`, and `both`).
+- **Prompt Architecture**: Versioned Core System Prompt registry (`backend/agent/prompts.py`) separating the static system instruction baseline (`CORE_SYSTEM_PROMPT_V1`) from dynamic runtime user personalization context (`backend/agent/persona.py`). Dynamically assembled via `build_system_instruction(persona, version=settings.system_prompt_version)` with deprecated backward-compatibility aliases preserved.
 - A single-session React chat interface communicating with FastAPI backend `/chat`. Requests are authenticated via Bearer tokens, checking session ownership and storing messages in Supabase.
 - A journal entry form submitting text under the authenticated user's ID to Supabase with automatic structure-aware chunking and vector embedding ingestion.
 
@@ -38,7 +39,8 @@ Copefy/
 │   │   ├── routers/                         # Rule-based router (rule.py) and AI router (ai.py)
 │   │   ├── tools/                           # Tools: semantic_search.py, journal_search.py, web_search.py, etc.
 │   │   ├── orchestrator.py                  # Agent orchestrator running Layer 1 routing, tool execution, and reply generation
-│   │   ├── prompts.py                       # System prompts and crisis response templates
+│   │   ├── persona.py                       # User persona prompt builder and communication style formatter
+│   │   ├── prompts.py                       # Versioned Core System Prompts (V1), prompt registry, and crisis response templates
 │   │   └── types.py                         # AgentResult data model and trace serialization
 │   ├── config.py                            # Pydantic BaseSettings loading environment variables
 │   ├── db.py                                # Cached Supabase client & asyncpg pool manager
