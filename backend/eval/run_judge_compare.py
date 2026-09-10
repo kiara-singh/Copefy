@@ -1,4 +1,4 @@
-"""LLM-as-judge bake-off for clinical KB and in-memory journal retrieval.
+"""LLM-as-judge bake-off for clinical KB and live journal search.
 
 Measure only — do not retune RAG_STRATEGY from this sample.
 
@@ -24,11 +24,18 @@ from eval.judge import (
     summary_asdict,
 )
 from eval.journal_retrieve import (
+    JOURNAL_EVAL_USER_ID,
+    JOURNAL_STRATEGY_SPECS,
+    PROD_JOURNAL_STRATEGIES,
+    count_journal_chunks,
     describe_entries,
     embed_journal_entries,
+    journal_embedding_distinct_count,
     journal_label_recall,
     load_journal_entries,
     retrieve_journal,
+    retrieve_production_journal,
+    snippets_for_journal_recall,
 )
 from eval.load_golden import load_golden_cases, load_journal_eval_cases
 from eval.retrieval_scoring import apply_split, apply_tag_filters, is_labeled, retrieval_positive_cases
@@ -117,28 +124,89 @@ async def _judge_clinical(
     return results, scores_by_case
 
 
+def _journal_score(
+    case: dict,
+    chunks: list,
+    journal_chunks: list,
+    *,
+    skip_judge: bool,
+    history: list[dict[str, str]],
+    corpus: str,
+) -> JudgeScore:
+    if case.get("expect_empty"):
+        if not journal_chunks:
+            return JudgeScore(
+                useful=5,
+                on_topic=5,
+                grounded=5,
+                non_redundant=5,
+                rationale="correct empty journal retrieve",
+            )
+        return JudgeScore(
+            useful=1,
+            on_topic=1,
+            grounded=1,
+            non_redundant=1,
+            rationale="retrieved a journal when the query has no matching entry",
+        )
+    if skip_judge:
+        return JudgeScore(
+            useful=0,
+            on_topic=0,
+            grounded=0,
+            non_redundant=0,
+            rationale="judge skipped",
+        )
+    return score_retrieval(case["query"], chunks, history=history, corpus=corpus)
+
+
 async def _judge_journal(
     strategies: list[str],
     cases: list[dict],
     *,
     list_only: bool = False,
     user_id: str | None = None,
-) -> tuple[dict[str, dict], dict[str, dict[str, JudgeScore]], list[dict]]:
+    skip_judge: bool = False,
+    source: str = "production",
+) -> tuple[dict[str, dict], dict[str, dict[str, JudgeScore]], list[dict], dict]:
+    resolved_user = user_id or JOURNAL_EVAL_USER_ID
     print("Loading journal_entries …")
-    entries = await load_journal_entries(user_id=user_id)
+    entries = await load_journal_entries(user_id=resolved_user)
     meta = describe_entries(entries)
-    print(f"  {len(entries)} entries:")
-    for item in meta:
-        print(f"    {item['id']}  chars={item['char_len']}  created={item['created_at']}")
+    chunk_count = await count_journal_chunks(resolved_user)
+    print(
+        f"  user={resolved_user}  entries={len(entries)}  journal_chunks={chunk_count}"
+    )
     if list_only:
-        return {}, {}, meta
+        for item in meta:
+            print(
+                f"    {item['id']}  chars={item['char_len']}  created={item['created_at']}"
+            )
+        return {}, {}, meta, {"user_id": resolved_user, "chunk_count": chunk_count}
     if not entries:
-        raise RuntimeError("No journal entries found")
+        raise RuntimeError(f"No journal_entries for user {resolved_user}")
     if not cases:
         raise RuntimeError("journal_eval.yaml has no cases")
+    if source == "production" and chunk_count == 0:
+        raise RuntimeError(
+            f"No journal_chunks for user {resolved_user}. "
+            "Ingest journals into journal_chunks before scoring production search."
+        )
+    if source == "production":
+        distinct = await journal_embedding_distinct_count(resolved_user)
+        print(f"  distinct embeddings={distinct}")
+        if chunk_count > 1 and distinct <= 1:
+            raise RuntimeError(
+                "journal_chunks embeddings are identical (placeholder [0.01] vectors). "
+                "Re-run from backend/: python scripts/reingest_journal_embeddings.py "
+                f"--user-id {resolved_user}"
+            )
 
-    print("Embedding journal entries (in-process, not written back) …")
-    await embed_journal_entries(entries)
+    if source == "inmemory":
+        print("Embedding journal entries (in-process, not written back) …")
+        await embed_journal_entries(entries)
+    else:
+        print("Using production search_journal_chunks (stored embeddings, MMR).")
 
     scores_by_case: dict[str, dict[str, JudgeScore]] = {}
     results: dict[str, dict] = {
@@ -153,28 +221,50 @@ async def _judge_journal(
     total = len(cases)
 
     for idx, case in enumerate(cases, start=1):
-        print(f"  case {idx}/{total}: {case['id']}")
+        print(f"  case {idx}/{total}: {case['id']}", flush=True)
         scores_by_case[case["id"]] = {}
         history = case.get("history") or []
         for name in strategies:
             started = time.perf_counter()
-            retrieved, entry_ids = await retrieve_journal(
-                case["query"],
-                entries,
-                strategy_name=name,
-                history=history,
-            )
+            if source == "production":
+                chunks, entry_ids = await retrieve_production_journal(
+                    resolved_user,
+                    case["query"],
+                    strategy_name=name,
+                    history=history,
+                )
+            else:
+                retrieved, entry_ids = await retrieve_journal(
+                    case["query"],
+                    entries,
+                    strategy_name=name,
+                    history=history,
+                )
+                chunks = retrieved.chunks
             elapsed_ms = (time.perf_counter() - started) * 1000
-            chunks = retrieved.chunks
-            if not chunks:
+            journal_chunks = snippets_for_journal_recall(chunks)
+            if not journal_chunks:
                 results[name]["empty_retrieves"] += 1
-            score = await asyncio.to_thread(
-                score_retrieval,
-                case["query"],
-                chunks,
-                history=history,
-                corpus="journal",
-            )
+            judge_corpus = "both" if name == "both" else "journal"
+            if skip_judge or case.get("expect_empty"):
+                score = _journal_score(
+                    case,
+                    chunks,
+                    journal_chunks,
+                    skip_judge=skip_judge,
+                    history=history,
+                    corpus=judge_corpus,
+                )
+            else:
+                score = await asyncio.to_thread(
+                    _journal_score,
+                    case,
+                    chunks,
+                    journal_chunks,
+                    skip_judge=False,
+                    history=history,
+                    corpus=judge_corpus,
+                )
             recall = journal_label_recall(case, entry_ids, chunks, entries)
             scores_by_case[case["id"]][name] = score
             results[name]["scores"].append(score)
@@ -183,6 +273,7 @@ async def _judge_journal(
                 {
                     "case_id": case["id"],
                     "chunk_count": len(chunks),
+                    "journal_chunk_count": len(journal_chunks),
                     "latency_ms": elapsed_ms,
                     "entry_ids": entry_ids,
                     "entry_recall": None if recall != recall else recall,
@@ -200,7 +291,11 @@ async def _judge_journal(
         results[name]["summary"] = summary_asdict(summary)
         del results[name]["scores"]
         del results[name]["entry_recalls"]
-    return results, scores_by_case, meta
+    return results, scores_by_case, meta, {
+        "user_id": resolved_user,
+        "chunk_count": chunk_count,
+        "source": source,
+    }
 
 
 def _print_summaries(results: dict[str, dict], *, journal: bool) -> None:
@@ -249,39 +344,67 @@ def _print_pairwise(pair: dict[str, int]) -> None:
 
 
 async def _main_async(args: argparse.Namespace) -> int:
-    strategies = args.strategies or strategy_names()
     if args.corpus == "journal":
+        if args.source == "production":
+            strategies = args.strategies or ["journal_mmr"]
+            unknown = [name for name in strategies if name not in PROD_JOURNAL_STRATEGIES]
+            if unknown:
+                raise SystemExit(
+                    f"Unknown production journal strategy {unknown}. "
+                    f"Use: {', '.join(PROD_JOURNAL_STRATEGIES)}"
+                )
+        else:
+            strategies = args.strategies or list(JOURNAL_STRATEGY_SPECS)
         cases = load_journal_eval_cases()
         if args.limit:
             cases = cases[: args.limit]
         print(
-            f"=== Journal judge ({len(cases)} queries × {len(strategies)} strategies) ==="
+            f"=== Journal judge ({len(cases)} queries × {len(strategies)} strategies, "
+            f"source={args.source}) ==="
         )
-        results, scores_by_case, meta = await _judge_journal(
-            strategies, cases, list_only=args.list_journal, user_id=args.user_id
+        results, scores_by_case, meta, info = await _judge_journal(
+            strategies,
+            cases,
+            list_only=args.list_journal,
+            user_id=args.user_id or JOURNAL_EVAL_USER_ID,
+            skip_judge=args.skip_judge,
+            source=args.source,
         )
         if args.list_journal:
-            payload = {"user_id": args.user_id, "entries": meta}
+            payload = {
+                "user_id": info["user_id"],
+                "chunk_count": info["chunk_count"],
+                "entries": meta,
+            }
             if args.output:
                 _export_json(args.output, payload)
             return 0
         _print_summaries(results, journal=True)
         pair = pairwise_mmr_vs_baseline(scores_by_case)
-        _print_pairwise(pair)
+        if "mmr" in results and "baseline" in results:
+            _print_pairwise(pair)
         payload = {
             "corpus": "journal",
-            "user_id": args.user_id,
+            "source": info["source"],
+            "user_id": info["user_id"],
             "entry_count": len(meta),
-            "entries": meta,
+            "chunk_count": info["chunk_count"],
             "case_count": len(cases),
-            "pairwise_mmr_vs_baseline": pair,
+            "skip_judge": args.skip_judge,
             "strategies": results,
-            "note": "In-memory journal eval. Tiny corpus: wide-then-narrow ≈ baseline. Measure only.",
+            "note": (
+                "Production journal search (search_journal_chunks). "
+                "Gold is expected_contains on journal snippets. "
+                "Do not retune clinical RAG_STRATEGY from this."
+                if info["source"] == "production"
+                else "In-memory journal eval. Measure only. Do not retune RAG_STRATEGY."
+            ),
         }
         if args.output:
             _export_json(args.output, payload)
         return 0
 
+    strategies = args.strategies or strategy_names()
     cases = _select_clinical_cases(args)
     if not cases:
         print("No labeled clinical search cases for this split/sample.")
@@ -324,7 +447,13 @@ def main() -> None:
         "--corpus",
         choices=("clinical", "journal"),
         default="clinical",
-        help="clinical KB (default) or in-memory journal entries",
+        help="clinical KB (default) or live journal search",
+    )
+    parser.add_argument(
+        "--source",
+        choices=("production", "inmemory"),
+        default="production",
+        help="journal: production search_journal_chunks (default) or in-memory bake-off",
     )
     parser.add_argument(
         "--split",
@@ -342,7 +471,9 @@ def main() -> None:
     parser.add_argument(
         "--strategies",
         nargs="*",
-        help="Strategy names (default: all registered strategies)",
+        help="Strategy names. Journal production default: journal_mmr. "
+        "Also: both (journal + clinical, same as chat). "
+        "In-memory: baseline threshold_0.65 mmr wide_then_narrow.",
     )
     parser.add_argument("--tag", default=None, help="Only score cases with this tag")
     parser.add_argument(
@@ -353,14 +484,19 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=0, help="Cap cases after sampling")
     parser.add_argument("--output", type=Path, help="Write full JSON results")
     parser.add_argument(
+        "--skip-judge",
+        action="store_true",
+        help="Score journal entry recall only; skip LLM-as-judge API calls",
+    )
+    parser.add_argument(
         "--list-journal",
         action="store_true",
         help="Print journal entry ids/dates/lengths and exit (no embeds, no judge)",
     )
     parser.add_argument(
         "--user-id",
-        default=None,
-        help="Journal user UUID (default: DEV_USER_ID, then fall back to the largest corpus)",
+        default=JOURNAL_EVAL_USER_ID,
+        help="Journal user UUID (default: live seed corpus in journal_eval.yaml)",
     )
     args = parser.parse_args()
     raise SystemExit(asyncio.run(_main_async(args)))

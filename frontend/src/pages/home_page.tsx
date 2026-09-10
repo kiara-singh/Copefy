@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import ChatTracePanel from "../components/chat_trace_panel";
+import { useChatSession } from "../contexts/chat_session_context";
 import {
-  create_session,
+  get_session_messages,
   is_rag_debug_enabled,
   send_chat,
   type ChatTrace,
 } from "../lib/api";
-
-const SESSION_STORAGE_KEY = "copefy_session_id";
 
 type ChatRole = "user" | "assistant";
 
@@ -18,28 +17,75 @@ interface ChatMessage {
 }
 
 function HomePage() {
-  const [session_id, set_session_id] = useState<string | null>(null);
+  const { session_id, sessions, loading_list, refresh_sessions } =
+    useChatSession();
   const [messages, set_messages] = useState<ChatMessage[]>([]);
   const [input, set_input] = useState("");
   const [is_sending, set_is_sending] = useState(false);
+  const [loading_history, set_loading_history] = useState(false);
   const scroll_anchor_ref = useRef<HTMLDivElement | null>(null);
+  const sessions_ref = useRef(sessions);
+  sessions_ref.current = sessions;
 
   useEffect(() => {
-    const existing = localStorage.getItem(SESSION_STORAGE_KEY);
-    if (existing) {
-      set_session_id(existing);
+    if (!session_id) {
+      set_messages([]);
+      set_loading_history(false);
       return;
     }
 
-    create_session()
-      .then((new_id) => {
-        localStorage.setItem(SESSION_STORAGE_KEY, new_id);
-        set_session_id(new_id);
+    if (loading_list) {
+      const known = sessions_ref.current.find(
+        (row) => row.session_id === session_id
+      );
+      if (known?.message_count === 0) {
+        set_messages([]);
+        set_loading_history(false);
+        return;
+      }
+      set_loading_history(true);
+      return;
+    }
+
+    const message_count = sessions_ref.current.find(
+      (row) => row.session_id === session_id
+    )?.message_count;
+
+    if (message_count === 0) {
+      set_messages([]);
+      set_loading_history(false);
+      return;
+    }
+
+    let cancelled = false;
+    set_loading_history(true);
+    set_messages([]);
+
+    get_session_messages(session_id)
+      .then((rows) => {
+        if (cancelled) {
+          return;
+        }
+        set_messages(
+          rows.map((row) => ({
+            role: row.role,
+            content: row.content,
+          }))
+        );
       })
       .catch((error) => {
-        console.error("Failed to create a chat session", error);
+        console.error("Failed to load chat messages", error);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          set_loading_history(false);
+        }
       });
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session_id, loading_list]);
 
   useEffect(() => {
     scroll_anchor_ref.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,6 +98,7 @@ function HomePage() {
       return;
     }
 
+    const is_first_message = messages.length === 0;
     set_messages((prev) => [...prev, { role: "user", content: trimmed }]);
     set_input("");
     set_is_sending(true);
@@ -66,6 +113,9 @@ function HomePage() {
           trace: data.trace,
         },
       ]);
+      if (is_first_message) {
+        void refresh_sessions();
+      }
     } catch (error) {
       console.error("Failed to send message", error);
       const message =
@@ -84,6 +134,8 @@ function HomePage() {
     }
   };
 
+  const show_empty = !loading_history && messages.length === 0;
+
   return (
     <div className="flex h-full flex-col">
       <header className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
@@ -97,7 +149,11 @@ function HomePage() {
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="mx-auto flex max-w-2xl flex-col gap-4">
-          {messages.length === 0 ? (
+          {loading_history ? (
+            <div className="mt-24 text-center text-sm text-slate-400">
+              Loading conversation…
+            </div>
+          ) : show_empty ? (
             <div className="mt-24 text-center text-slate-400">
               <p className="text-lg font-medium">How are you feeling today?</p>
               <p className="mt-1 text-sm">

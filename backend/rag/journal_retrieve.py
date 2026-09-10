@@ -83,6 +83,7 @@ async def search_journal_chunks(
             title=hit.title,
             category="journal",
             similarity=hit.similarity,
+            document_id=hit.document_id,
         )
         for hit in reranked
     ]

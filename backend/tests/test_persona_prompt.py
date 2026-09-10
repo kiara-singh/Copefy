@@ -2,6 +2,7 @@
 
 from agent.persona import (
     UserPersona,
+    build_profile_data_block,
     build_system_instruction,
     closing_instruction,
     normalize_style,
@@ -30,11 +31,14 @@ def test_unknown_style_falls_back_to_gentle():
     assert normalize_style("") == DEFAULT_COMMUNICATION_STYLE
 
 
-def test_custom_style_is_preserved():
+def test_custom_style_is_quoted_in_data_block_not_system_commands():
     custom = "direct but compassionate"
     prompt = build_system_instruction(UserPersona(communication_style=custom))
-    assert custom in prompt
-    assert "Match this tone" in prompt
+    assert custom not in prompt
+    assert "user-profile data" in prompt
+    block = build_profile_data_block(UserPersona(communication_style=custom), nonce="test")
+    assert custom in block
+    assert "<user_profile_test>" in block
 
 
 def test_name_and_goal_only_when_set():
@@ -55,29 +59,30 @@ def test_name_and_goal_only_when_set():
 
 
 def test_coaching_preferences_from_dedicated_column():
-    prompt = build_system_instruction(
-        UserPersona(
-            wellness_goal="reduce exam stress",
-            coaching_preferences="I prefer answers in bullet points.",
-        )
+    persona = UserPersona(
+        wellness_goal="reduce exam stress",
+        coaching_preferences="I prefer answers in bullet points.",
     )
+    prompt = build_system_instruction(persona)
     assert "reduce exam stress" in prompt
-    assert "I prefer answers in bullet points" in prompt
-    assert "Coaching preferences — follow these on every reply" in prompt
+    assert "structured replies" in prompt.lower()
+    assert "follow these on every reply" not in prompt
+    block = build_profile_data_block(persona, nonce="aabb")
+    assert "I prefer answers in bullet points" in block
 
 
 def test_coaching_preferences_injected_separately_with_stronger_wording():
-    prompt = build_system_instruction(
-        UserPersona(
-            wellness_goal=(
-                "reduce exam stress\n\nAdditional Context:\n"
-                "I prefer answers in bullet points."
-            )
+    persona = UserPersona(
+        wellness_goal=(
+            "reduce exam stress\n\nAdditional Context:\n"
+            "I prefer answers in bullet points."
         )
     )
+    prompt = build_system_instruction(persona)
     assert "reduce exam stress" in prompt
-    assert "I prefer answers in bullet points" in prompt
-    assert "Coaching preferences — follow these on every reply" in prompt
+    assert "follow these on every reply" not in prompt
+    block = build_profile_data_block(persona, nonce="ccdd")
+    assert "I prefer answers in bullet points" in block
     assert "structured replies" in prompt.lower()
 
 

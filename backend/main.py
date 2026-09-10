@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from agent.orchestrator import run_agent
 from auth import resolve_user_id
+from chat_history import summarize_sessions
 from config import settings
 from db import get_supabase
 from profiles import load_user_persona
@@ -96,7 +97,12 @@ def _load_session_history(client, session_id: str) -> list[dict[str, str]]:
     return [{"role": row["role"], "content": row["content"]} for row in result.data]
 
 
-def _get_session_user_id(client, session_id: str) -> str:
+def _require_session_access(
+    client,
+    session_id: str,
+    auth_user_id: str | None,
+) -> str:
+    """Return the session owner, or 404 if missing / not owned by the caller."""
     result = (
         client.table("sessions")
         .select("user_id")
@@ -104,9 +110,12 @@ def _get_session_user_id(client, session_id: str) -> str:
         .maybe_single()
         .execute()
     )
-    if result.data and result.data.get("user_id"):
-        return str(result.data["user_id"])
-    return DEV_USER_ID
+    if not result.data or not result.data.get("user_id"):
+        raise HTTPException(status_code=404, detail="Chat not found.")
+    owner_id = str(result.data["user_id"])
+    if auth_user_id and auth_user_id != owner_id:
+        raise HTTPException(status_code=404, detail="Chat not found.")
+    return owner_id
 
 
 @app.get("/")
@@ -150,6 +159,77 @@ def create_session(
     return {"session_id": session_id}
 
 
+@app.get("/sessions")
+def list_sessions(
+    authorization: str | None = Header(default=None),
+) -> dict:
+    """List this user's chats, newest first, with a title from the first user message."""
+    client = _require_supabase()
+    user_id = resolve_user_id(authorization, fallback_user_id=None)
+    if not user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Please log in again. Your session could not be verified.",
+        )
+
+    sessions_result = (
+        client.table("sessions")
+        .select("id, started_at")
+        .eq("user_id", user_id)
+        .order("started_at", desc=True)
+        .limit(80)
+        .execute()
+    )
+    sessions = sessions_result.data or []
+    if not sessions:
+        return {"sessions": []}
+
+    session_ids = [row["id"] for row in sessions]
+    messages_result = (
+        client.table("messages")
+        .select("session_id, role, content, created_at")
+        .in_("session_id", session_ids)
+        .order("created_at")
+        .execute()
+    )
+    return {
+        "sessions": summarize_sessions(sessions, messages_result.data or []),
+    }
+
+
+@app.get("/sessions/{session_id}/messages")
+def get_session_messages(
+    session_id: str,
+    authorization: str | None = Header(default=None),
+) -> dict:
+    """Load messages for one chat owned by the logged-in user."""
+    client = _require_supabase()
+    auth_user_id = resolve_user_id(authorization, fallback_user_id=None)
+    if not auth_user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Please log in again. Your session could not be verified.",
+        )
+    _require_session_access(client, session_id, auth_user_id)
+    result = (
+        client.table("messages")
+        .select("role, content, created_at")
+        .eq("session_id", session_id)
+        .order("created_at")
+        .execute()
+    )
+    messages = [
+        {
+            "role": row["role"],
+            "content": row["content"],
+            "created_at": row.get("created_at"),
+        }
+        for row in (result.data or [])
+        if row.get("role") in {"user", "assistant"}
+    ]
+    return {"session_id": session_id, "messages": messages}
+
+
 @app.post("/chat")
 async def chat(
     payload: ChatRequest,
@@ -158,28 +238,9 @@ async def chat(
     """Store the user message, run the agent, and return the reply."""
     logger.info("chat start session=%s user_id=%s", payload.session_id, user_id)
     client = _require_supabase()
-
-    # Verify session ownership
-    session_res = (
-        client.table("sessions")
-        .select("user_id")
-        .eq("id", payload.session_id)
-        .execute()
+    await asyncio.to_thread(
+        _require_session_access, client, payload.session_id, user_id
     )
-
-    if not session_res.data:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session not found.",
-        )
-
-    session_owner = str(session_res.data[0]["user_id"])
-    if session_owner != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied: You do not own this chat session.",
-        )
-
     persona = await asyncio.to_thread(load_user_persona, user_id)
 
     await asyncio.to_thread(

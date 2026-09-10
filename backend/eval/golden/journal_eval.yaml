@@ -1,77 +1,221 @@
-# Chat-like queries over live journal_entries.
-# Do not paste diary text here. expected_contains is the stable label
-# (rows are duplicated; expected_entry_ids are one representative UUID each).
-# Corpus user: 938c6dc2-bab8-44d9-b732-8bbd308fd838 (DEV_USER_ID has none).
+# Chat-like queries over live journal_entries (user 938c6dc2-bab8-44d9-b732-8bbd308fd838).
+# Do not paste diary text here. expected_contains is the gold label.
+# kind: callback | paraphrase | negative | mood_trap
+
+- id: journal_student_id_01
+  kind: callback
+  query: I still panic whenever I think I lost my student ID
+  expected_contains:
+    - jacket pocket
+  expected_entry_ids:
+    - bc07b6a1-398d-4aa7-a8a4-f5bed402fc13
+
+- id: journal_mixer_scifi_01
+  kind: callback
+  query: that club mixer was scary at first but I actually talked to someone
+  expected_contains:
+    - sci-fi
+  expected_entry_ids:
+    - 76657a49-b7f0-4f97-99a2-d8e603c57aa3
+
+- id: journal_victorian_essay_01
+  kind: callback
+  query: I keep thinking about that English literature essay grade
+  expected_contains:
+    - Victorian
+  expected_entry_ids:
+    - 5aa4feca-c8a0-4e4b-8d32-4ded5d842224
+
+- id: journal_mom_cookies_01
+  kind: callback
+  query: I miss the care package my mom sent
+  expected_contains:
+    - homemade cookies
+  expected_entry_ids:
+    - 57f3a0c2-b28f-438e-9b4b-761788b99eaa
+
+- id: journal_grounding_dining_01
+  kind: callback
+  query: should I try that counting-senses thing if I panic in the dining hall again
+  expected_contains:
+    - 5-4-3-2-1
+  expected_entry_ids:
+    - 833add38-fd20-45c2-897b-2745ae46a8aa
+
+- id: journal_stat_quiz_01
+  kind: callback
+  query: I bombed that statistics pop quiz and spiraled
+  expected_contains:
+    - 4 out of 10
+  expected_entry_ids:
+    - ddceb6bf-9f39-40ac-970d-1e0387d46844
+
+- id: journal_internship_apps_01
+  kind: callback
+  query: still waiting to hear back about those summer internships
+  expected_contains:
+    - cover letter
+  expected_entry_ids:
+    - 6d4c640c-8c3f-49cc-acbd-b906f5d7fe32
+
+- id: journal_sister_vacation_01
+  kind: callback
+  query: I keep replaying that phone call with my sister
+  expected_contains:
+    - family vacation
+  expected_entry_ids:
+    - f86c94aa-8959-43ba-934a-83a61540d5dd
+
+- id: journal_animal_shelter_01
+  kind: callback
+  query: walking those rescue dogs actually calmed me down
+  expected_contains:
+    - animal shelter
+  expected_entry_ids:
+    - ef8bf4ae-3f89-4334-9967-230a61af16e7
 
 - id: journal_exam_stress_01
+  kind: callback
   query: that organic chemistry exam stress is back
   expected_contains:
     - organic chemistry
   expected_entry_ids:
-    - 9a1cbf23-7036-456f-a5f3-c18b51159a63
-- id: journal_presentation_01
-  query: I have to present in seminar again and I'm already shaking
-  expected_contains:
-    - public speaking
-  expected_entry_ids:
-    - 2357e2b6-be12-4a0b-95d3-c50b70341c2a
-- id: journal_insomnia_deadlines_01
-  query: my mind won't shut off at night with all these deadlines
-  expected_contains:
-    - 3am
-  expected_entry_ids:
-    - 2e651d53-439e-47ad-aa62-6333161c3db8
+    - dd974872-c79c-4625-92ca-27dbcf0cb13e
+
 - id: journal_roommate_dishes_01
+  kind: callback
   query: my roommate still isn't doing the dishes
   expected_contains:
     - dirty dishes
   expected_entry_ids:
-    - 4b9b7599-3c96-4c9c-9f33-05e88a6864bd
-- id: journal_homesick_01
-  query: I'm homesick again this week
-  expected_contains:
-    - homesick
-  expected_entry_ids:
-    - 132f4a95-c30d-4c76-92bc-0c16369662c2
-- id: journal_assignment_pile_01
-  query: I have too many assignments due Friday and I don't know where to start
-  expected_contains:
-    - lab report
-  expected_entry_ids:
-    - b1b0e6ee-6adc-4da9-8e33-6ffdcb45eb50
-- id: journal_morning_run_01
-  query: did that morning run actually help last time?
-  expected_contains:
-    - 30-minute run
-  expected_entry_ids:
-    - 27bb394e-fb25-461d-8185-25876f675cfd
+    - d4c3604d-9b11-4188-972c-e601bda2548d
+
 - id: journal_box_breathing_01
+  kind: callback
   query: should I try that breathing thing before my meeting?
   expected_contains:
     - box breathing
   expected_entry_ids:
-    - 15dc2a53-6cec-4aa6-8f7d-8e8ad0760de6
+    - a3f8cf14-271c-4c0e-8651-3350d9ba070a
+
 - id: journal_chem_grade_01
+  kind: callback
   query: I keep thinking about how I did on the chemistry test
   expected_contains:
     - B+
   expected_entry_ids:
-    - 9377b104-aa02-4ba8-92f2-d507af5bf112
-- id: journal_phone_bed_01
-  query: I should get my phone out of the bedroom tonight
+    - 2beaab58-1700-46de-8dea-cdea973f1441
+
+- id: journal_pomodoro_01
+  kind: callback
+  query: did that 25-minute writing timer actually help last time?
   expected_contains:
-    - phone in another room
+    - Pomodoro
   expected_entry_ids:
-    - 4e700a9e-9dea-4035-b074-2b3e54640c4d
+    - b293634b-02b2-4116-a766-ea10cccdb3fd
+
+- id: journal_earplugs_01
+  kind: callback
+  query: those earplugs for the street noise actually worked
+  expected_contains:
+    - earplugs
+  expected_entry_ids:
+    - 35b0018b-c390-4667-8f0d-d1d75fa0da3e
+
 - id: journal_freeze_on_exam_01
+  kind: paraphrase
   query: I freeze up when I see the test questions
   expected_contains:
     - freeze
   expected_entry_ids:
-    - 9a1cbf23-7036-456f-a5f3-c18b51159a63
+    - dd974872-c79c-4625-92ca-27dbcf0cb13e
+
 - id: journal_hate_presenting_01
+  kind: paraphrase
   query: I still hate standing up in front of the class
   expected_contains:
-    - presentation
+    - seminar class
   expected_entry_ids:
-    - 2357e2b6-be12-4a0b-95d3-c50b70341c2a
+    - 9840bb6d-f39e-4c06-8e81-73c5adb85ae4
+
+- id: journal_homesick_01
+  kind: paraphrase
+  query: I'm homesick again this week
+  expected_contains:
+    - homesick
+  expected_entry_ids:
+    - b94669b0-9f01-4960-8e27-7e555c7529bb
+
+- id: journal_insomnia_deadlines_01
+  kind: paraphrase
+  query: my mind won't shut off at night with all these deadlines
+  expected_contains:
+    - deadlines coming up
+  expected_entry_ids:
+    - 4567618e-f172-462d-aa26-b7b41b0326ab
+
+- id: journal_morning_run_01
+  kind: paraphrase
+  query: did that morning run actually help last time?
+  expected_contains:
+    - 30-minute run
+  expected_entry_ids:
+    - 58e5d700-cf3b-498a-beb5-6ecbdc613601
+
+- id: journal_phone_bed_01
+  kind: paraphrase
+  query: I should get my phone out of the bedroom tonight
+  expected_contains:
+    - phone in another room
+  expected_entry_ids:
+    - 240b9252-4941-45ad-b0c0-fe7964e717cb
+
+- id: journal_neg_dog_01
+  kind: negative
+  expect_empty: true
+  query: my dog ate my homework again this morning
+  expected_contains: []
+
+- id: journal_neg_wedding_01
+  kind: negative
+  expect_empty: true
+  query: I'm stressed about seating charts for my wedding
+  expected_contains: []
+
+- id: journal_neg_knee_01
+  kind: negative
+  expect_empty: true
+  query: physical therapy after my knee surgery is exhausting
+  expected_contains: []
+
+- id: journal_neg_newborn_01
+  kind: negative
+  expect_empty: true
+  query: the baby still isn't sleeping through the night
+  expected_contains: []
+
+- id: journal_neg_crypto_01
+  kind: negative
+  expect_empty: true
+  query: I lost a lot of money day-trading crypto last week
+  expected_contains: []
+
+- id: journal_mood_tired_01
+  kind: mood_trap
+  query: I'm so tired
+  expected_contains: []
+
+- id: journal_mood_overwhelmed_01
+  kind: mood_trap
+  query: everything feels overwhelming right now
+  expected_contains: []
+
+- id: journal_mood_anxious_01
+  kind: mood_trap
+  query: I'm anxious again
+  expected_contains: []
+
+- id: journal_mood_miss_home_01
+  kind: mood_trap
+  query: I miss home
+  expected_contains: []

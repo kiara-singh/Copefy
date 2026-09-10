@@ -45,6 +45,8 @@ Respond with JSON only.
 RATE_LIMIT_RETRIES = 6
 RATE_LIMIT_BACKOFF_S = 15
 RETRYABLE_CODES = {429, 503}
+# Retired / unknown model ids. Skip immediately; do not sleep-retry the same name.
+SKIP_MODEL_CODES = {404}
 
 _local = threading.local()
 
@@ -137,11 +139,14 @@ def build_judge_prompt(
     history: list[dict[str, str]] | None = None,
     corpus: str = "clinical",
 ) -> str:
-    corpus_line = (
-        "Corpus: clinical knowledge base snippets."
-        if corpus == "clinical"
-        else "Corpus: this user's past journal entries."
-    )
+    if corpus == "clinical":
+        corpus_line = "Corpus: clinical knowledge base snippets."
+    elif corpus == "both":
+        corpus_line = (
+            "Corpus: mixed clinical knowledge base snippets and this user's journal entries."
+        )
+    else:
+        corpus_line = "Corpus: this user's past journal entries."
     return (
         f"{corpus_line}\n\n"
         f"{format_history(history)}"
@@ -178,11 +183,22 @@ def _client():
     return client
 
 
+def _judge_models() -> list[str]:
+    from config import settings
+
+    models = [settings.agent_router_model, *settings.agent_router_model_fallbacks_list]
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for model in models:
+        if model and model not in seen:
+            seen.add(model)
+            ordered.append(model)
+    return ordered
+
+
 def _call_judge_api(prompt: str) -> JudgeScore:
     from google.genai import types
     from google.genai.errors import APIError
-
-    from config import settings
 
     schema = types.Schema(
         type=types.Type.OBJECT,
@@ -202,25 +218,60 @@ def _call_judge_api(prompt: str) -> JudgeScore:
         response_schema=schema,
         max_output_tokens=256,
     )
-    model = settings.agent_router_model
-    response = None
-    for attempt in range(RATE_LIMIT_RETRIES + 1):
-        try:
-            response = _client().models.generate_content(
-                model=model,
-                contents=prompt,
-                config=config,
-            )
-            break
-        except APIError as exc:
-            code = getattr(exc, "code", None)
-            if code not in RETRYABLE_CODES or attempt == RATE_LIMIT_RETRIES:
-                raise
-            delay = _retry_delay_s(exc, attempt)
-            print(f"    judge retry {attempt + 1}/{RATE_LIMIT_RETRIES} after {code} (sleep {delay:.0f}s)")
-            time.sleep(delay)
-    payload = json.loads((response.text if response else None) or "{}")
-    return parse_judge_payload(payload)
+    last_error: Exception | None = None
+    attempts_per_model = 2
+    models = _judge_models()
+
+    for model in models:
+        for attempt in range(attempts_per_model):
+            try:
+                response = _client().models.generate_content(
+                    model=model,
+                    contents=prompt,
+                    config=config,
+                )
+                raw = ((response.text if response else None) or "").strip()
+                if not raw:
+                    raise json.JSONDecodeError("empty judge response", "", 0)
+                parsed = json.loads(raw)
+                if not isinstance(parsed, dict):
+                    raise json.JSONDecodeError("judge JSON was not an object", raw, 0)
+                if model != models[0]:
+                    print(f"    judge used fallback model {model}")
+                return parse_judge_payload(parsed)
+            except APIError as exc:
+                last_error = exc
+                code = getattr(exc, "code", None)
+                if code in SKIP_MODEL_CODES:
+                    print(f"    judge skip unavailable model {model} ({code})")
+                    break
+                if code not in RETRYABLE_CODES:
+                    raise
+                if attempt + 1 < attempts_per_model:
+                    delay = _retry_delay_s(exc, attempt)
+                    print(
+                        f"    judge retry {attempt + 1}/{attempts_per_model} "
+                        f"on {model} after {code} (sleep {delay:.0f}s)"
+                    )
+                    time.sleep(delay)
+                    continue
+                print(f"    judge fallback after {code} on {model}")
+            except json.JSONDecodeError as exc:
+                last_error = exc
+                if attempt + 1 < attempts_per_model:
+                    delay = RATE_LIMIT_BACKOFF_S * (attempt + 1)
+                    print(
+                        f"    judge retry {attempt + 1}/{attempts_per_model} "
+                        f"on {model} after invalid JSON (sleep {delay:.0f}s)"
+                    )
+                    time.sleep(delay)
+                    continue
+                print(f"    judge fallback after invalid JSON on {model}")
+
+    print("    all judge models failed; using default scores")
+    if last_error and not isinstance(last_error, (APIError, json.JSONDecodeError)):
+        raise last_error
+    return parse_judge_payload({})
 
 
 def score_retrieval(

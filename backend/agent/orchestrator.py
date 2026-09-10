@@ -11,16 +11,17 @@ from google import genai
 from google.genai import types
 from google.genai.errors import APIError
 
+from agent.injection_filter import reply_violates_safety
 from agent.persona import (
     UserPersona,
+    build_profile_data_block,
     build_system_instruction,
     closing_instruction,
-    normalize_style,
-    resolve_coaching_preferences,
-    wants_structured_format,
+    new_profile_nonce,
 )
 from agent.pipeline_trace import PipelineTrace
-from agent.prompts import CRISIS_RESPONSE
+from agent.preference_extract import extract_preference_knobs
+from agent.prompts import CRISIS_RESPONSE, SAFETY_SANDWICH, UNSAFE_REPLY_FALLBACK
 from agent.routers import Path, get_router
 from agent.routers.base import RouteDecision
 from agent.tools.extract_docs import extract_unstructured
@@ -35,7 +36,8 @@ from rag.retrieve import RetrievalPlan, RetrievedChunk, retrieve_with_strategy
 logger = logging.getLogger(__name__)
 
 # HTTP codes where we should try the next model instead of failing the request.
-RETRYABLE_API_CODES = frozenset({429, 500, 502, 503, 504})
+# 404 = retired / unknown model id (e.g. gemini-2.5-flash-lite).
+RETRYABLE_API_CODES = frozenset({429, 500, 502, 503, 504, 404})
 
 
 def _should_try_next_model(exc: APIError) -> bool:
@@ -136,6 +138,11 @@ def _build_user_prompt(
                 "Use a different opening and structure — do not repeat the same pattern."
             )
 
+    profile_block = build_profile_data_block(persona, nonce=new_profile_nonce())
+    if profile_block:
+        sections.append(profile_block)
+        sections.append(SAFETY_SANDWICH)
+
     sections.append(closing_instruction(persona))
     return "\n\n".join(section for section in sections if section), anti_repeat
 
@@ -210,7 +217,7 @@ def _generate_reply(prompt: str, system_instruction: str) -> tuple[str, str | No
 def _corpus_reason(decision: RouteDecision) -> str:
     if decision.corpus:
         return f"router selected {decision.corpus}"
-    return "journal retrieval not wired; default clinical"
+    return "default clinical"
 
 
 def _log_pipeline(result: AgentResult) -> None:
@@ -348,18 +355,21 @@ async def run_agent(
 
     l4_start = time.perf_counter()
     reply, model = await asyncio.to_thread(_generate_reply, prompt, system_instruction)
-    style = normalize_style(persona.communication_style)
-    coaching_preferences = resolve_coaching_preferences(persona)
+    if reply_violates_safety(reply):
+        logger.warning("blocked unsafe generated reply")
+        reply = UNSAFE_REPLY_FALLBACK
+    knobs = extract_preference_knobs(persona)
+    style = knobs.display_style
     pipeline.add_timed(
         4,
         "generation",
         style,
         l4_start,
         communication_style=style,
-        preferred_name_set=bool(persona.preferred_name),
-        wellness_goal_set=bool(persona.wellness_goal),
-        coaching_preferences_set=bool(coaching_preferences),
-        structured_format_requested=wants_structured_format(coaching_preferences),
+        preferred_name_set=bool(knobs.preferred_name),
+        wellness_goal_set=bool(knobs.wellness_goal),
+        coaching_preferences_set=bool(knobs.coaching_notes),
+        structured_format_requested=knobs.structured_format,
         model=model,
         history_turns=min(len(history), 6),
         kb_chunks_in_prompt=len(chunks),

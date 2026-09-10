@@ -173,6 +173,69 @@ export async function create_session(): Promise<string> {
   return data.session_id;
 }
 
+export interface SessionSummary {
+  session_id: string;
+  title: string;
+  last_activity: string | null;
+  message_count: number;
+}
+
+export interface StoredChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  created_at?: string | null;
+}
+
+async function get_json<T>(path: string): Promise<T> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const headers = await auth_headers();
+    const response = await fetch(`${API_URL}${path}`, {
+      method: "GET",
+      headers,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      let detail = `Request to ${path} failed with status ${response.status}`;
+      try {
+        const error_body = (await response.json()) as { detail?: string };
+        if (error_body.detail) {
+          detail = error_body.detail;
+        }
+      } catch {
+        // ignore JSON parse errors on error responses
+      }
+      throw new Error(detail);
+    }
+
+    return (await response.json()) as T;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Request timed out. The server may still be thinking — try again.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export async function list_sessions(): Promise<SessionSummary[]> {
+  const data = await get_json<{ sessions: SessionSummary[] }>("/sessions");
+  return data.sessions ?? [];
+}
+
+export async function get_session_messages(
+  session_id: string
+): Promise<StoredChatMessage[]> {
+  const data = await get_json<{ messages: StoredChatMessage[] }>(
+    `/sessions/${session_id}/messages`
+  );
+  return data.messages ?? [];
+}
+
 export async function send_chat(
   session_id: string,
   message: string

@@ -21,6 +21,7 @@ pytest-cache-files*/
 
 # Layer 3 bake-off dumps (summaries live in docs/)
 backend/eval/results/
+backend/eval/cache/
 
 # Logs
 *.log

@@ -362,6 +362,7 @@ function OnboardingPage() {
                   type="text"
                   value={custom_communication_style}
                   onChange={(e) => handle_custom_style_change(e.target.value)}
+                  maxLength={200}
                   placeholder="e.g., direct but compassionate, or using structured and analytical language..."
                   className="w-full rounded-full border border-slate-300 px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 />
@@ -421,6 +422,7 @@ function OnboardingPage() {
                   rows={4}
                   value={wellness_goal}
                   onChange={(e) => set_wellness_goal(e.target.value)}
+                  maxLength={300}
                   placeholder="e.g., I want to build a daily mindfulness habit, reduce stress before exams, and find healthier ways to manage anxiety..."
                   className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none leading-relaxed"
                 />
@@ -439,6 +441,7 @@ function OnboardingPage() {
                   rows={3}
                   value={additional_context}
                   onChange={(e) => set_additional_context(e.target.value)}
+                  maxLength={500}
                   placeholder="e.g., I prefer practical exercises over open-ended journaling, or I have a busy schedule and prefer quick tips."
                   className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none leading-relaxed"
                 />

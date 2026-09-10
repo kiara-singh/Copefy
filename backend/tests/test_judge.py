@@ -118,3 +118,16 @@ def test_journal_eval_yaml_is_not_a_layer1_case_file():
     assert journal_cases
     assert all("query" in case for case in journal_cases)
     assert {case["id"] for case in journal_cases}.isdisjoint(golden_ids)
+    kinds = {case.get("kind") for case in journal_cases}
+    assert "callback" in kinds
+    assert "negative" in kinds
+    assert "mood_trap" in kinds
+    assert any(case.get("expect_empty") for case in journal_cases)
+    assert len(journal_cases) == 30
+    from collections import Counter
+
+    kinds = Counter(case.get("kind") for case in journal_cases)
+    assert kinds["callback"] == 15
+    assert kinds["paraphrase"] == 6
+    assert kinds["negative"] == 5
+    assert kinds["mood_trap"] == 4

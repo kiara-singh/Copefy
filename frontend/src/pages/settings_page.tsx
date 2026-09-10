@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/auth_context";
+import { SESSION_STORAGE_KEY } from "../contexts/chat_session_context";
 import { supabase } from "../lib/supabase_client";
 import { CommunicationStyleType } from "../constants/quiz_constants";
 import { CommunicationStyleQuiz } from "../components/communication_style_quiz";
@@ -10,8 +11,6 @@ import {
   upload_medical_document,
   delete_medical_document,
 } from "../lib/api";
-
-const SESSION_STORAGE_KEY = "copefy_session_id";
 
 const COMMUNICATION_STYLES: {
   value: CommunicationStyleType;
@@ -486,6 +485,7 @@ function SettingsPage() {
                     type="text"
                     value={custom_style}
                     onChange={(e) => handle_custom_style_change(e.target.value)}
+                    maxLength={200}
                     placeholder="e.g., direct but compassionate, or using structured and analytical language..."
                     className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                   />
@@ -563,6 +563,7 @@ function SettingsPage() {
                   rows={4}
                   value={primary_goal}
                   onChange={(e) => set_primary_goal(e.target.value)}
+                  maxLength={300}
                   placeholder="e.g., I want to build a daily mindfulness habit, reduce stress before exams, and find healthier ways to manage anxiety..."
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none leading-relaxed"
                 />
@@ -581,6 +582,7 @@ function SettingsPage() {
                   rows={3}
                   value={additional_context}
                   onChange={(e) => set_additional_context(e.target.value)}
+                  maxLength={500}
                   placeholder="e.g., I prefer practical exercises over open-ended journaling, or I have a busy schedule and prefer quick tips."
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none leading-relaxed"
                 />

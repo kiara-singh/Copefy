@@ -1,15 +1,17 @@
-"""In-memory journal retrieval for eval only.
+"""Journal retrieval helpers for eval.
 
-Loads live journal_entries for DEV_USER_ID, embeds them with Gemini 768-d,
-then applies the same four Layer 3 rerankers. Does not write embeddings back
-and does not wire Layer 2 into the orchestrator.
+Production path calls `search_journal_chunks` (same as chat). The in-memory
+path embeds full `journal_entries` in-process for ranker bake-offs only.
 """
 
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 import math
 from dataclasses import dataclass
+from pathlib import Path
 
 from rag.retrieve import RetrievalPlan, RetrievedChunk, _rerank_hits
 from rag.search import KBChunkHit
@@ -21,6 +23,10 @@ from rag.strategies.threshold import THRESHOLD_CONFIG
 from rag.strategies.wide_then_narrow import WIDE_CONFIG
 
 DEV_USER_ID = "78b0cc86-0b60-4220-8127-4430b1f3cd9e"
+# Live seed diary corpus used by journal_eval.yaml.
+JOURNAL_EVAL_USER_ID = "938c6dc2-bab8-44d9-b732-8bbd308fd838"
+EMBED_CACHE_PATH = Path(__file__).resolve().parent / "cache" / "journal_embeddings.json"
+PROD_JOURNAL_STRATEGIES = ("journal_mmr", "both")
 
 JOURNAL_STRATEGY_SPECS: dict[str, tuple[StrategyConfig, str]] = {
     "baseline": (DEFAULT_CONFIG, "heuristic"),
@@ -62,6 +68,30 @@ def entry_id_recall(expected: list[str], retrieved_ids: list[str]) -> float:
     return hits / len(expected)
 
 
+def snippets_for_journal_recall(chunks: list) -> list:
+    """Gold labels apply to journal snippets only.
+
+    Chat's `both` path mixes clinical KB with journals. Clinical hits must not
+    count as a journal match, and they must not fail `expect_empty`.
+    Untagged in-memory eval chunks are treated as journal.
+    """
+    journal = [chunk for chunk in chunks if getattr(chunk, "category", None) == "journal"]
+    if journal:
+        return journal
+    if any(getattr(chunk, "category", None) not in (None, "journal") for chunk in chunks):
+        return []
+    return list(chunks)
+
+
+def entry_ids_from_chunks(chunks: list) -> list[str]:
+    ids: list[str] = []
+    for chunk in snippets_for_journal_recall(chunks):
+        document_id = getattr(chunk, "document_id", None)
+        if document_id:
+            ids.append(str(document_id))
+    return ids
+
+
 def contains_recall(needles: list[str], chunks: list) -> float:
     if not needles:
         return float("nan")
@@ -77,9 +107,12 @@ def journal_label_recall(
     entries: list[JournalEntry],
 ) -> float:
     """Prefer expected_contains (stable with duplicate rows). Else entry ids, expanded by identical text."""
+    scored = snippets_for_journal_recall(chunks)
+    if case.get("expect_empty"):
+        return 1.0 if not scored else 0.0
     needles = [str(item) for item in (case.get("expected_contains") or [])]
     if needles:
-        return contains_recall(needles, chunks)
+        return contains_recall(needles, scored)
     expected_ids = [str(item) for item in (case.get("expected_entry_ids") or [])]
     if not expected_ids:
         return float("nan")
@@ -214,11 +247,64 @@ def describe_entries(entries: list[JournalEntry]) -> list[dict]:
     ]
 
 
+def _content_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _load_embed_cache() -> dict:
+    if not EMBED_CACHE_PATH.exists():
+        return {"model": "", "entries": {}}
+    try:
+        payload = json.loads(EMBED_CACHE_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"model": "", "entries": {}}
+    if not isinstance(payload, dict):
+        return {"model": "", "entries": {}}
+    payload.setdefault("entries", {})
+    return payload
+
+
+def _save_embed_cache(payload: dict) -> None:
+    EMBED_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    EMBED_CACHE_PATH.write_text(json.dumps(payload), encoding="utf-8")
+
+
 async def embed_journal_entries(entries: list[JournalEntry]) -> list[JournalEntry]:
+    from config import settings
     from rag.embed import embed_query
 
-    for entry in entries:
-        entry.embedding = await asyncio.to_thread(embed_query, entry.content)
+    cache = _load_embed_cache()
+    cache_model = str(cache.get("model") or "")
+    if cache_model and cache_model != settings.gemini_embed_model:
+        cache = {"model": settings.gemini_embed_model, "entries": {}}
+    cache["model"] = settings.gemini_embed_model
+    stored: dict = cache.setdefault("entries", {})
+
+    total = len(entries)
+    hits = 0
+    misses = 0
+    dirty = False
+    for index, entry in enumerate(entries, start=1):
+        digest = _content_hash(entry.content)
+        cached = stored.get(entry.id) or {}
+        vector = cached.get("vector") if cached.get("sha256") == digest else None
+        if isinstance(vector, list) and vector:
+            entry.embedding = [float(value) for value in vector]
+            hits += 1
+        else:
+            entry.embedding = await asyncio.to_thread(embed_query, entry.content)
+            stored[entry.id] = {"sha256": digest, "vector": entry.embedding}
+            misses += 1
+            dirty = True
+        if dirty and (misses % 10 == 0 or index == total):
+            _save_embed_cache(cache)
+            dirty = False
+        if index % 10 == 0 or index == total:
+            print(f"  embedded {index}/{total} (cache hits={hits} new={misses})", flush=True)
+    if dirty:
+        _save_embed_cache(cache)
+    if hits:
+        print(f"  journal embed cache: reused {hits}, computed {misses}", flush=True)
     return entries
 
 
@@ -307,3 +393,81 @@ async def retrieve_journal(
         },
     )
     return result, retrieved_ids
+
+
+def _search_query(query: str, history: list[dict[str, str]] | None) -> str:
+    parts = []
+    if history:
+        parts.extend(
+            entry.get("content", "")
+            for entry in history
+            if entry.get("role") == "user"
+        )
+    parts.append(query.strip())
+    return " ".join(part for part in parts if part)
+
+
+async def count_journal_chunks(user_id: str) -> int:
+    from db import get_pool
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT count(*)::int AS n
+            FROM journal_chunks
+            WHERE user_id = $1::uuid
+            """,
+            user_id,
+        )
+    return int(row["n"] or 0) if row else 0
+
+
+async def journal_embedding_distinct_count(user_id: str) -> int:
+    """How many unique stored vectors this user has. 1 means placeholder/mock ingest."""
+    from db import get_pool
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT count(DISTINCT embedding::text)::int AS n
+            FROM journal_chunks
+            WHERE user_id = $1::uuid
+            """,
+            user_id,
+        )
+    return int(row["n"] or 0) if row else 0
+
+
+async def retrieve_production_journal(
+    user_id: str,
+    query: str,
+    *,
+    strategy_name: str,
+    history: list[dict[str, str]] | None = None,
+) -> tuple[list[RetrievedChunk], list[str]]:
+    """Same retrieval chat uses: journal MMR, or journal + clinical KB."""
+    from rag.journal_retrieve import search_journal_chunks
+    from rag.retrieve import RetrievalPlan, retrieve_with_strategy
+
+    if strategy_name not in PROD_JOURNAL_STRATEGIES:
+        raise ValueError(
+            f"Unknown production journal strategy {strategy_name!r}. "
+            f"Use one of: {', '.join(PROD_JOURNAL_STRATEGIES)}"
+        )
+
+    search_query = _search_query(query, history)
+    if strategy_name == "journal_mmr":
+        chunks = await search_journal_chunks(user_id, search_query, top_k=3)
+    else:
+        plan = RetrievalPlan(
+            search_query=search_query,
+            categories=(),
+            reason="journal_eval_both",
+        )
+        kb_task = retrieve_with_strategy(query, history=history or [], plan=plan)
+        journal_task = search_journal_chunks(user_id, search_query, top_k=3)
+        (_, kb_chunks, _), journal_chunks = await asyncio.gather(kb_task, journal_task)
+        chunks = kb_chunks[:2] + journal_chunks[:2]
+    return chunks, entry_ids_from_chunks(chunks)

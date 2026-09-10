@@ -59,6 +59,38 @@ def test_contains_and_label_recall():
     assert journal_label_recall(case_ids, ["exam"], [chunk], [close]) == 1.0
 
 
+def test_expect_empty_recall():
+    chunk = type("C", (), {"content": "organic chemistry exam"})()
+    empty_case = {"expect_empty": True}
+    assert journal_label_recall(empty_case, [], [], []) == 1.0
+    assert journal_label_recall(empty_case, ["exam"], [chunk], []) == 0.0
+
+
+def test_expect_empty_ignores_clinical_mixins():
+    from eval.journal_retrieve import snippets_for_journal_recall
+
+    clinical = type("C", (), {"content": "anxiety psychoeducation", "category": "anxiety"})()
+    journal = type(
+        "J",
+        (),
+        {"content": "homemade cookies", "category": "journal", "document_id": "abc"},
+    )()
+    empty_case = {"expect_empty": True}
+    assert snippets_for_journal_recall([clinical]) == []
+    assert journal_label_recall(empty_case, [], [clinical], []) == 1.0
+    assert journal_label_recall(empty_case, ["abc"], [clinical, journal], []) == 0.0
+    labeled = {"expected_contains": ["homemade cookies"]}
+    assert journal_label_recall(labeled, ["abc"], [clinical, journal], []) == 1.0
+    assert journal_label_recall(labeled, [], [clinical], []) == 0.0
+
+
+def test_content_hash_is_stable():
+    from eval.journal_retrieve import _content_hash
+
+    assert _content_hash("hello") == _content_hash("hello")
+    assert _content_hash("hello") != _content_hash("hello ")
+
+
 def test_mmr_and_heuristic_rerank_on_fake_hits():
     query = "exam stress"
     close = JournalEntry(id="exam", content="worried about my exam tomorrow", embedding=[1.0, 0.0])
