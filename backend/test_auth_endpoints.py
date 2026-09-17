@@ -58,8 +58,8 @@ class TestAuthEndpoints(unittest.TestCase):
         self.assertEqual(inserted_data["user_id"], TEST_USER_ID)
 
     @patch("main.get_supabase")
-    def test_chat_unowned_session_forbidden(self, mock_get_supabase):
-        """Sending a message to a session owned by another user returns 403 Forbidden."""
+    def test_chat_unowned_session_not_found(self, mock_get_supabase):
+        """Unowned sessions return 404 to avoid disclosing their existence."""
         mock_supabase = MagicMock()
         mock_user = MagicMock()
         mock_user.id = TEST_USER_ID
@@ -69,7 +69,7 @@ class TestAuthEndpoints(unittest.TestCase):
 
         # Mock session ownership check returning OTHER_USER_ID
         mock_select = MagicMock()
-        mock_select.execute.return_value = MagicMock(data=[{"user_id": OTHER_USER_ID}])
+        mock_select.maybe_single.return_value.execute.return_value = MagicMock(data={"user_id": OTHER_USER_ID})
         mock_supabase.table("sessions").select.return_value.eq.return_value = mock_select
 
         mock_get_supabase.return_value = mock_supabase
@@ -80,14 +80,17 @@ class TestAuthEndpoints(unittest.TestCase):
             json={"session_id": SESSION_ID, "message": "hello"},
             headers=headers,
         )
-        self.assertEqual(res.status_code, 403)
-        self.assertIn("Access denied", res.json()["detail"])
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual("Chat not found.", res.json()["detail"])
 
+    @patch("main.load_user_persona")
     @patch("main.run_agent")
     @patch("main.get_supabase")
-    def test_chat_owned_session_success(self, mock_get_supabase, mock_run_agent):
+    def test_chat_owned_session_success(self, mock_get_supabase, mock_run_agent, mock_persona):
         """Sending a message to an owned session succeeds and records messages."""
         from agent.types import AgentResult
+        from agent.persona import UserPersona
+        mock_persona.return_value = UserPersona()
 
         mock_run_agent.return_value = AgentResult(
             response="Hello! How can I help you?",
@@ -105,7 +108,7 @@ class TestAuthEndpoints(unittest.TestCase):
 
         # Mock session ownership check returning TEST_USER_ID
         mock_select = MagicMock()
-        mock_select.execute.return_value = MagicMock(data=[{"user_id": TEST_USER_ID}])
+        mock_select.maybe_single.return_value.execute.return_value = MagicMock(data={"user_id": TEST_USER_ID})
         mock_supabase.table("sessions").select.return_value.eq.return_value = mock_select
 
         mock_get_supabase.return_value = mock_supabase
@@ -119,8 +122,9 @@ class TestAuthEndpoints(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn("response", res.json())
 
+    @patch("rag.journal_ingestion.ingest_journal_entry")
     @patch("main.get_supabase")
-    def test_journal_authenticated_success(self, mock_get_supabase):
+    def test_journal_authenticated_success(self, mock_get_supabase, mock_ingest):
         """Submitting a journal entry stores content under the authenticated user's ID."""
         mock_supabase = MagicMock()
         mock_user = MagicMock()
