@@ -19,8 +19,9 @@ env/
 .pytest_cache/
 pytest-cache-files*/
 
-# Layer 3 bake-off dumps (summaries live in docs/)
-backend/eval/results/
+# Layer 3 bake-off dumps (slide tables are committed; notes stay local)
+backend/eval/results/**
+!backend/eval/results/eval_stats.md
 backend/eval/cache/
 
 # Logs

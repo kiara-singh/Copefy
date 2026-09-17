@@ -133,6 +133,169 @@ def journal_label_recall(
     return hits / len(expected_ids)
 
 
+RANKED_MEMORY_KINDS = frozenset({"callback", "paraphrase"})
+NEGATIVE_KIND = "negative"
+MOOD_TRAP_KIND = "mood_trap"
+
+
+def is_ranked_memory_case(case: dict) -> bool:
+    """Callback/paraphrase (or any row with a gold memory). Not negatives or mood traps."""
+    kind = str(case.get("kind") or "")
+    if kind in RANKED_MEMORY_KINDS:
+        return True
+    if case.get("expect_empty") or kind in {NEGATIVE_KIND, MOOD_TRAP_KIND}:
+        return False
+    needles = case.get("expected_contains") or []
+    ids = case.get("expected_entry_ids") or []
+    return bool(needles or ids)
+
+
+def _snippet_matches_gold(chunk, case: dict, entries: list[JournalEntry]) -> bool:
+    content = (getattr(chunk, "content", "") or "").lower()
+    needles = [str(item).lower() for item in (case.get("expected_contains") or []) if str(item).strip()]
+    if needles:
+        return any(needle in content for needle in needles)
+    expected_ids = [str(item) for item in (case.get("expected_entry_ids") or [])]
+    if not expected_ids:
+        return False
+    doc_id = str(getattr(chunk, "document_id", "") or getattr(chunk, "id", "") or "")
+    if doc_id in expected_ids:
+        return True
+    by_content: dict[str, set[str]] = {}
+    content_of: dict[str, str] = {}
+    for entry in entries:
+        key = _normalize_body(entry.content)
+        content_of[entry.id] = key
+        by_content.setdefault(key, set()).add(entry.id)
+    expanded: set[str] = set()
+    for entry_id in expected_ids:
+        key = content_of.get(entry_id)
+        if key:
+            expanded.update(by_content[key])
+        expanded.add(entry_id)
+    return doc_id in expanded
+
+
+def gold_rank(
+    case: dict,
+    chunks: list,
+    *,
+    entries: list[JournalEntry] | None = None,
+) -> int | None:
+    """1-based rank of the first gold journal snippet, or None if missing / not labeled."""
+    if not is_ranked_memory_case(case):
+        return None
+    scored = snippets_for_journal_recall(chunks)
+    for index, chunk in enumerate(scored, start=1):
+        if _snippet_matches_gold(chunk, case, entries or []):
+            return index
+    return None
+
+
+def hit_at_k(rank: int | None, k: int) -> float:
+    if rank is None:
+        return 0.0
+    return 1.0 if rank <= k else 0.0
+
+
+def reciprocal_rank(rank: int | None) -> float:
+    """1.0 at rank 1, 0.5 at rank 2, 0 if missing. Not production MMR."""
+    if rank is None or rank < 1:
+        return 0.0
+    return 1.0 / rank
+
+
+def ranked_case_metrics(
+    case: dict,
+    chunks: list,
+    *,
+    entries: list[JournalEntry] | None = None,
+) -> dict:
+    kind = str(case.get("kind") or "")
+    if is_ranked_memory_case(case):
+        rank = gold_rank(case, chunks, entries=entries)
+        return {
+            "kind": kind or "memory",
+            "gold_rank": rank,
+            "hit_at_1": hit_at_k(rank, 1),
+            "hit_at_3": hit_at_k(rank, 3),
+            "reciprocal_rank": reciprocal_rank(rank),
+        }
+    journal_chunks = snippets_for_journal_recall(chunks)
+    empty = not journal_chunks
+    return {
+        "kind": kind or ("negative" if case.get("expect_empty") else "other"),
+        "gold_rank": None,
+        "hit_at_1": None,
+        "hit_at_3": None,
+        "reciprocal_rank": None,
+        "empty_retrieve": empty,
+    }
+
+
+def _mean(values: list[float]) -> float | None:
+    return (sum(values) / len(values)) if values else None
+
+
+def summarize_ranked_metrics(cases: list[dict]) -> dict:
+    """Headline Hit@k/MRR on callbacks+paraphrases only. Negatives and mood traps are separate rows."""
+    by_kind: dict[str, list[dict]] = {}
+    for row in cases:
+        kind = str(row.get("kind") or "other")
+        by_kind.setdefault(kind, []).append(row)
+
+    def _hit_block(rows: list[dict]) -> dict:
+        ranked = [row for row in rows if row.get("hit_at_1") is not None]
+        return {
+            "n": len(ranked),
+            "hit_at_1": _mean([float(row["hit_at_1"]) for row in ranked]),
+            "hit_at_3": _mean([float(row["hit_at_3"]) for row in ranked]),
+            "mrr": _mean([float(row["reciprocal_rank"]) for row in ranked]),
+        }
+
+    memory_rows = [
+        row
+        for row in cases
+        if row.get("kind") in RANKED_MEMORY_KINDS or row.get("hit_at_1") is not None
+    ]
+    # Avoid double-counting mood/negatives that slipped in with hit fields.
+    memory_rows = [row for row in memory_rows if row.get("hit_at_1") is not None]
+
+    kind_summaries: dict[str, dict] = {}
+    for kind, rows in sorted(by_kind.items()):
+        if kind == MOOD_TRAP_KIND:
+            kind_summaries[kind] = {"n": len(rows), "note": "no gold day; Hit@k skipped"}
+        elif kind == NEGATIVE_KIND:
+            empties = [row for row in rows if row.get("empty_retrieve")]
+            kind_summaries[kind] = {
+                "n": len(rows),
+                "empty_retrieves": len(empties),
+                "empty_rate": (len(empties) / len(rows)) if rows else None,
+            }
+        else:
+            kind_summaries[kind] = _hit_block(rows)
+
+    negatives = by_kind.get(NEGATIVE_KIND, [])
+    empty_n = sum(1 for row in negatives if row.get("empty_retrieve"))
+    return {
+        "memory_quality": _hit_block(memory_rows),
+        "by_kind": kind_summaries,
+        "negatives": {
+            "n": len(negatives),
+            "empty_retrieves": empty_n,
+            "empty_rate": (empty_n / len(negatives)) if negatives else None,
+            "note": (
+                "Router should often never search journals; this is empty-retrieve "
+                "when journal search was forced."
+            ),
+        },
+        "mood_traps": {
+            "n": len(by_kind.get(MOOD_TRAP_KIND, [])),
+            "note": "No gold memory; Hit@k skipped. Snippet judge only.",
+        },
+    }
+
+
 def _text_column(column_names: set[str]) -> str:
     if "content" in column_names:
         return "content"

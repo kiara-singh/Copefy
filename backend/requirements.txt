@@ -1,11 +1,12 @@
 fastapi==0.115.0
 uvicorn[standard]==0.31.0
 supabase==2.31.0
-pydantic-settings==2.5.2
-python-dotenv==1.0.1
+pydantic-settings>=2.10.1
+python-dotenv>=1.1.1
 python-multipart==0.0.32
 google-genai==2.12.1
 asyncpg==0.30.0
 PyYAML==6.0.3
 datasets>=2.14.0
 pytest>=8.0.0
+deepeval>=2.9.0,<5

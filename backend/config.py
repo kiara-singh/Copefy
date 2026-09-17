@@ -10,10 +10,12 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
 
     gemini_api_key: str = ""
+    # Optional paid/ingest project. Generation eval prefers this over GEMINI_API_KEY.
+    gemini_ingest_api_key: str = ""
     gemini_chat_model: str = "gemini-2.5-flash"
     # Comma-separated fallbacks tried in order when the primary model is unavailable.
     gemini_chat_model_fallbacks: str = (
-        "gemini-2.5-flash,gemini-2.0-flash,gemini-3.5-flash-lite,gemini-2.0-flash-lite"
+        "gemini-2.5-flash,gemini-3.5-flash-lite,gemini-flash-latest,gemini-3.6-flash"
     )
     gemini_embed_model: str = "gemini-embedding-2"
 
@@ -24,7 +26,7 @@ class Settings(BaseSettings):
     agent_router_model: str = "gemini-flash-latest"
     # Comma-separated judge/router fallbacks when the primary is 503 or returns empty JSON.
     agent_router_model_fallbacks: str = (
-        "gemini-3.5-flash-lite,gemini-2.0-flash-lite,gemini-2.5-flash,gemini-2.0-flash"
+        "gemini-3.5-flash-lite,gemini-flash-latest,gemini-2.5-flash,gemini-3.6-flash"
     )
     # Optional: bill routing to a different project than chat/embeddings. Free-tier
     # generateContent quotas are tiny, so a paid key here makes eval runs practical.

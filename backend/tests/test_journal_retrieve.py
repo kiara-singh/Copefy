@@ -102,3 +102,89 @@ def test_mmr_and_heuristic_rerank_on_fake_hits():
     assert mmr
     assert {hit.id for hit in heuristic} == {"exam", "sleep"}
     assert {hit.id for hit in mmr} == {"exam", "sleep"}
+
+
+def _chunk(content: str, document_id: str = "", category: str = "journal"):
+    return type("C", (), {"content": content, "document_id": document_id, "category": category, "id": document_id})()
+
+
+def test_hit_at_k_and_mrr_on_fake_ranks():
+    from eval.journal_retrieve import hit_at_k, reciprocal_rank
+
+    assert hit_at_k(1, 1) == 1.0
+    assert hit_at_k(2, 1) == 0.0
+    assert hit_at_k(2, 3) == 1.0
+    assert hit_at_k(None, 3) == 0.0
+    assert reciprocal_rank(1) == 1.0
+    assert reciprocal_rank(2) == 0.5
+    assert reciprocal_rank(3) == 1.0 / 3
+    assert reciprocal_rank(None) == 0.0
+
+
+def test_gold_rank_uses_ranked_id_list():
+    from eval.journal_retrieve import gold_rank, ranked_case_metrics
+
+    gold = _chunk("lost my student ID in my jacket pocket", "gold")
+    other = _chunk("ate lunch in the dining hall", "other")
+    case = {
+        "kind": "callback",
+        "expected_contains": ["jacket pocket"],
+        "expected_entry_ids": ["gold"],
+    }
+    assert gold_rank(case, [gold, other]) == 1
+    assert gold_rank(case, [other, gold]) == 2
+    assert gold_rank(case, [other]) is None
+    ranked = ranked_case_metrics(case, [other, gold])
+    assert ranked["hit_at_1"] == 0.0
+    assert ranked["hit_at_3"] == 1.0
+    assert ranked["reciprocal_rank"] == 0.5
+
+
+def test_gold_rank_skips_negatives_and_mood_traps():
+    from eval.journal_retrieve import gold_rank, ranked_case_metrics, summarize_ranked_metrics
+
+    junk = _chunk("homemade cookies", "x")
+    negative = {"kind": "negative", "expect_empty": True}
+    mood = {"kind": "mood_trap"}
+    assert gold_rank(negative, [junk]) is None
+    assert gold_rank(mood, [junk]) is None
+    neg_row = {"case_id": "n", **ranked_case_metrics(negative, [junk])}
+    mood_row = {"case_id": "m", **ranked_case_metrics(mood, [])}
+    hit_row = {
+        "case_id": "c",
+        **ranked_case_metrics(
+            {"kind": "callback", "expected_contains": ["jacket pocket"]},
+            [_chunk("jacket pocket", "gold")],
+        ),
+    }
+    paraphrase = {
+        "case_id": "p",
+        **ranked_case_metrics(
+            {"kind": "paraphrase", "expected_contains": ["freeze"]},
+            [_chunk("I freeze during exams", "p1"), _chunk("other", "p2")],
+        ),
+    }
+    summary = summarize_ranked_metrics([hit_row, paraphrase, neg_row, mood_row])
+    assert summary["memory_quality"]["n"] == 2
+    assert summary["memory_quality"]["hit_at_1"] == 1.0
+    assert summary["memory_quality"]["mrr"] == 1.0
+    assert summary["negatives"]["empty_retrieves"] == 0
+    assert summary["negatives"]["n"] == 1
+    assert summary["mood_traps"]["n"] == 1
+    assert summary["by_kind"]["mood_trap"]["n"] == 1
+    assert "hit_at_1" not in summary["by_kind"]["mood_trap"]
+
+
+def test_headline_hit_k_excludes_negatives():
+    from eval.journal_retrieve import ranked_case_metrics, summarize_ranked_metrics
+
+    miss = ranked_case_metrics(
+        {"kind": "callback", "expected_contains": ["Victorian"]},
+        [_chunk("organic chemistry", "wrong")],
+    )
+    empty_neg = ranked_case_metrics({"kind": "negative", "expect_empty": True}, [])
+    summary = summarize_ranked_metrics(
+        [{"case_id": "miss", **miss}, {"case_id": "neg", **empty_neg}]
+    )
+    assert summary["memory_quality"]["hit_at_3"] == 0.0
+    assert summary["negatives"]["empty_rate"] == 1.0

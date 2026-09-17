@@ -33,9 +33,11 @@ from eval.journal_retrieve import (
     journal_embedding_distinct_count,
     journal_label_recall,
     load_journal_entries,
+    ranked_case_metrics,
     retrieve_journal,
     retrieve_production_journal,
     snippets_for_journal_recall,
+    summarize_ranked_metrics,
 )
 from eval.load_golden import load_golden_cases, load_journal_eval_cases
 from eval.retrieval_scoring import apply_split, apply_tag_filters, is_labeled, retrieval_positive_cases
@@ -215,6 +217,7 @@ async def _judge_journal(
             "empty_retrieves": 0,
             "scores": [],
             "entry_recalls": [],
+            "ranked_rows": [],
         }
         for name in strategies
     }
@@ -266,17 +269,26 @@ async def _judge_journal(
                     corpus=judge_corpus,
                 )
             recall = journal_label_recall(case, entry_ids, chunks, entries)
+            ranked = ranked_case_metrics(case, chunks, entries=entries)
+            ranked_row = {"case_id": case["id"], **ranked}
             scores_by_case[case["id"]][name] = score
             results[name]["scores"].append(score)
             results[name]["entry_recalls"].append(recall)
+            results[name]["ranked_rows"].append(ranked_row)
             results[name]["cases"].append(
                 {
                     "case_id": case["id"],
+                    "kind": ranked.get("kind"),
                     "chunk_count": len(chunks),
                     "journal_chunk_count": len(journal_chunks),
                     "latency_ms": elapsed_ms,
                     "entry_ids": entry_ids,
                     "entry_recall": None if recall != recall else recall,
+                    "gold_rank": ranked.get("gold_rank"),
+                    "hit_at_1": ranked.get("hit_at_1"),
+                    "hit_at_3": ranked.get("hit_at_3"),
+                    "reciprocal_rank": ranked.get("reciprocal_rank"),
+                    "empty_retrieve": ranked.get("empty_retrieve"),
                     "judge": asdict(score),
                 }
             )
@@ -289,8 +301,12 @@ async def _judge_journal(
             entry_recalls=results[name]["entry_recalls"],
         )
         results[name]["summary"] = summary_asdict(summary)
+        results[name]["ranked_metrics"] = summarize_ranked_metrics(
+            results[name]["ranked_rows"]
+        )
         del results[name]["scores"]
         del results[name]["entry_recalls"]
+        del results[name]["ranked_rows"]
     return results, scores_by_case, meta, {
         "user_id": resolved_user,
         "chunk_count": chunk_count,
@@ -310,7 +326,7 @@ def _print_summaries(results: dict[str, dict], *, journal: bool) -> None:
         "empty",
     ]
     if journal:
-        headers.append("entry_rec")
+        headers.extend(["entry_rec", "hit@1", "hit@3", "mrr"])
     rows: list[list[str]] = []
     for name, data in results.items():
         summary = data["summary"]
@@ -327,9 +343,50 @@ def _print_summaries(results: dict[str, dict], *, journal: bool) -> None:
         if journal:
             recall = summary.get("avg_entry_recall")
             row.append("n/a" if recall is None else f"{recall:.2f}")
+            ranked = data.get("ranked_metrics") or {}
+            memory = ranked.get("memory_quality") or {}
+            for key in ("hit_at_1", "hit_at_3", "mrr"):
+                value = memory.get(key)
+                row.append("n/a" if value is None else f"{value:.2f}")
         rows.append(row)
     print("\n=== Judge summary (measure only — do not retune RAG_STRATEGY) ===")
     _print_table(rows, headers)
+    if journal:
+        _print_ranked_breakdown(results)
+
+
+def _fmt_rate(value: float | None) -> str:
+    return "n/a" if value is None else f"{value:.2f}"
+
+
+def _print_ranked_breakdown(results: dict[str, dict]) -> None:
+    print("\n=== Ranked journal metrics (callbacks + paraphrases only) ===")
+    print("  Hit@k / MRR ignore negatives and mood traps.")
+    print("  Negatives: empty-when-forced (router may never search in live chat).")
+    for name, data in results.items():
+        ranked = data.get("ranked_metrics") or {}
+        memory = ranked.get("memory_quality") or {}
+        negatives = ranked.get("negatives") or {}
+        print(
+            f"  {name}: n={memory.get('n', 0)}  "
+            f"Hit@1={_fmt_rate(memory.get('hit_at_1'))}  "
+            f"Hit@3={_fmt_rate(memory.get('hit_at_3'))}  "
+            f"MRR={_fmt_rate(memory.get('mrr'))}"
+        )
+        print(
+            f"    negatives empty={negatives.get('empty_retrieves', 0)}/"
+            f"{negatives.get('n', 0)}  "
+            f"rate={_fmt_rate(negatives.get('empty_rate'))}"
+        )
+        by_kind = ranked.get("by_kind") or {}
+        for kind, stats in by_kind.items():
+            if "hit_at_3" in stats:
+                print(
+                    f"    {kind}: n={stats.get('n', 0)}  "
+                    f"Hit@1={_fmt_rate(stats.get('hit_at_1'))}  "
+                    f"Hit@3={_fmt_rate(stats.get('hit_at_3'))}  "
+                    f"MRR={_fmt_rate(stats.get('mrr'))}"
+                )
 
 
 def _print_pairwise(pair: dict[str, int]) -> None:
@@ -395,6 +452,8 @@ async def _main_async(args: argparse.Namespace) -> int:
             "note": (
                 "Production journal search (search_journal_chunks). "
                 "Gold is expected_contains on journal snippets. "
+                "Hit@k/MRR are callbacks+paraphrases only. "
+                "Negatives are empty-when-forced, not a router score. "
                 "Do not retune clinical RAG_STRATEGY from this."
                 if info["source"] == "production"
                 else "In-memory journal eval. Measure only. Do not retune RAG_STRATEGY."
