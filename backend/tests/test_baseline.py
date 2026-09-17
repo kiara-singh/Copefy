@@ -10,7 +10,7 @@ from pathlib import Path
 import uuid
 
 from eval.baseline import cases, validate_suite, offline, selected_records, trace_retrieval
-from eval.baseline_fixtures import fingerprint, valid_chunks, entry_id
+from eval.baseline_fixtures import fingerprint, valid_chunks, entry_id, definitions
 from eval.baseline_runtime import Ledger, BudgetExceeded
 from eval.baseline_scoring import grade, summarize, validate_judge, WEIGHTS, FAILURE_TYPES
 
@@ -38,6 +38,15 @@ def test_suite_counts_and_no_state_journal_contamination():
     assert report['category_counts']['privacy']==18
     assert report['lengths']['long_8_15']==15
     assert all(c['user']=='beta' for c in items if 'statefulness' in c['tags'])
+    journals={f['id']:f for f in definitions()['journals']}
+    assert len(journals)==109
+    for c in items:
+        if 'journal_retrieval' in c['tags']:
+            later=c['expected_entries'][0]
+            earlier=later.replace('_after','_before')
+            assert earlier in journals
+            assert journals[earlier]['created_at']<journals[later]['created_at']
+            assert journals[earlier]['content']!=journals[later]['content']
 
 def test_zero_denominators_are_not_perfect_scores():
     s=summarize([])
@@ -111,7 +120,9 @@ class MemoryConnection:
             self.entries,self.chunks=before; raise
     async def execute(self,sql,*args):
         if sql.startswith('INSERT INTO journal_entries'):
-            jid,uid,content=args; self.entries[jid]={'user_id':uid,'content':content}
+            jid,uid,content,created_at=args; self.entries[jid]={'user_id':uid,'content':content,'created_at':created_at}
+        elif sql.startswith('UPDATE journal_entries SET created_at'):
+            created_at,jid=args; self.entries[jid]['created_at']=created_at
     async def fetchrow(self,sql,jid): return self.entries.get(jid)
     async def fetch(self,sql,jid): return self.chunks.get(jid,[])
 
@@ -126,7 +137,7 @@ def setup_seed(monkeypatch):
     monkeypatch.setattr(db,'get_pool',AsyncMock(return_value=SimpleNamespace(acquire=acquire)))
     monkeypatch.setattr(f,'users',AsyncMock(return_value={'alpha':'u'}))
     monkeypatch.setattr(f,'inspect_kb',AsyncMock(return_value={'available':False}))
-    fixture={'id':'one','user':'alpha','content':'A unique synthetic diary.'}
+    fixture={'id':'one','user':'alpha','content':'A unique synthetic diary.','created_at':'2026-07-01T12:00:00+00:00'}
     monkeypatch.setattr(f,'definitions',lambda:{'users':['alpha'],'journals':[fixture]})
     async def ingest(conn,jid,uid,content):
         conn.chunks[jid]=[{'id':'chunk','chunk_index':0,'content':content,'user_id':uid,'dimensions':768,'norm':1}]
@@ -144,6 +155,8 @@ def test_seed_is_persistent_idempotent_and_reembeds_only_on_change(monkeypatch):
     asyncio.run(f.seed()); assert ingest.await_count==2
     from config import settings
     monkeypatch.setattr(settings,'gemini_embed_model','changed-model')
+    asyncio.run(f.seed()); assert ingest.await_count==3
+    fixture['created_at']='2026-07-03T12:00:00+00:00'
     asyncio.run(f.seed()); assert ingest.await_count==3
 
 def test_seed_rolls_back_on_embedding_failure(monkeypatch):

@@ -2,6 +2,8 @@
 import hashlib
 import json
 import uuid
+from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 import yaml
 
@@ -9,6 +11,7 @@ ROOT=Path(__file__).parent
 NAMESPACE='copefy-baseline-v1'
 STATE_PATH=ROOT/'results'/'baseline-state'/'fixture-fingerprints.json'
 
+@lru_cache(maxsize=1)
 def definitions():
     return yaml.safe_load((ROOT/'fixtures/synthetic.yaml').read_text(encoding='utf-8'))
 
@@ -114,8 +117,9 @@ async def seed(identifiers=None):
             for fixture in chosen:
                 uid=ids[fixture['user']]; jid=entry_id(fixture['user'],fixture['id'])
                 content=fixture['content']; stamp=fingerprint(content,settings.gemini_embed_model)
+                fixture_time=datetime.fromisoformat(fixture['created_at'])
                 async with conn.transaction():
-                    existing=await conn.fetchrow('SELECT user_id, content FROM journal_entries WHERE id=$1::uuid',jid)
+                    existing=await conn.fetchrow('SELECT user_id, content, created_at FROM journal_entries WHERE id=$1::uuid',jid)
                     if existing and str(existing['user_id'])!=uid:
                         raise RuntimeError('Journal ownership marker mismatch')
                     if existing and jid not in state['entries']:
@@ -123,12 +127,14 @@ async def seed(identifiers=None):
                     rows=await chunk_rows(conn,jid) if existing else []
                     unchanged=bool(existing and state['entries'].get(jid)==stamp and existing['content']==content and valid_chunks(rows,content,uid))
                     if not unchanged:
-                        await conn.execute('INSERT INTO journal_entries(id,user_id,content) VALUES($1::uuid,$2::uuid,$3) ON CONFLICT(id) DO UPDATE SET content=EXCLUDED.content',jid,uid,content)
+                        await conn.execute('INSERT INTO journal_entries(id,user_id,content,created_at) VALUES($1::uuid,$2::uuid,$3,$4) ON CONFLICT(id) DO UPDATE SET content=EXCLUDED.content,created_at=EXCLUDED.created_at',jid,uid,content,fixture_time)
                         # Same ingestion function as /journal: chunker -> Gemini -> journal_chunks.
                         # Transaction additionally prevents partial fixture replacement on failure.
                         await ingest_journal_entry_asyncpg(conn,jid,uid,content)
                         rows=await chunk_rows(conn,jid)
                         if not valid_chunks(rows,content,uid): raise RuntimeError('Persisted chunk verification failed')
+                    elif existing['created_at']!=fixture_time:
+                        await conn.execute('UPDATE journal_entries SET created_at=$1 WHERE id=$2::uuid',fixture_time,jid)
                 if not unchanged:
                     state['entries'][jid]=stamp
                     save_fixture_state(state)
@@ -148,9 +154,9 @@ async def verify(identifiers=None):
         ids=await users(conn)
         for f in chosen:
             jid=entry_id(f['user'],f['id'])
-            row=await conn.fetchrow('SELECT content,user_id FROM journal_entries WHERE id=$1::uuid',jid)
+            row=await conn.fetchrow('SELECT content,user_id,created_at FROM journal_entries WHERE id=$1::uuid',jid)
             stamp=fingerprint(f['content'],settings.gemini_embed_model)
-            if not row or str(row['user_id'])!=ids[f['user']] or row['content']!=f['content'] or state['entries'].get(jid)!=stamp or not valid_chunks(await chunk_rows(conn,jid),f['content'],ids[f['user']]):
+            if not row or str(row['user_id'])!=ids[f['user']] or row['content']!=f['content'] or row['created_at']!=datetime.fromisoformat(f['created_at']) or state['entries'].get(jid)!=stamp or not valid_chunks(await chunk_rows(conn,jid),f['content'],ids[f['user']]):
                 raise RuntimeError(f'Fixture missing/stale/corrupt: {f["id"]}; seed first')
         return ids,await inspect_kb(conn)
 

@@ -39,7 +39,7 @@ These authored labels are not a clinically validated assessment instrument.
 
 ## Persistent fixtures
 
-`fixtures/synthetic.yaml` defines 64 journals / 79 chunks under two dedicated users:
+`fixtures/synthetic.yaml` defines 109 dated journals / 109 initial chunks under two dedicated users:
 `copefy-baseline-v1-alpha@example.com` and `copefy-baseline-v1-beta@example.com`.
 No messages or email are sent. Admin creation uses random passwords that are never
 saved or printed. Trusted Auth app metadata marks the namespace; profiles are named
@@ -49,7 +49,9 @@ The seeder inserts raw journals under the marked synthetic accounts with determi
 **same `ingest_journal_entry_asyncpg` function used by `/journal`**. Thus the real
 chunker, `gemini-embedding-2`, journal chunk storage and pgvector are exercised.
 The `/journal` HTTP/auth wrapper is not exercised by seeding: raw insertion is
-transactional to support deterministic identity and reliable fixture recovery.
+transactional to support deterministic identity and reliable fixture recovery. Earlier
+facts and later corrections are separate entries, two weeks apart; personal notes
+stay on their own topics rather than copying chat questions into the diary.
 This distinction is intentional and recorded, not presented as an HTTP end-to-end test.
 
 The ignored local `results/baseline-state/fixture-fingerprints.json` persists per-entry
@@ -145,7 +147,7 @@ and cannot account for other processes using the key.
 Prices checked 2026-09-17 against [Google's pricing page](https://ai.google.dev/gemini-api/docs/pricing):
 embedding-2 text $0.20/M input tokens; 2.5 Flash and recommended judge 3.5 Flash-Lite
 $0.30/M input and $2.50/M output, including thinking. Model access has not been paid-tested.
-Initial fixture seeding plans 79 calls, with a conservative text/config estimate below $0.03
+Initial full fixture seeding plans 109 calls, with a conservative text/config estimate below $0.03
 before retries. Use a $0.05 cumulative ceiling for that first stage. Future stages
 share the ledger and must remain within $1 unless separately authorized and implemented.
 
@@ -164,9 +166,9 @@ Set-Location C:\Users\singh\Downloads\Copefy\backend
 .\venv\Scripts\python.exe -m eval.baseline inspect
 
 # A two-journal smoke seed, one journal per synthetic user, after text review
-.\venv\Scripts\python.exe -m eval.baseline plan --fixture-ids interview,beta_dentist
-.\venv\Scripts\python.exe -m eval.baseline seed --approved-stage seed --fixture-ids interview,beta_dentist --max-usd 0.05
-.\venv\Scripts\python.exe -m eval.baseline verify --fixture-ids interview,beta_dentist
+.\venv\Scripts\python.exe -m eval.baseline plan --fixture-ids interview_after,beta_dentist
+.\venv\Scripts\python.exe -m eval.baseline seed --approved-stage seed --fixture-ids interview_after,beta_dentist --max-usd 0.05
+.\venv\Scripts\python.exe -m eval.baseline verify --fixture-ids interview_after,beta_dentist
 
 # Only after reviewing the smoke result: finish the full approved seed
 .\venv\Scripts\python.exe -m eval.baseline seed --approved-stage seed --max-usd 0.05

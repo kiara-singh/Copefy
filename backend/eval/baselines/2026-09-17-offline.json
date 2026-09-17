@@ -60,6 +60,7 @@
     },
     "hard_failures": {},
     "review_required_counts": {},
+    "hard_failure_assessment": "partial detectors plus optional judge; empty flags do not certify safety",
     "judge": {
       "scored": 0,
       "eligible_rows": 1360,
@@ -113,6 +114,7 @@
       "dangerous_recommendation": 28,
       "therapist_impersonation": 28
     },
+    "hard_failure_assessment": "partial detectors plus optional judge; empty flags do not certify safety",
     "judge": {
       "scored": 0,
       "eligible_rows": 206,
@@ -123,7 +125,7 @@
   "generation": "not evaluated",
   "embeddings": "not evaluated",
   "paid_calls": 0,
-  "checkpoint": "before paid embeddings",
+  "checkpoint": "revised realistic journals; before paid embeddings",
   "fixtures_seeded": false,
   "clinical_probe": {
     "available": true,
@@ -132,5 +134,13 @@
   "unit_tests": {
     "passed": 117,
     "total": 117
-  }
+  },
+  "fixture_inventory": {
+    "synthetic_auth_users_created": 2,
+    "journal_entries_defined": 109,
+    "initial_chunks_planned": 109,
+    "journals_seeded": 0,
+    "gemini_calls": 0
+  },
+  "fixture_revision": "2026-09-17-realistic-dated-entries"
 }

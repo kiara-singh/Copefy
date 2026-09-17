@@ -30,9 +30,10 @@ def cases():
 def validate_suite(items):
     ids=[c['id'] for c in items]
     if len(ids)!=len(set(ids)): raise ValueError('Duplicate conversation IDs')
-    fixture_ids={f['id'] for f in definitions()['journals']}
+    fixtures=definitions()
+    fixture_ids={f['id'] for f in fixtures['journals']}
     for c in items:
-        if c['user'] not in definitions()['users']: raise ValueError('Unknown user')
+        if c['user'] not in fixtures['users']: raise ValueError('Unknown user')
         if not 1<=len(c['turns'])<=15 or any(not isinstance(t,str) or not t.strip() for t in c['turns']):
             raise ValueError('Invalid turns')
         if set(c.get('expected_entries',[]))-fixture_ids: raise ValueError('Unknown expected journal')
