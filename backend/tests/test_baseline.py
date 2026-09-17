@@ -111,7 +111,7 @@ class MemoryConnection:
             self.entries,self.chunks=before; raise
     async def execute(self,sql,*args):
         if sql.startswith('INSERT INTO journal_entries'):
-            jid,uid,content,tags=args; self.entries[jid]={'user_id':uid,'content':content,'tags':tags}
+            jid,uid,content=args; self.entries[jid]={'user_id':uid,'content':content}
     async def fetchrow(self,sql,jid): return self.entries.get(jid)
     async def fetch(self,sql,jid): return self.chunks.get(jid,[])
 
@@ -120,6 +120,7 @@ def setup_seed(monkeypatch):
     from rag import journal_ingestion
     import db
     conn=MemoryConnection()
+    monkeypatch.setattr(f,'STATE_PATH',Path(__file__).parents[1]/'eval'/'results'/'test-scratch'/uuid.uuid4().hex/'fixture-fingerprints.json')
     @asynccontextmanager
     async def acquire(): yield conn
     monkeypatch.setattr(db,'get_pool',AsyncMock(return_value=SimpleNamespace(acquire=acquire)))
@@ -153,7 +154,7 @@ def test_seed_rolls_back_on_embedding_failure(monkeypatch):
 
 def test_seed_rejects_foreign_existing_entry(monkeypatch):
     f,conn,fixture,ingest=setup_seed(monkeypatch)
-    conn.entries[entry_id('alpha','one')]={'user_id':'manual-user','tags':[],'content':'real journal'}
+    conn.entries[entry_id('alpha','one')]={'user_id':'manual-user','content':'real journal'}
     with pytest.raises(RuntimeError): asyncio.run(f.seed())
     assert ingest.await_count==0
 

@@ -20,7 +20,7 @@ from unittest.mock import patch
 import uuid
 import yaml
 
-from eval.baseline_fixtures import ROOT, definitions, entry_id, inspect_kb, seed, verify, reset
+from eval.baseline_fixtures import ROOT, definitions, entry_id, inspect_kb, seed, verify, reset, selected_journals
 from eval.baseline_runtime import JUDGE_MODEL, paid_runtime
 from eval.baseline_scoring import WEIGHTS, HARD_FAILURES, grade, summarize, fraction, validate_judge
 
@@ -278,14 +278,16 @@ async def conversation(c,folder,client,judge_model,ids,kb):
     save(folder/'in_progress.json',row)
     return row
 
-def plan(items):
+def plan(items,fixture_ids=None):
     from rag.journal_chunking import chunk_journal_entry
     from config import settings
-    chunks=[chunk for f in definitions()['journals'] for chunk in chunk_journal_entry(f['content'])]
+    from eval.baseline_fixtures import selected_journals
+    fixtures=selected_journals(fixture_ids)
+    chunks=[chunk for f in fixtures for chunk in chunk_journal_entry(f['content'])]
     # Include an extra config allowance beyond the UTF-8 text/structural bound.
     byte_bound=sum(len(c.encode())+1152 for c in chunks)
     return {'coverage':validate_suite(cases()),'selected_conversations':len(items),'selected_exchanges':sum(len(c['turns']) for c in items),
-            'synthetic_users':definitions()['users'],'journal_entries':len(definitions()['journals']),
+            'synthetic_users':definitions()['users'],'journal_entries':len(fixtures),
             'initial_embedding_calls':len(chunks),'unchanged_seed_embedding_calls':0,
             'seed_text_cost_upper_estimate_usd':byte_bound*.20/1e6,
             'generation_primary':settings.gemini_chat_model,'generation_fallbacks':settings.gemini_chat_model_fallbacks_list,
@@ -303,7 +305,8 @@ async def execute(args,folder):
         wanted=set(args.ids.split(',')); items=[c for c in items if c['id'] in wanted]
         if {c['id'] for c in items}!=wanted: raise ValueError('Unknown case IDs')
     if args.limit: items=items[:args.limit]
-    if args.mode=='plan': return plan(items)
+    fixture_ids=args.fixture_ids.split(',') if args.fixture_ids else None
+    if args.mode=='plan': return plan(items,fixture_ids)
     if args.mode=='deterministic': return await deterministic(folder)
     if args.mode=='inspect':
         from db import get_pool
@@ -311,12 +314,12 @@ async def execute(args,folder):
         async with pool.acquire() as conn: return {'clinical_kb':await inspect_kb(conn)}
     if args.mode=='reset': return await reset(args.confirm_namespace)
     if args.mode=='verify':
-        ids,kb=await verify(); return {'verified_users':ids,'clinical_kb':kb}
+        ids,kb=await verify(fixture_ids); return {'verified_users':ids,'verified_journals':[f['id'] for f in selected_journals(fixture_ids)],'clinical_kb':kb}
     required='seed' if args.mode=='seed' else 'live'
     if args.approved_stage!=required: raise ValueError(f'{args.mode} requires --approved-stage {required} after the user checkpoint')
     with paid_runtime(args.max_usd) as (ledger,client):
         try:
-            if args.mode=='seed': result=await seed()
+            if args.mode=='seed': result=await seed(fixture_ids)
             elif args.mode=='seeded': result=await integration(items,folder)
             elif args.mode=='live': result=await conversations(items,folder,client,args.judge_model if args.judge else None)
             elif args.mode=='judge':
@@ -346,6 +349,7 @@ def main_cli():
     parser.add_argument('--approved-stage',choices=['seed','live'])
     parser.add_argument('--max-usd',type=float,default=1.0)
     parser.add_argument('--ids'); parser.add_argument('--limit',type=int,default=0)
+    parser.add_argument('--fixture-ids',help='Comma-separated synthetic journal IDs for a small seed/verify/plan run')
     parser.add_argument('--judge',action='store_true'); parser.add_argument('--judge-model',default=JUDGE_MODEL)
     parser.add_argument('--confirm-namespace')
     parser.add_argument('--input-run',help='Existing local live run directory for judge-only mode')

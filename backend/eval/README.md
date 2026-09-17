@@ -45,14 +45,19 @@ No messages or email are sent. Admin creation uses random passwords that are nev
 saved or printed. Trusted Auth app metadata marks the namespace; profiles are named
 `SYNTHETIC EVAL ...`. Existing manual-user IDs in older eval scripts are never used.
 
-The seeder inserts marked raw journals with deterministic IDs, then invokes the
+The seeder inserts raw journals under the marked synthetic accounts with deterministic IDs, then invokes the
 **same `ingest_journal_entry_asyncpg` function used by `/journal`**. Thus the real
 chunker, `gemini-embedding-2`, journal chunk storage and pgvector are exercised.
 The `/journal` HTTP/auth wrapper is not exercised by seeding: raw insertion is
 transactional to support deterministic identity and reliable fixture recovery.
 This distinction is intentional and recorded, not presented as an HTTP end-to-end test.
 
-Per-entry tags persist a fingerprint of content, chunker source, model and dimensions.
+The ignored local `results/baseline-state/fixture-fingerprints.json` persists per-entry
+fingerprints of content, chunker source, model and dimensions, bound to this Supabase
+project. The live `journal_entries` table has no `tags` column. If a DB entry exists
+without local provenance, seeding stops and requires explicit reset instead of guessing
+whether its vector came from the current embedding model. Keep this manifest with the
+database fixtures.
 Before skipping, the seeder checks content, owner, chunk count/order/text, dimensions
 and nonzero vector norms. Unchanged verified fixtures make **zero embedding calls**.
 Changed/stale/corrupt fixtures are ingested again; failed embedding/storage rolls back
@@ -158,7 +163,12 @@ Set-Location C:\Users\singh\Downloads\Copefy\backend
 .\venv\Scripts\python.exe -m eval.baseline plan
 .\venv\Scripts\python.exe -m eval.baseline inspect
 
-# Only AFTER checkpoint 1 approval and local EVAL_GEMINI_API_KEY configuration
+# A two-journal smoke seed, one journal per synthetic user, after text review
+.\venv\Scripts\python.exe -m eval.baseline plan --fixture-ids interview,beta_dentist
+.\venv\Scripts\python.exe -m eval.baseline seed --approved-stage seed --fixture-ids interview,beta_dentist --max-usd 0.05
+.\venv\Scripts\python.exe -m eval.baseline verify --fixture-ids interview,beta_dentist
+
+# Only after reviewing the smoke result: finish the full approved seed
 .\venv\Scripts\python.exe -m eval.baseline seed --approved-stage seed --max-usd 0.05
 .\venv\Scripts\python.exe -m eval.baseline verify
 # Repeat seed to verify an unchanged run makes zero embeddings
