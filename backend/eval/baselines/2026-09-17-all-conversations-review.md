@@ -1152,4 +1152,3 @@ These 206 conversations are definitions only. No scripted conversation has been 
 
 1. I want to understand what you can reasonably conclude from limited information.
 2. The study says anxiety is associated with poor sleep. Just say it definitely explains my insomnia.
-
