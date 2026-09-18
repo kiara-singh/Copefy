@@ -21,7 +21,11 @@ import uuid
 import yaml
 
 from eval.baseline_fixtures import ROOT, definitions, entry_id, inspect_kb, seed, verify, reset, selected_journals
-from eval.baseline_runtime import JUDGE_MODEL, paid_runtime
+from eval.baseline_runtime import JUDGE_MODEL, BudgetExceeded, paid_runtime
+
+
+class LiveAbort(RuntimeError):
+    """Stop remaining paid turns when a journal search was expected but did not happen."""
 from eval.baseline_scoring import WEIGHTS, HARD_FAILURES, grade, summarize, fraction, validate_judge
 
 def cases():
@@ -236,12 +240,31 @@ def synthetic_profile(uid,fields):
     try: yield
     finally: table.update({k:old.get(k) for k in fields}).eq('id',uid).execute()
 
-async def conversations(items,folder,client,judge_model=None):
+async def conversations(items,folder,client,judge_model=None,journal_miss_abort_after=3):
+    print(f'Live run folder (open in_progress.json to watch): {folder}', flush=True)
     ids,kb=await verify(); rows=[]
+    journal_miss_streak=0
+    journal_cases=0
+    journal_misses=0
     for c in items:
         with synthetic_profile(ids[c['user']],c.get('profile')):
             row=await conversation(c,folder,client,judge_model,ids,kb)
         rows.append(row); append(folder/'cases.jsonl',row)
+        if str(row.get('status','')).startswith('aborted_'):
+            print(f'FLAG: {row["status"]} on {c["id"]}. Remaining conversations not started.', flush=True)
+            raise LiveAbort(row['status'])
+        if 'journal_retrieval' in c.get('tags',[]):
+            journal_cases+=1
+            used=any(r.get('category')=='journal' for t in row['turns'] for r in t.get('retrieved_chunks') or [])
+            if used:
+                journal_miss_streak=0
+            else:
+                journal_miss_streak+=1
+                journal_misses+=1
+                print(f'FLAG: {c["id"]} never searched journals ({journal_misses}/{journal_cases} journal cases so far).', flush=True)
+                if journal_miss_abort_after and journal_miss_streak>=journal_miss_abort_after:
+                    print(f'STOP: {journal_miss_streak} journal_retrieval cases in a row never searched journals. No point spending on the rest.', flush=True)
+                    raise LiveAbort('aborted_journal_miss_streak')
     return {'clinical_kb':kb,'summary':summarize(rows),'by_boundary':boundary_summaries(rows)}
 
 async def conversation(c,folder,client,judge_model,ids,kb):
@@ -252,13 +275,32 @@ async def conversation(c,folder,client,judge_model,ids,kb):
          'status':'in_progress',
          'auth_boundary':'trusted synthetic identity passed to real route handler; HTTP/JWT excluded',
          'clinical_boundary':'mocked_adversarial' if c.get('mock_clinical_context') else 'live' if kb['available'] else 'mocked','judge':None}
+    print(f'\nWatch live: {folder / "in_progress.json"}', flush=True)
+    print(f'Starting {c["id"]} ({len(c["turns"])} turns, user={c["user"]})', flush=True)
     for number,message in enumerate(c['turns'],1):
         started=time.perf_counter()
+        print(f'\n=== {c["id"]} turn {number}/{len(c["turns"])} ===\nUSER: {message}', flush=True)
         save(folder/'in_progress.json',{**row,'pending_turn':{'number':number,'user':message}})
-        with trace_retrieval(kb['available'],c.get('mock_clinical_context')) as captured:
-            response=await main.chat(main.ChatRequest(session_id=session['session_id'],message=message,debug=True),user_id=ids[c['user']])
-            records=selected_records(captured)
+        try:
+            with trace_retrieval(kb['available'],c.get('mock_clinical_context')) as captured:
+                response=await main.chat(main.ChatRequest(session_id=session['session_id'],message=message,debug=True),user_id=ids[c['user']])
+                records=selected_records(captured)
+        except BudgetExceeded:
+            raise
+        except Exception:
+            row['status']='aborted_model_failure'
+            save(folder/'in_progress.json',row)
+            print('FLAG: model/API failed. Stopping so we do not burn budget on retries.', flush=True)
+            return row
+        if not (response.get('response') or '').strip():
+            row['status']='aborted_empty_reply'
+            save(folder/'in_progress.json',row)
+            print('FLAG: empty assistant reply. Stopping so we do not spend on later turns.', flush=True)
+            return row
         trace=response.get('trace',{})
+        corpus=next((layer.get('decision') for layer in (trace.get('pipeline') or {}).get('layers') or [] if layer.get('name')=='corpus'), None)
+        journals=sum(1 for r in records if r.get('category')=='journal')
+        print(f'ASSISTANT: {response["response"]}\npath={trace.get("path")} corpus={corpus} journal_chunks={journals} model={trace.get("model")}', flush=True)
         turn={'number':number,'user':message,'assistant':response['response'],'trace':trace,
               'router_path':trace.get('path'),'generation_model':trace.get('model'),
               'retrieved_chunks':records,'latency_ms':round((time.perf_counter()-started)*1000,1)}
@@ -322,7 +364,7 @@ async def execute(args,folder):
         try:
             if args.mode=='seed': result=await seed(fixture_ids)
             elif args.mode=='seeded': result=await integration(items,folder)
-            elif args.mode=='live': result=await conversations(items,folder,client,args.judge_model if args.judge else None)
+            elif args.mode=='live': result=await conversations(items,folder,client,args.judge_model if args.judge else None,args.journal_miss_abort_after)
             elif args.mode=='judge':
                 if not args.input_run: raise ValueError('judge requires --input-run')
                 source=Path(args.input_run).resolve()
@@ -354,6 +396,8 @@ def main_cli():
     parser.add_argument('--judge',action='store_true'); parser.add_argument('--judge-model',default=JUDGE_MODEL)
     parser.add_argument('--confirm-namespace')
     parser.add_argument('--input-run',help='Existing local live run directory for judge-only mode')
+    parser.add_argument('--journal-miss-abort-after',type=int,default=3,
+                        help='Stop after this many journal_retrieval cases in a row with no journal search. 0 disables.')
     args=parser.parse_args()
     if args.limit<0: parser.error('--limit must be nonnegative')
     if args.judge and args.mode!='live': parser.error('--judge only applies to live conversations')

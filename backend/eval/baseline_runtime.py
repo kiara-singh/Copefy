@@ -18,7 +18,8 @@ class BudgetExceeded(RuntimeError): pass
 class Ledger:
     """One persistent Phase 1 ledger; reserve before sending, including failed calls."""
     def __init__(self, path, cap=1.0):
-        if not 0<cap<=1: raise ValueError('Phase 1 cap must be in (0,1]')
+        # Default stays $1. Higher caps require an explicit --max-usd (user-authorized).
+        if not 0<cap<=4: raise ValueError('Cumulative cap must be in (0,4]')
         self.path=Path(path); self.cap=cap; self.lock=threading.Lock()
         self.data=json.loads(self.path.read_text()) if self.path.exists() else {'schema_version':1,'calls':[]}
 

@@ -24,6 +24,9 @@ backend/eval/results/**
 !backend/eval/results/eval_stats.md
 backend/eval/cache/
 
+# Local interview notes; not part of the repo
+docs/KIARA_UPDATES.md
+
 # Logs
 *.log
 npm-debug.log*

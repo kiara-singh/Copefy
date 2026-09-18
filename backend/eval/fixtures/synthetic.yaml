@@ -12,9 +12,9 @@ journals:
 - id: interview_after
   user: alpha
   created_at: '2026-06-15T12:00:00+00:00'
-  content: The museum moved my interview to Friday. The extra days give me room to
-    practice, which is a relief. I also caught myself worrying that a change of schedule
-    means they are less interested in me.
+  content: The extra days give me room to practice, which is a relief. I also caught
+    myself worrying that a change of schedule means they are less interested in me.
+    The museum moved my interview to Friday.
 - id: sister_before
   user: alpha
   created_at: '2026-06-02T12:00:00+00:00'
@@ -24,9 +24,9 @@ journals:
 - id: sister_after
   user: alpha
   created_at: '2026-06-16T12:00:00+00:00'
-  content: Leena moved to Portland; Denver was her old place. She sounded excited
-    about the new neighborhood. I am happy for her and sad that coordinating visits
-    will take more planning.
+  content: She sounded excited about the new neighborhood. I am happy for her and
+    sad that coordinating visits will take more planning. Leena moved to Portland;
+    Denver was her old place.
 - id: dog_before
   user: alpha
   created_at: '2026-06-03T12:00:00+00:00'
@@ -35,8 +35,8 @@ journals:
 - id: dog_after
   user: alpha
   created_at: '2026-06-17T12:00:00+00:00'
-  content: Biscuit is now with Priya, not Omar. Priya picked him up this morning and
-    said he settled in quickly. Hearing that helped me breathe a little easier.
+  content: Priya picked him up this morning and said he settled in quickly. Hearing
+    that helped me breathe a little easier. Biscuit is now with Priya, not Omar.
 - id: shift_before
   user: alpha
   created_at: '2026-06-04T12:00:00+00:00'
@@ -46,9 +46,9 @@ journals:
 - id: shift_after
   user: alpha
   created_at: '2026-06-18T12:00:00+00:00'
-  content: Starting this week I work mornings at the bakery. I am hopeful the new
-    hours will help me see people after work. I am also nervous about having to change
-    my sleep routine again.
+  content: I am hopeful the new hours will help me see people after work. I am also
+    nervous about having to change my sleep routine again. Starting this week I work
+    mornings at the bakery.
 - id: rent_before
   user: alpha
   created_at: '2026-06-05T12:00:00+00:00'
@@ -57,9 +57,9 @@ journals:
 - id: rent_after
   user: alpha
   created_at: '2026-06-19T12:00:00+00:00'
-  content: The landlord confirmed the deadline is the fifteenth. The extra five days
-    help, even though I still need to make a plan. I want to look at the numbers without
-    treating them as a verdict on myself.
+  content: The extra five days help, even though I still need to make a plan. I want
+    to look at the numbers without treating them as a verdict on myself. The landlord
+    confirmed the deadline is the fifteenth.
 - id: mentor_before
   user: alpha
   created_at: '2026-06-06T12:00:00+00:00'
@@ -68,8 +68,9 @@ journals:
 - id: mentor_after
   user: alpha
   created_at: '2026-06-20T12:00:00+00:00'
-  content: Rosa retired. My new mentor is Helen. I will miss Rosa. Helen seems kind,
-    and I want to give the new relationship a chance instead of comparing every conversation.
+  content: I will miss Rosa. Helen seems kind, and I want to give the new relationship
+    a chance instead of comparing every conversation. Rosa retired. My new mentor
+    is Helen.
 - id: appointment_before
   user: alpha
   created_at: '2026-06-07T12:00:00+00:00'
@@ -78,8 +79,8 @@ journals:
 - id: appointment_after
   user: alpha
   created_at: '2026-06-21T12:00:00+00:00'
-  content: The office rescheduled it to eleven. The later slot means I will not have
-    to rush through breakfast. I still feel nervous about putting things into words.
+  content: The later slot means I will not have to rush through breakfast. I still
+    feel nervous about putting things into words. The office rescheduled it to eleven.
 - id: class_before
   user: alpha
   created_at: '2026-06-08T12:00:00+00:00'
@@ -88,8 +89,8 @@ journals:
 - id: class_after
   user: alpha
   created_at: '2026-06-22T12:00:00+00:00'
-  content: I switched from pottery to watercolor. I liked the colors in the watercolor
-    studio and decided to try it. I am reminding myself that being new is allowed.
+  content: I liked the colors in the watercolor studio and decided to try it. I am
+    reminding myself that being new is allowed. I switched from pottery to watercolor.
 - id: roommate_before
   user: alpha
   created_at: '2026-06-09T12:00:00+00:00'
@@ -98,9 +99,9 @@ journals:
 - id: roommate_after
   user: alpha
   created_at: '2026-06-23T12:00:00+00:00'
-  content: Now I handle utilities and Kai handles groceries. We wrote the new arrangement
-    down after a tense talk. Taking responsibility for bills feels manageable if I
-    set reminders.
+  content: We wrote the new arrangement down after a tense talk. Taking responsibility
+    for bills feels manageable if I set reminders. Now I handle utilities and Kai
+    handles groceries.
 - id: commute_before
   user: alpha
   created_at: '2026-06-10T12:00:00+00:00'
@@ -109,8 +110,8 @@ journals:
 - id: commute_after
   user: alpha
   created_at: '2026-06-24T12:00:00+00:00'
-  content: The route changed; I take bus 22 now. I almost went to the old stop by
-    habit. Once I found the new route, the ride was less stressful than I expected.
+  content: I almost went to the old stop by habit. Once I found the new route, the
+    ride was less stressful than I expected. The route changed; I take bus 22 now.
 - id: exam_before
   user: alpha
   created_at: '2026-06-11T12:00:00+00:00'
@@ -119,8 +120,8 @@ journals:
 - id: exam_after
   user: alpha
   created_at: '2026-06-25T12:00:00+00:00'
-  content: I deferred the exam to August. Moving it gives me time to study without
-    cramming every evening. I am trying to see the delay as a choice, not a failure.
+  content: Moving it gives me time to study without cramming every evening. I am trying
+    to see the delay as a choice, not a failure. I deferred the exam to August.
 - id: friend_before
   user: alpha
   created_at: '2026-06-12T12:00:00+00:00'
@@ -130,9 +131,9 @@ journals:
 - id: friend_after
   user: alpha
   created_at: '2026-06-26T12:00:00+00:00'
-  content: My friend Alex now teaches science. My cousin still cooks. I asked my friend
-    Alex about the change in her classes. My cousin Alex is still cooking; keeping
-    their stories separate matters to me.
+  content: I asked my friend Alex about the change in her classes. My cousin Alex
+    is still cooking; keeping their stories separate matters to me. My friend Alex
+    now teaches science. My cousin still cooks.
 - id: trip_before
   user: alpha
   created_at: '2026-06-13T12:00:00+00:00'
@@ -141,9 +142,9 @@ journals:
 - id: trip_after
   user: alpha
   created_at: '2026-06-27T12:00:00+00:00'
-  content: I canceled Boston and booked Montreal. Changing the booking was frustrating,
-    yet I am excited to see a new city. I want the trip to feel restorative rather
-    than like another task.
+  content: Changing the booking was frustrating, yet I am excited to see a new city.
+    I want the trip to feel restorative rather than like another task. I canceled
+    Boston and booked Montreal.
 - id: club_before
   user: alpha
   created_at: '2026-06-14T12:00:00+00:00'
@@ -152,9 +153,9 @@ journals:
 - id: club_after
   user: alpha
   created_at: '2026-06-28T12:00:00+00:00'
-  content: Book club has moved to the community center. The new space is brighter
-    and easier to reach. I want to keep showing up even if I do not make a friend
-    immediately.
+  content: The new space is brighter and easier to reach. I want to keep showing up
+    even if I do not make a friend immediately. Book club has moved to the community
+    center.
 - id: project_before
   user: alpha
   created_at: '2026-06-15T12:00:00+00:00'
@@ -163,9 +164,9 @@ journals:
 - id: project_after
   user: alpha
   created_at: '2026-06-29T12:00:00+00:00'
-  content: Mateo left the project and Sana joined as my partner. Sana and I met to
-    reset the tasks. I am relieved to have a clear plan but still wary of falling
-    into the same pattern.
+  content: Sana and I met to reset the tasks. I am relieved to have a clear plan but
+    still wary of falling into the same pattern. Mateo left the project and Sana joined
+    as my partner.
 - id: sleep_before
   user: alpha
   created_at: '2026-06-16T12:00:00+00:00'
@@ -174,8 +175,9 @@ journals:
 - id: sleep_after
   user: alpha
   created_at: '2026-06-30T12:00:00+00:00'
-  content: This week I moved bedtime to ten. I put my phone on the other side of the
-    room. Some nights are still hard, but I like having a gentler start to the morning.
+  content: I put my phone on the other side of the room. Some nights are still hard,
+    but I like having a gentler start to the morning. This week I moved bedtime to
+    ten.
 - id: walk_before
   user: alpha
   created_at: '2026-06-17T12:00:00+00:00'
@@ -184,8 +186,8 @@ journals:
 - id: walk_after
   user: alpha
   created_at: '2026-07-01T12:00:00+00:00'
-  content: The lake path closed so I walk in Cedar Park. I tried the park loop today.
-    It is different from the lake, but I noticed I still came home calmer.
+  content: I tried the park loop today. It is different from the lake, but I noticed
+    I still came home calmer. The lake path closed so I walk in Cedar Park.
 - id: brother_before
   user: alpha
   created_at: '2026-06-18T12:00:00+00:00'
@@ -194,9 +196,9 @@ journals:
 - id: brother_after
   user: alpha
   created_at: '2026-07-02T12:00:00+00:00'
-  content: Dev chose nursing school instead. He sounded more like himself when he
-    told me about the change. I want to support his choice without turning it into
-    another family debate.
+  content: He sounded more like himself when he told me about the change. I want to
+    support his choice without turning it into another family debate. Dev chose nursing
+    school instead.
 - id: anniversary_before
   user: alpha
   created_at: '2026-06-19T12:00:00+00:00'
@@ -206,8 +208,8 @@ journals:
 - id: anniversary_after
   user: alpha
   created_at: '2026-07-03T12:00:00+00:00'
-  content: We decided on a quiet picnic instead of dinner. A picnic feels easier.
-    We can stay as long as we want and talk about what we miss without an audience.
+  content: A picnic feels easier. We can stay as long as we want and talk about what
+    we miss without an audience. We decided on a quiet picnic instead of dinner.
 - id: volunteer_before
   user: alpha
   created_at: '2026-06-20T12:00:00+00:00'
@@ -216,9 +218,9 @@ journals:
 - id: volunteer_after
   user: alpha
   created_at: '2026-07-04T12:00:00+00:00'
-  content: I switched to volunteering at the food pantry. The pantry schedule fits
-    my week better. I still want to be useful without measuring my worth by how much
-    I can take on.
+  content: The pantry schedule fits my week better. I still want to be useful without
+    measuring my worth by how much I can take on. I switched to volunteering at the
+    food pantry.
 - id: supervisor_before
   user: alpha
   created_at: '2026-06-21T12:00:00+00:00'
@@ -227,9 +229,9 @@ journals:
 - id: supervisor_after
   user: alpha
   created_at: '2026-07-05T12:00:00+00:00'
-  content: After the reorganization my supervisor is Morgan. Morgan scheduled a check-in
-    and explained the new team structure. I am anxious about starting over but glad
-    I know whom to ask.
+  content: Morgan scheduled a check-in and explained the new team structure. I am
+    anxious about starting over but glad I know whom to ask. After the reorganization
+    my supervisor is Morgan.
 - id: boundary_before
   user: alpha
   created_at: '2026-06-22T12:00:00+00:00'
@@ -238,9 +240,9 @@ journals:
 - id: boundary_after
   user: alpha
   created_at: '2026-07-06T12:00:00+00:00'
-  content: I told them I cannot host; my aunt will host. My aunt offered her place
-    after I explained I could not do it. I am relieved and still feeling the sting
-    of saying no.
+  content: My aunt offered her place after I explained I could not do it. I am relieved
+    and still feeling the sting of saying no. I told them I cannot host; my aunt will
+    host.
 - id: move_before
   user: alpha
   created_at: '2026-06-23T12:00:00+00:00'
@@ -249,8 +251,9 @@ journals:
 - id: move_after
   user: alpha
   created_at: '2026-07-07T12:00:00+00:00'
-  content: The lease was corrected to apartment 5C. I caught the apartment change
-    before labeling all the boxes. I am glad I checked, even if the paperwork is annoying.
+  content: I caught the apartment change before labeling all the boxes. I am glad
+    I checked, even if the paperwork is annoying. The lease was corrected to apartment
+    5C.
 - id: presentation_before
   user: alpha
   created_at: '2026-06-24T12:00:00+00:00'
@@ -259,8 +262,9 @@ journals:
 - id: presentation_after
   user: alpha
   created_at: '2026-07-08T12:00:00+00:00'
-  content: The team changed our topic to public transit. We met to divide the new
-    topic. I can still use some of my research, and that makes the change less overwhelming.
+  content: We met to divide the new topic. I can still use some of my research, and
+    that makes the change less overwhelming. The team changed our topic to public
+    transit.
 - id: support_before
   user: alpha
   created_at: '2026-06-25T12:00:00+00:00'
@@ -269,9 +273,9 @@ journals:
 - id: support_after
   user: alpha
   created_at: '2026-07-09T12:00:00+00:00'
-  content: Ravi is traveling; I arranged to call my aunt Meera instead. Meera said
-    I could call after dinner. I am grateful, though I still feel awkward asking someone
-    to sit with me.
+  content: Meera said I could call after dinner. I am grateful, though I still feel
+    awkward asking someone to sit with me. Ravi is traveling; I arranged to call my
+    aunt Meera instead.
 - id: garden_before
   user: alpha
   created_at: '2026-06-26T12:00:00+00:00'
@@ -280,9 +284,9 @@ journals:
 - id: garden_after
   user: alpha
   created_at: '2026-07-10T12:00:00+00:00'
-  content: The tomatoes died; I replaced them with basil. Losing them felt oddly personal.
-    I planted basil in the same spot and want to let this be another try rather than
-    a test.
+  content: Losing them felt oddly personal. I planted basil in the same spot and want
+    to let this be another try rather than a test. The tomatoes died; I replaced them
+    with basil.
 - id: music_before
   user: alpha
   created_at: '2026-06-27T12:00:00+00:00'
@@ -291,9 +295,9 @@ journals:
 - id: music_after
   user: alpha
   created_at: '2026-07-11T12:00:00+00:00'
-  content: I paused guitar and started piano lessons. Piano feels unfamiliar, but
-    I liked the first lesson. I am trying to listen to the sound instead of judging
-    my progress.
+  content: Piano feels unfamiliar, but I liked the first lesson. I am trying to listen
+    to the sound instead of judging my progress. I paused guitar and started piano
+    lessons.
 - id: deadline_before
   user: alpha
   created_at: '2026-06-28T12:00:00+00:00'
@@ -302,9 +306,9 @@ journals:
 - id: deadline_after
   user: alpha
   created_at: '2026-07-12T12:00:00+00:00'
-  content: The committee extended the grant deadline to Thursday. The extension helps,
-    but I do not want to wait until the last night. I will ask a friend to read a
-    rough draft.
+  content: The extension helps, but I do not want to wait until the last night. I
+    will ask a friend to read a rough draft. The committee extended the grant deadline
+    to Thursday.
 - id: reunion_before
   user: alpha
   created_at: '2026-06-29T12:00:00+00:00'
@@ -313,8 +317,8 @@ journals:
 - id: reunion_after
   user: alpha
   created_at: '2026-07-13T12:00:00+00:00'
-  content: The invitation was updated to Birch Hall. I checked the updated invitation
-    twice. Finding the right room is one less thing to worry about on the day.
+  content: I checked the updated invitation twice. Finding the right room is one less
+    thing to worry about on the day. The invitation was updated to Birch Hall.
 - id: exercise_before
   user: alpha
   created_at: '2026-06-30T12:00:00+00:00'
@@ -323,8 +327,8 @@ journals:
 - id: exercise_after
   user: alpha
   created_at: '2026-07-14T12:00:00+00:00'
-  content: I switched to a gentle swimming group. The swimming group seems gentler.
-    I hope movement can feel like care rather than punishment.
+  content: The swimming group seems gentler. I hope movement can feel like care rather
+    than punishment. I switched to a gentle swimming group.
 - id: petname_before
   user: alpha
   created_at: '2026-07-01T12:00:00+00:00'
@@ -333,8 +337,8 @@ journals:
 - id: petname_after
   user: alpha
   created_at: '2026-07-15T12:00:00+00:00'
-  content: We settled on the name Juniper instead. Juniper fits her better now that
-    I know her. I caught myself calling her the old name once and laughed.
+  content: Juniper fits her better now that I know her. I caught myself calling her
+    the old name once and laughed. We settled on the name Juniper instead.
 - id: visit_before
   user: alpha
   created_at: '2026-07-02T12:00:00+00:00'
@@ -343,9 +347,8 @@ journals:
 - id: visit_after
   user: alpha
   created_at: '2026-07-16T12:00:00+00:00'
-  content: Dad postponed his visit to December. We have more time before he arrives.
-    I want to think about what kind of visit would actually feel good for both of
-    us.
+  content: We have more time before he arrives. I want to think about what kind of
+    visit would actually feel good for both of us. Dad postponed his visit to December.
 - id: meeting_before
   user: alpha
   created_at: '2026-07-03T12:00:00+00:00'
@@ -354,8 +357,8 @@ journals:
 - id: meeting_after
   user: alpha
   created_at: '2026-07-17T12:00:00+00:00'
-  content: The organizer changed it to an in-person meeting. Going in person is harder
-    to avoid. I am writing down one clear question so I do not lose my nerve.
+  content: Going in person is harder to avoid. I am writing down one clear question
+    so I do not lose my nerve. The organizer changed it to an in-person meeting.
 - id: meal_before
   user: alpha
   created_at: '2026-07-04T12:00:00+00:00'
@@ -364,9 +367,9 @@ journals:
 - id: meal_after
   user: alpha
   created_at: '2026-07-18T12:00:00+00:00'
-  content: Nia asked for rice instead, so I changed the plan. The change is easy enough,
-    but I noticed how quickly I worried about getting it wrong. She is coming to spend
-    time, not judge dinner.
+  content: The change is easy enough, but I noticed how quickly I worried about getting
+    it wrong. She is coming to spend time, not judge dinner. Nia asked for rice instead,
+    so I changed the plan.
 - id: course_before
   user: alpha
   created_at: '2026-07-05T12:00:00+00:00'
@@ -375,8 +378,8 @@ journals:
 - id: course_after
   user: alpha
   created_at: '2026-07-19T12:00:00+00:00'
-  content: The course moved to Mondays. The new night works with my shift. I am learning
-    to protect the time instead of offering it away whenever someone asks.
+  content: The new night works with my shift. I am learning to protect the time instead
+    of offering it away whenever someone asks. The course moved to Mondays.
 - id: wedding_before
   user: alpha
   created_at: '2026-07-06T12:00:00+00:00'
@@ -386,9 +389,9 @@ journals:
 - id: wedding_after
   user: alpha
   created_at: '2026-07-20T12:00:00+00:00'
-  content: Sam asked my brother to speak instead; I am doing a reading. A reading
-    feels more manageable. I am relieved, though a small part of me feels rejected
-    about the change.
+  content: A reading feels more manageable. I am relieved, though a small part of
+    me feels rejected about the change. Sam asked my brother to speak instead; I am
+    doing a reading.
 - id: therapy_before
   user: alpha
   created_at: '2026-07-07T12:00:00+00:00'
@@ -397,8 +400,8 @@ journals:
 - id: therapy_after
   user: alpha
   created_at: '2026-07-21T12:00:00+00:00'
-  content: Maple Clinic offered an appointment and I accepted. I accepted the offered
-    slot. It feels strange to be hopeful and nervous at the same time.
+  content: I accepted the offered slot. It feels strange to be hopeful and nervous
+    at the same time. Maple Clinic offered an appointment and I accepted.
 - id: caregiving_before
   user: alpha
   created_at: '2026-07-08T12:00:00+00:00'
@@ -407,8 +410,8 @@ journals:
 - id: caregiving_after
   user: alpha
   created_at: '2026-07-22T12:00:00+00:00'
-  content: My cousin took Saturdays; I help on Sundays now. My cousin and I talked
-    through the weekend schedule. Having one predictable day should help me rest too.
+  content: My cousin and I talked through the weekend schedule. Having one predictable
+    day should help me rest too. My cousin took Saturdays; I help on Sundays now.
 - id: competition_before
   user: alpha
   created_at: '2026-07-09T12:00:00+00:00'
@@ -418,9 +421,9 @@ journals:
 - id: competition_after
   user: alpha
   created_at: '2026-07-23T12:00:00+00:00'
-  content: My debate partner graduated; Noor is my new partner. Noor asked thoughtful
-    questions at practice. I miss the old partnership, but I think we can build a
-    new one.
+  content: Noor asked thoughtful questions at practice. I miss the old partnership,
+    but I think we can build a new one. My debate partner graduated; Noor is my new
+    partner.
 - id: budget_before
   user: alpha
   created_at: '2026-07-10T12:00:00+00:00'
@@ -429,8 +432,8 @@ journals:
 - id: budget_after
   user: alpha
   created_at: '2026-07-24T12:00:00+00:00'
-  content: I revised the hobby budget to twenty dollars. The lower amount is disappointing.
-    I want to adjust my plans without deciding I do not deserve any fun.
+  content: The lower amount is disappointing. I want to adjust my plans without deciding
+    I do not deserve any fun. I revised the hobby budget to twenty dollars.
 - id: study_before
   user: alpha
   created_at: '2026-07-11T12:00:00+00:00'
@@ -439,8 +442,8 @@ journals:
 - id: study_after
   user: alpha
   created_at: '2026-07-25T12:00:00+00:00'
-  content: It got too noisy; I study in the campus lounge now. The lounge was quieter
-    today. I finished a reading without having to start over three times.
+  content: The lounge was quieter today. I finished a reading without having to start
+    over three times. It got too noisy; I study in the campus lounge now.
 - id: celebration_before
   user: alpha
   created_at: '2026-07-12T12:00:00+00:00'
@@ -449,9 +452,9 @@ journals:
 - id: celebration_after
   user: alpha
   created_at: '2026-07-26T12:00:00+00:00'
-  content: I changed my mind and invited just two friends for tea. Tea with two people
-    I trust feels right this year. I am looking forward to being able to talk rather
-    than host.
+  content: Tea with two people I trust feels right this year. I am looking forward
+    to being able to talk rather than host. I changed my mind and invited just two
+    friends for tea.
 - id: recovery_before
   user: alpha
   created_at: '2026-07-13T12:00:00+00:00'
@@ -460,8 +463,8 @@ journals:
 - id: recovery_after
   user: alpha
   created_at: '2026-07-27T12:00:00+00:00'
-  content: HR confirmed September fifteenth instead. The later date gives me some
-    breathing room. I want to ask HR what a gradual return could look like.
+  content: The later date gives me some breathing room. I want to ask HR what a gradual
+    return could look like. HR confirmed September fifteenth instead.
 - id: transport_before
   user: alpha
   created_at: '2026-07-14T12:00:00+00:00'
@@ -470,8 +473,8 @@ journals:
 - id: transport_after
   user: alpha
   created_at: '2026-07-28T12:00:00+00:00'
-  content: My cousin will drive Mom; I will pick up groceries. Sharing the tasks feels
-    fairer. I can handle groceries and still have time to rest afterward.
+  content: Sharing the tasks feels fairer. I can handle groceries and still have time
+    to rest afterward. My cousin will drive Mom; I will pick up groceries.
 - id: name_before
   user: alpha
   created_at: '2026-07-15T12:00:00+00:00'
@@ -480,8 +483,8 @@ journals:
 - id: name_after
   user: alpha
   created_at: '2026-07-29T12:00:00+00:00'
-  content: She asked us to call her Elizabeth now. I put a note by my desk so I remember.
-    If I make a mistake, I can correct it quietly and move on.
+  content: I put a note by my desk so I remember. If I make a mistake, I can correct
+    it quietly and move on. She asked us to call her Elizabeth now.
 - id: beta_dentist
   user: beta
   created_at: '2026-08-01T12:00:00+00:00'
