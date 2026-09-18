@@ -38,7 +38,10 @@ class ChatRequest(BaseModel):
     message: str
     debug: bool = Field(
         default=False,
-        description="If true, include KB retrieval trace in the response.",
+        description=(
+            "If true, include a metadata-only retrieval trace. Never includes "
+            "raw journal or clinical snippet text."
+        ),
     )
 
 
@@ -303,8 +306,10 @@ async def chat(
     )
 
     body: dict = {"response": result.response}
+    # Client debug and server RAG_DEBUG may attach metadata. Raw retrieved
+    # text never leaves this HTTP response.
     if payload.debug or settings.rag_debug:
-        body["trace"] = result.to_debug_dict()
+        body["trace"] = result.to_public_debug_dict()
     return body
 
 

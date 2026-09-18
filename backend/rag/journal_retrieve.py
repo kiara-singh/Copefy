@@ -99,6 +99,7 @@ async def search_journal_chunks(
             similarity=hit.similarity,
             document_id=hit.document_id,
             created_at=(hit.metadata or {}).get("entry_created_at"),
+            chunk_id=hit.id,
         )
         for hit in gated
     ]

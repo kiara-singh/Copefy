@@ -9,8 +9,11 @@ export interface ChatSource {
   source_url: string | null;
   category: string | null;
   similarity: number;
-  preview: string;
-  excerpt: string;
+  created_at?: string | null;
+  chunk_id?: string | null;
+  document_id?: string | null;
+  preview?: string;
+  excerpt?: string;
 }
 
 export interface PipelineLayer {

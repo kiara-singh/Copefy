@@ -21,7 +21,12 @@ from agent.persona import (
 )
 from agent.pipeline_trace import PipelineTrace
 from agent.preference_extract import extract_preference_knobs
-from agent.prompts import CRISIS_RESPONSE, SAFETY_SANDWICH, UNSAFE_REPLY_FALLBACK
+from agent.prompts import (
+    CRISIS_RESPONSE,
+    RETRIEVED_UNTRUSTED_NOTICE,
+    SAFETY_SANDWICH,
+    UNSAFE_REPLY_FALLBACK,
+)
 from agent.routers import Path, get_router
 from agent.routers.base import RouteDecision
 from agent.tools.extract_docs import extract_unstructured
@@ -84,8 +89,11 @@ def _format_history(messages: list[dict[str, str]], limit: int = 6) -> str:
 
 
 def _chunks_to_sources(chunks: list[RetrievedChunk]) -> list[dict]:
+    """Internal/eval source records. HTTP responses must strip retrieved text."""
     return [
         {
+            "chunk_id": chunk.chunk_id,
+            "document_id": chunk.document_id,
             "title": chunk.title,
             "source_url": chunk.source_url,
             "category": chunk.category,
@@ -98,6 +106,13 @@ def _chunks_to_sources(chunks: list[RetrievedChunk]) -> list[dict]:
     ]
 
 
+def _retrieved_prompt_block(tag: str, heading: str, chunks: list[RetrievedChunk]) -> str:
+    body = format_chunks_for_prompt(chunks)
+    return (
+        f"<{tag}>\n{RETRIEVED_UNTRUSTED_NOTICE}\n{heading}\n{body}\n</{tag}>"
+    )
+
+
 def _build_user_prompt(
     user_message: str,
     history: list[dict[str, str]],
@@ -106,22 +121,34 @@ def _build_user_prompt(
     persona: UserPersona | None,
 ) -> tuple[str, bool]:
     sections = [_format_history(history), f"USER: {user_message}"]
+    retrieved = False
 
     if chunks:
         clinical_chunks = [c for c in chunks if c.category != "journal"]
         journal_chunks = [c for c in chunks if c.category == "journal"]
 
         if clinical_chunks:
+            retrieved = True
             sections.append(
-                "Background reference (generic — not about this user):\n"
-                + format_chunks_for_prompt(clinical_chunks)
+                _retrieved_prompt_block(
+                    "retrieved_clinical",
+                    "Background reference (generic — not about this user):",
+                    clinical_chunks,
+                )
             )
 
         if journal_chunks:
+            retrieved = True
             sections.append(
-                "User's past journal entries (personal memory):\n"
-                + format_chunks_for_prompt(journal_chunks)
+                _retrieved_prompt_block(
+                    "retrieved_journal",
+                    "User's past journal entries (personal memory):",
+                    journal_chunks,
+                )
             )
+
+        if retrieved:
+            sections.append(SAFETY_SANDWICH)
 
     if tool_note:
         sections.append(f"Tool note: {tool_note}")

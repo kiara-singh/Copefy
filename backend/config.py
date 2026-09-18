@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     gemini_embed_model: str = "gemini-embedding-2"
 
     rag_debug: bool = False
+    # When true, /chat always attaches a metadata-only trace. Retrieved snippet
+    # text is never included in HTTP responses.
     rag_strategy: str = "mmr"
     # Journal path only. Calibrated junk reduction on synthetic no-memory
     # searches; not a guarantee that a kept chunk is the right memory.

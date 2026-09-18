@@ -137,6 +137,8 @@ async def test_run_agent_embeds_current_message_and_dates_journals():
     assert seen["query"] == current
     assert "shrinking" not in seen["query"]
     assert "Personal Journal · 2026-06-20" in seen["prompt"]
+    assert "<retrieved_journal>" in seen["prompt"]
+    assert "untrusted reference data" in seen["prompt"]
     assert JOURNAL_MEMORY_PROMPT in seen["system"]
     assert result.sources[0]["created_at"] == "2026-06-20T12:00:00+00:00"
 
@@ -153,6 +155,10 @@ def test_user_prompt_journal_block_is_dated():
     prompt, _ = _build_user_prompt("help me ask about the program", [], [chunk], None, None)
     assert "User's past journal entries" in prompt
     assert "2026-07-02" in prompt
+    assert "<retrieved_journal>" in prompt
+    assert "untrusted reference data" in prompt
+    assert prompt.index("<retrieved_journal>") < prompt.index("Dev chose nursing")
+    assert prompt.index("Dev chose nursing") < prompt.index("</retrieved_journal>")
 
 
 def _journal_row(user_id: str, similarity: float, content: str, suffix: str) -> dict:

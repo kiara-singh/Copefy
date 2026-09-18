@@ -13,10 +13,12 @@ Copefy is an early-stage web application scaffold for an AI mental health and we
 - An AI Personas management feature allowing authenticated users to create, view, edit, and delete custom chatbot persona configurations (`name`, `role_type`, `base_personality`, `custom_instructions`).
 - A Medical Documents management feature inside Settings allowing authenticated users to upload PDF health records (validated for `.pdf` extension, MIME type, 10 MB size limit, and `%PDF-` magic header bytes), view uploaded documents, and delete them. Files are stored in a private Supabase Storage bucket (`medical-documents`) with metadata tracked in PostgreSQL.
 - An Agentic RAG Pipeline with:
-  - **Layer 1 Router**: Production default `AGENT_ROUTER=rule` pattern-based router (100.0% accuracy on 529 golden regression cases, 0 crisis/web false positives, 0.2 ms/case latency).
+  - **Layer 1 Router**: Production default `AGENT_ROUTER=rule` pattern-based router. Crisis matching prefers recall: indirect current/finality language (goodbye artifacts, not-waking, near-term preparation) routes to crisis; recovered historical risk is suppressed only when a past-time anchor, present safety/recovery, and no current danger are all present.
   - **Layer 3 Clinical KB Retrieval**: Production default `RAG_STRATEGY=mmr` diversity-reranked vector search over 1,123 clinical KB documents using 768-dimensional Gemini embeddings (`gemini-embedding-2` / `text-embedding-004`).
   - **Layer 2 User Journal Corpus**: Derived RAG retrieval system (`journal_chunks` table) using structure-aware paragraph/sentence-boundary chunking, 768-dim Gemini embeddings, idempotent ingestion, strict database-level user isolation (`WHERE user_id = authenticated_user_id`), MMR reranking, synthetic dataset seeder, and multi-corpus orchestration (`clinical`, `journal`, and `both`).
-- A single-session React chat interface communicating with FastAPI backend `/chat`. Requests are authenticated via Bearer tokens, checking session ownership and storing messages in Supabase.
+- A single-session React chat interface communicating with FastAPI backend `/chat`. Requests are authenticated via Bearer tokens, checking session ownership and storing messages in Supabase. Optional RAG debug traces are **metadata-only** (router, corpus, chunk ids, scores, dates); HTTP responses never include raw retrieved journal or clinical snippet text.
+- Prompt construction wraps retrieved journal and clinical snippets as untrusted reference data (`<retrieved_journal>` / `<retrieved_clinical>`) so they must not override safety instructions. Settings/persona injection filtering is unchanged.
+- Tracked RLS/storage policies for user-owned tables and private `medical-documents/{user_id}/` paths live in `database/migrations/002_rls_user_owned.sql` (must be applied in Supabase). The backend service-role client still bypasses RLS; application `user_id` checks remain.
 - A journal entry form submitting text under the authenticated user's ID to Supabase with automatic structure-aware chunking and vector embedding ingestion.
 
 ### Major Technologies & Frameworks
@@ -98,7 +100,7 @@ Copefy/
 - `GET /`: API status message.
 - `GET /health`: System health status (`{"status": "ok"}`).
 - `POST /session`: Requires Bearer token. Inserts a new row into `sessions` with `user_id = authenticated_user_id` and returns `session_id`.
-- `POST /chat`: Requires Bearer token and `ChatRequest(session_id, message, debug)`. Verifies session ownership, runs Layer 1 router (`rule`), executes database vector retrieval (`clinical`, `journal`, or `both`), generates AI reply, stores messages, and returns reply + optional debug trace.
+- `POST /chat`: Requires Bearer token and `ChatRequest(session_id, message, debug)`. Verifies session ownership, runs Layer 1 router (`rule`), executes database vector retrieval (`clinical`, `journal`, or `both`), generates AI reply, stores messages, and returns the reply. `debug: true` or server `RAG_DEBUG` may attach a **public** retrieval trace (no snippet text).
 - `POST /journal`: Requires Bearer token and `JournalRequest(text)`. Inserts raw entry into `journal_entries` and triggers structure-aware chunking + 768-dim embedding ingestion into `journal_chunks`.
 - `GET /personas`, `POST /personas`, `PUT /personas/{id}`, `DELETE /personas/{id}`: Authenticated CRUD for AI personas.
 - `GET /medical-documents`, `POST /medical-documents`, `DELETE /medical-documents/{id}`: Authenticated PDF health records management with private Supabase Storage persistence.
@@ -117,13 +119,15 @@ Copefy/
 6. **`ai_personas`**: AI persona configurations (`name`, `role_type`, `base_personality`, `custom_instructions`).
 7. **`medical_documents`**: Metadata for uploaded PDF files stored in private Supabase Storage bucket `medical-documents`.
 
+Row-level security for the tables above (and storage objects under `{auth.uid()}/` in `medical-documents`) is defined in [database/migrations/002_rls_user_owned.sql](database/migrations/002_rls_user_owned.sql). It is not inlined in `schema_core.sql`; apply the migration in the Supabase project.
+
 ---
 
 ## 6. AI & RAG Pipeline Implementation Status
 
 | RAG Component | Status | Implementation Details |
 | --- | --- | --- |
-| **Layer 1 Router** | **Implemented** | `AGENT_ROUTER=rule` pattern matching router (`backend/agent/routers/rule.py`). 100.0% accuracy on 529 golden regression cases, 0 crisis/web false positives, 0.2 ms/case. |
+| **Layer 1 Router** | **Implemented** | `AGENT_ROUTER=rule` (`backend/agent/routers/rule.py`). Acute/current crisis language over-fires rather than missing; historical recovery is a narrow exception. Scripted crisis suite: 35/35 recall, 4 remaining media/third-party FPs. |
 | **Layer 2 Corpus Selection** | **Implemented** | Two-signal intent routing ($S_{\text{clinical}}$ vs. $S_{\text{journal}}$) in `backend/agent/routers/rule.py` accurately directing queries to `clinical`, `journal`, `both`, or `none`. 100.0% accuracy on 36-case contrast group suite, 0 false retrieval activations. |
 | **Layer 3 Clinical KB Retrieval** | **Implemented** | `RAG_STRATEGY=mmr` over 1,123 `kb_documents`. Relevance + token Jaccard diversity reranking (`lambda_mult = 0.7`). |
 | **Layer 2 Journal Corpus** | **Implemented** | Structure-aware paragraph/sentence-boundary chunking (`journal_chunking.py`), 768-dim Gemini embeddings (`embed.py`), idempotent ingestion (`journal_ingestion.py`), strict user-isolated pgvector search (`WHERE user_id = authenticated_user_id`), MMR reranking (`journal_retrieve.py`), synthetic dataset seeder (`seed_dummy_journals.py`), and `clinical`/`journal`/`both` multi-corpus orchestration (`orchestrator.py`). |
@@ -134,7 +138,7 @@ Copefy/
 
 ## 7. Verification & Test Suite
 
-- **Backend Pytest Suite**: 37/37 passing (`tests/test_corpus_selection.py`, `tests/test_journal_rag.py`, `tests/test_retrieval_scoring.py`, `tests/test_retrieval_subdecisions.py`, `test_auth_endpoints.py`).
+- **Backend Pytest Suite**: 136 passing (`tests/` plus `test_auth_endpoints.py`), including journal memory/prompt tests, debug-privacy (HTTP traces omit retrieved text), RLS migration presence, and auth/session ownership.
 - **Layer 1 Golden Eval Suite**: 529/529 cases passing (100.0% overall accuracy, 100.0% crisis recall, 0 false positives).
 - **Layer 2 Corpus Selection Suite**: 36/36 cases passing (100.0% accuracy across clinical, journal, both, none).
 - **Synthetic Dataset**: 112 unique synthetic journal entries across 12 realistic life themes and timeline spreads, ingested into `journal_entries` and `journal_chunks` (114 chunks) with real 768-dimensional Gemini embeddings (`gemini-embedding-2`).
