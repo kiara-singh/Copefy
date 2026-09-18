@@ -40,6 +40,11 @@ Thumbs.db
 # TypeScript Build Info
 *.tsbuildinfo
 
-# Local Phase 4A voice recordings at the repo root (do not commit)
+# Local Phase 4A/4B media recordings at the repo root (do not commit)
 /*.m4a
 /*.M4A
+/*.mp4
+/*.MP4
+/*.mov
+/*.MOV
+/*.webm

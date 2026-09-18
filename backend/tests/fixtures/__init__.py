@@ -29,3 +29,12 @@ def write_synthetic_wav(path: Path | None = None) -> Path:
     target = path or SYNTHETIC_WAV_PATH
     target.write_bytes(synthetic_wav_bytes())
     return target
+
+
+def synthetic_mp4_bytes() -> bytes:
+    """Minimal ISO BMFF header. Tests stub ffmpeg; this is not a playable movie."""
+    # 24-byte ftyp box: size(4) + 'ftyp' + brand + version + compat
+    return (
+        b"\x00\x00\x00\x18ftypisom\x00\x00\x00\x00isomiso2"
+        + b"\x00\x00\x00\x08free"
+    )

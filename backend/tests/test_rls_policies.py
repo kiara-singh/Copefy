@@ -43,3 +43,14 @@ def test_journal_audio_migration_scopes_private_bucket():
     assert "bucket_id = 'journal-audio'" in sql
     assert "split_part(name, '/', 1) = auth.uid()::text" in sql
     assert "journal_audio_select_own" in sql
+
+
+def test_journal_video_migration_scopes_private_bucket():
+    sql = (ROOT / "database" / "migrations" / "004_journal_video.sql").read_text(
+        encoding="utf-8"
+    )
+    assert "video_storage_path" in sql
+    assert "video_filename" in sql
+    assert "bucket_id = 'journal-video'" in sql
+    assert "split_part(name, '/', 1) = auth.uid()::text" in sql
+    assert "journal_video_select_own" in sql

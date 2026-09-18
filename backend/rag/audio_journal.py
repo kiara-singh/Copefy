@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import asyncio
-import logging
-import uuid
-from typing import Any
-
-from rag.audio_transcribe import TranscriptionError, transcribe_audio
+from rag.audio_transcribe import transcribe_audio
 from rag.journal_ingestion import ingest_journal_entry
-
-logger = logging.getLogger(__name__)
+from rag.media_journal import (
+    MediaJournalError,
+    persist_transcribed_journal,
+    upload_user_object,
+    user_object_path,
+)
 
 JOURNAL_AUDIO_BUCKET = "journal-audio"
 MAX_AUDIO_JOURNAL_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -33,19 +32,13 @@ _AUDIO_MIME_TYPES = {
 }
 _VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi", ".mkv", ".m4v"}
 
-
-class AudioJournalError(RuntimeError):
-    """User-facing audio journal validation or persistence failure."""
-
-    def __init__(self, message: str, *, status_code: int = 400) -> None:
-        super().__init__(message)
-        self.status_code = status_code
+AudioJournalError = MediaJournalError
 
 
 def _suffix(filename: str) -> str:
-    lower = filename.lower()
-    dot = lower.rfind(".")
-    return lower[dot:] if dot >= 0 else ""
+    from rag.media_journal import file_suffix
+
+    return file_suffix(filename)
 
 
 def normalize_audio_mime(filename: str, content_type: str | None) -> str:
@@ -101,35 +94,13 @@ def validate_audio_bytes(contents: bytes, mime_type: str) -> None:
             raise AudioJournalError("Invalid WAV file. Expected a RIFF/WAVE header.")
 
 
-def _safe_filename(filename: str) -> str:
-    cleaned = "".join(c for c in filename if c.isalnum() or c in "._-").strip()
-    return cleaned or "journal.wav"
-
-
-def _remove_storage(client: Any, storage_path: str) -> None:
-    try:
-        client.storage.from_(JOURNAL_AUDIO_BUCKET).remove([storage_path])
-    except Exception:
-        logger.warning("Failed to remove journal audio object %s", storage_path)
-
-
-def _insert_entry(client: Any, row: dict[str, Any]) -> dict[str, Any]:
-    res = client.table("journal_entries").insert(row).execute()
-    if not res.data:
-        raise AudioJournalError(
-            "Failed to record audio journal metadata.",
-            status_code=500,
-        )
-    return res.data[0]
-
-
 async def ingest_audio_journal(
-    client: Any,
+    client,
     user_id: str,
     filename: str,
     content_type: str | None,
     contents: bytes,
-) -> dict[str, Any]:
+) -> dict:
     """Upload audio, transcribe, persist metadata, ingest transcript as text RAG.
 
     Failed transcription keeps the private audio object and a journal_entries row
@@ -137,75 +108,31 @@ async def ingest_audio_journal(
     """
     mime_type = normalize_audio_mime(filename, content_type)
     validate_audio_bytes(contents, mime_type)
+    storage_path = user_object_path(user_id, filename, "journal.wav")
+    upload_user_object(
+        client,
+        JOURNAL_AUDIO_BUCKET,
+        storage_path,
+        contents,
+        mime_type,
+        kind="audio",
+    )
 
-    storage_path = f"{user_id}/{uuid.uuid4()}_{_safe_filename(filename)}"
-    try:
-        client.storage.from_(JOURNAL_AUDIO_BUCKET).upload(
-            path=storage_path,
-            file=contents,
-            file_options={"content-type": mime_type},
-        )
-    except Exception as err:
-        err_msg = str(err)
-        if "not_found" in err_msg.lower() or "bucket" in err_msg.lower():
-            detail = (
-                "Storage bucket 'journal-audio' was not found in Supabase. "
-                "Create a private 'journal-audio' bucket in the Supabase dashboard."
-            )
-        else:
-            detail = f"Failed to upload audio to private storage: {err_msg}"
-        raise AudioJournalError(detail, status_code=500) from err
+    def transcribe_fn() -> str:
+        return transcribe_audio(contents, mime_type)
 
-    transcript = ""
-    transcription_status = "failed"
-    try:
-        transcript = await asyncio.to_thread(transcribe_audio, contents, mime_type)
-        transcription_status = "completed"
-    except TranscriptionError as err:
-        logger.warning("Audio transcription failed for user %s: %s", user_id, err)
-
-    try:
-        record = _insert_entry(
-            client,
-            {
-                "user_id": user_id,
-                "content": transcript,
-                "source_modality": "audio",
-                "audio_storage_path": storage_path,
-                "audio_filename": filename,
-                "transcription_status": transcription_status,
-            },
-        )
-    except Exception as err:
-        _remove_storage(client, storage_path)
-        if isinstance(err, AudioJournalError):
-            raise
-        raise AudioJournalError(
-            f"Failed to record audio journal metadata: {err}",
-            status_code=500,
-        ) from err
-
-    journal_id = str(record["id"])
-    if transcription_status != "completed":
-        return {
-            "status": "transcription_failed",
-            "journal_id": journal_id,
+    return await persist_transcribed_journal(
+        client,
+        user_id,
+        bucket=JOURNAL_AUDIO_BUCKET,
+        storage_path=storage_path,
+        row={
             "source_modality": "audio",
-            "transcription_status": transcription_status,
             "audio_storage_path": storage_path,
-        }
-
-    try:
-        await ingest_journal_entry(journal_id, user_id, transcript)
-    except Exception as err:
-        logger.warning(
-            "Journal ingestion failed for audio entry %s: %s", journal_id, err
-        )
-
-    return {
-        "status": "success",
-        "journal_id": journal_id,
-        "source_modality": "audio",
-        "transcription_status": transcription_status,
-        "audio_storage_path": storage_path,
-    }
+            "audio_filename": filename,
+        },
+        path_key="audio_storage_path",
+        transcribe_fn=transcribe_fn,
+        ingest_fn=ingest_journal_entry,
+        failed_status="transcription_failed",
+    )

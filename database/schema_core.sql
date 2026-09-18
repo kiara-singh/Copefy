@@ -72,9 +72,11 @@ CREATE TABLE journal_entries (
     content TEXT NOT NULL,
     tags VARCHAR(50)[],
     embedding vector(768), -- Dimension size (768) configured for Gemini embeddings
-    source_modality VARCHAR(20) NOT NULL DEFAULT 'text', -- 'text' or 'audio'
+    source_modality VARCHAR(20) NOT NULL DEFAULT 'text', -- 'text', 'audio', or 'video'
     audio_storage_path TEXT, -- private journal-audio object: {user_id}/{uuid}_{filename}
     audio_filename VARCHAR(255),
+    video_storage_path TEXT, -- private journal-video object: {user_id}/{uuid}_{filename}
+    video_filename VARCHAR(255),
     transcription_status VARCHAR(32) NOT NULL DEFAULT 'not_applicable',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

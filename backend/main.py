@@ -364,6 +364,30 @@ async def create_audio_journal_entry(
         raise HTTPException(status_code=err.status_code, detail=str(err)) from err
 
 
+@app.post("/journal/video")
+async def create_video_journal_entry(
+    file: UploadFile = File(...),
+    user_id: str = Depends(get_current_user),
+):
+    """Upload private video, extract audio locally, transcribe, ingest as text journal."""
+    from rag.media_journal import MediaJournalError
+    from rag.video_journal import ingest_video_journal
+
+    client = _require_supabase()
+    filename = file.filename or "journal.mp4"
+    contents = await file.read()
+    try:
+        return await ingest_video_journal(
+            client,
+            user_id,
+            filename,
+            file.content_type,
+            contents,
+        )
+    except MediaJournalError as err:
+        raise HTTPException(status_code=err.status_code, detail=str(err)) from err
+
+
 class PersonaPayload(BaseModel):
     name: str
     role_type: str
