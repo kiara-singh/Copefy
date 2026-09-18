@@ -620,9 +620,10 @@ async def retrieve_production_journal(
             f"Use one of: {', '.join(PROD_JOURNAL_STRATEGIES)}"
         )
 
+    journal_query = (query or "").strip()
     search_query = _search_query(query, history)
     if strategy_name == "journal_mmr":
-        chunks = await search_journal_chunks(user_id, search_query, top_k=3)
+        chunks = await search_journal_chunks(user_id, journal_query, top_k=3)
     else:
         plan = RetrievalPlan(
             search_query=search_query,
@@ -630,7 +631,7 @@ async def retrieve_production_journal(
             reason="journal_eval_both",
         )
         kb_task = retrieve_with_strategy(query, history=history or [], plan=plan)
-        journal_task = search_journal_chunks(user_id, search_query, top_k=3)
+        journal_task = search_journal_chunks(user_id, journal_query, top_k=3)
         (_, kb_chunks, _), journal_chunks = await asyncio.gather(kb_task, journal_task)
         chunks = kb_chunks[:2] + journal_chunks[:2]
     return chunks, entry_ids_from_chunks(chunks)

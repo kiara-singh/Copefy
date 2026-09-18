@@ -387,6 +387,7 @@ class RetrievedChunk:
     category: str | None
     similarity: float
     document_id: str | None = None
+    created_at: str | None = None
 
 
 def _normalize(text: str) -> str:

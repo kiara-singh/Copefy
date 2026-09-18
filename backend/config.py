@@ -12,15 +12,19 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     # Optional paid/ingest project. Generation eval prefers this over GEMINI_API_KEY.
     gemini_ingest_api_key: str = ""
-    gemini_chat_model: str = "gemini-2.5-flash"
+    gemini_chat_model: str = "gemini-3.5-flash-lite"
     # Comma-separated fallbacks tried in order when the primary model is unavailable.
+    # 2.5-flash is last: this project 404s it, and a failed first try still burns eval budget.
     gemini_chat_model_fallbacks: str = (
-        "gemini-2.5-flash,gemini-3.5-flash-lite,gemini-flash-latest,gemini-3.6-flash"
+        "gemini-3.5-flash-lite,gemini-flash-latest,gemini-3.6-flash,gemini-2.5-flash"
     )
     gemini_embed_model: str = "gemini-embedding-2"
 
     rag_debug: bool = False
     rag_strategy: str = "mmr"
+    # Journal path only. Calibrated junk reduction on synthetic no-memory
+    # searches; not a guarantee that a kept chunk is the right memory.
+    journal_min_similarity: float = 0.70
 
     agent_router: str = "rule"
     agent_router_model: str = "gemini-flash-latest"

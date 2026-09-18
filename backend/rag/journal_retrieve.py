@@ -12,7 +12,8 @@ from typing import Any
 from rag.embed import embed_query
 from rag.retrieve import RetrievedChunk
 from rag.search import KBChunkHit, _vector_literal
-from rag.strategies.pipeline import mmr_rerank_hits
+from rag.strategies.pipeline import apply_min_similarity, mmr_rerank_hits
+from config import settings
 
 
 async def search_journal_chunks(
@@ -22,14 +23,18 @@ async def search_journal_chunks(
     match_count: int = 15,
     top_k: int = 5,
     mmr_lambda: float = 0.7,
+    min_similarity: float | None = None,
 ) -> list[RetrievedChunk]:
     """Execute vector search over journal_chunks filtered strictly by user_id.
 
-    Reuses MMR reranking to balance relevance and diversity.
+    Reuses MMR reranking, then drops chunks below `journal_min_similarity`.
+    An empty list is a valid result.
     """
     cleaned_query = query.strip()
     if not cleaned_query or not user_id:
         return []
+
+    cutoff = settings.journal_min_similarity if min_similarity is None else min_similarity
 
     # 1. Embed query string using shared embed_query (768-dim)
     query_embedding = await asyncio.to_thread(embed_query, cleaned_query)
@@ -42,11 +47,13 @@ async def search_journal_chunks(
     async with pool.acquire() as conn:
         rows = await conn.fetch(
             """
-            SELECT id, journal_entry_id, user_id, chunk_index, content,
-                   1 - (embedding <=> $1::vector) AS similarity, created_at
-            FROM journal_chunks
-            WHERE user_id = $2::uuid
-            ORDER BY embedding <=> $1::vector
+            SELECT jc.id, jc.journal_entry_id, jc.user_id, jc.chunk_index, jc.content,
+                   1 - (jc.embedding <=> $1::vector) AS similarity,
+                   je.created_at AS entry_created_at
+            FROM journal_chunks jc
+            JOIN journal_entries je ON je.id = jc.journal_entry_id
+            WHERE jc.user_id = $2::uuid
+            ORDER BY jc.embedding <=> $1::vector
             LIMIT $3
             """,
             literal,
@@ -63,7 +70,13 @@ async def search_journal_chunks(
             id=str(row["id"]),
             document_id=str(row["journal_entry_id"]),
             content=row["content"],
-            metadata={"chunk_index": row["chunk_index"], "user_id": str(row["user_id"])},
+            metadata={
+                "chunk_index": row["chunk_index"],
+                "user_id": str(row["user_id"]),
+                "entry_created_at": row["entry_created_at"].isoformat()
+                if row["entry_created_at"] is not None
+                else None,
+            },
             similarity=float(row["similarity"]),
             title="Personal Journal",
             source_url=None,
@@ -72,8 +85,9 @@ async def search_journal_chunks(
         for row in rows
     ]
 
-    # 4. Apply standard Layer 3 MMR reranking
+    # 4. Apply standard Layer 3 MMR reranking, then the journal relevance gate.
     reranked = mmr_rerank_hits(hits, top_k=top_k, lambda_mult=mmr_lambda)
+    gated = apply_min_similarity(reranked, cutoff)
 
     # 5. Convert to RetrievedChunk instances tagged as 'journal'
     return [
@@ -84,6 +98,7 @@ async def search_journal_chunks(
             category="journal",
             similarity=hit.similarity,
             document_id=hit.document_id,
+            created_at=(hit.metadata or {}).get("entry_created_at"),
         )
-        for hit in reranked
+        for hit in gated
     ]

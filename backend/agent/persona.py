@@ -9,6 +9,7 @@ from agent.preference_extract import PreferenceKnobs, extract_preference_knobs
 from agent.prompts import (
     DEFAULT_COMMUNICATION_STYLE,
     INSTRUCTION_HIERARCHY,
+    JOURNAL_MEMORY_PROMPT,
     STYLE_OVERLAYS,
     build_shared_safety_prompt,
 )
@@ -95,7 +96,11 @@ def new_profile_nonce() -> str:
     return secrets.token_hex(4)
 
 
-def build_system_instruction(persona: UserPersona | None = None) -> str:
+def build_system_instruction(
+    persona: UserPersona | None = None,
+    *,
+    journal_memories: bool = False,
+) -> str:
     """Build the Gemini system instruction for one chat turn.
 
     User-authored free text is not interpolated as commands here. Extracted
@@ -108,6 +113,8 @@ def build_system_instruction(persona: UserPersona | None = None) -> str:
         INSTRUCTION_HIERARCHY,
         _style_overlay(knobs),
     ]
+    if journal_memories:
+        parts.append(JOURNAL_MEMORY_PROMPT)
 
     context_lines: list[str] = []
     if knobs.preferred_name:

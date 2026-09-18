@@ -90,6 +90,7 @@ def _chunks_to_sources(chunks: list[RetrievedChunk]) -> list[dict]:
             "source_url": chunk.source_url,
             "category": chunk.category,
             "similarity": round(chunk.similarity, 4),
+            "created_at": chunk.created_at,
             "preview": chunk.content[:200].strip(),
             "excerpt": chunk.content[:400].strip(),
         }
@@ -301,7 +302,7 @@ async def run_agent(
 
         if corpus == "journal":
             tools_used.append("search_journal_entries")
-            query = decision.search_query or user_message
+            query = user_message
             chunks = await search_journal_chunks(user_id, query, top_k=3)
             retrieval_meta = {"strategy": "journal_mmr", "candidates": len(chunks)}
         elif corpus == "both":
@@ -311,9 +312,8 @@ async def run_agent(
                 categories=decision.categories,
                 reason=decision.reason,
             )
-            query = decision.search_query or user_message
             kb_task = retrieve_with_strategy(user_message, history=history, plan=plan)
-            j_task = search_journal_chunks(user_id, query, top_k=3)
+            j_task = search_journal_chunks(user_id, user_message, top_k=3)
             (_, kb_chunks, retrieval_meta), journal_chunks = await asyncio.gather(kb_task, j_task)
             chunks = kb_chunks[:2] + journal_chunks[:2]
         else:  # "clinical"
@@ -329,13 +329,19 @@ async def run_agent(
             chunks = all_chunks[:3]
 
         top_similarity = round(chunks[0].similarity, 4) if chunks else None
+        if corpus in ("journal", "both"):
+            traced_query = user_message
+        else:
+            traced_query = decision.search_query or (
+                plan.search_query if "plan" in locals() else user_message
+            )
         pipeline.add_timed(
             3,
             "retrieval",
             retrieval_meta.get("strategy", settings.rag_strategy),
             l3_start,
             strategy=retrieval_meta.get("strategy", settings.rag_strategy),
-            search_query=decision.search_query or (plan.search_query if "plan" in locals() else user_message),
+            search_query=traced_query,
             categories=list(decision.categories),
             candidates=retrieval_meta.get("candidates", 0),
             returned=len(chunks),
@@ -348,7 +354,10 @@ async def run_agent(
         tool_note = tool_result["message"]
         tool_status = tool_result["status"]
 
-    system_instruction = build_system_instruction(persona)
+    journal_memories = any(chunk.category == "journal" for chunk in chunks)
+    system_instruction = build_system_instruction(
+        persona, journal_memories=journal_memories
+    )
     prompt, anti_repeat = _build_user_prompt(
         user_message, history, chunks, tool_note, persona
     )

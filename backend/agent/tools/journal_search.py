@@ -17,6 +17,7 @@ async def search_journal_entries(user_id: str, query: str, top_k: int = 5) -> di
                 "content": chunk.content,
                 "similarity": round(chunk.similarity, 4),
                 "category": chunk.category,
+                "created_at": chunk.created_at,
             }
             for chunk in chunks
         ],
