@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     # Journal path only. Calibrated junk reduction on synthetic no-memory
     # searches; not a guarantee that a kept chunk is the right memory.
     journal_min_similarity: float = 0.70
+    # Generation prompt only: prior user/assistant exchanges to keep (current user
+    # message stays separate). Journal retrieval is unaffected. 6 still drops the
+    # in-chat update on long 11-turn state_* fixtures (update at turn 4 of 10 prior);
+    # 8 covers those while staying exchange-based.
+    chat_history_exchanges: int = 8
 
     agent_router: str = "rule"
     agent_router_model: str = "gemini-flash-latest"

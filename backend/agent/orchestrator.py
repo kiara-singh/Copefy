@@ -23,6 +23,7 @@ from agent.pipeline_trace import PipelineTrace
 from agent.preference_extract import extract_preference_knobs
 from agent.prompts import (
     CRISIS_RESPONSE,
+    RECENT_FACT_REUSE_PROMPT,
     RETRIEVED_UNTRUSTED_NOTICE,
     SAFETY_SANDWICH,
     UNSAFE_REPLY_FALLBACK,
@@ -80,8 +81,49 @@ def _chat_models() -> list[str]:
     return ordered
 
 
-def _format_history(messages: list[dict[str, str]], limit: int = 6) -> str:
-    recent = messages[-limit:]
+def _group_exchanges(messages: list[dict[str, str]]) -> list[list[dict[str, str]]]:
+    """Split history into user/assistant exchanges, preserving order.
+
+    An exchange is a user message plus the following assistant reply when present.
+    A leading orphan assistant message is its own exchange.
+    """
+    exchanges: list[list[dict[str, str]]] = []
+    i = 0
+    while i < len(messages):
+        msg = messages[i]
+        if msg.get("role") == "user":
+            pair = [msg]
+            if i + 1 < len(messages) and messages[i + 1].get("role") == "assistant":
+                pair.append(messages[i + 1])
+                i += 2
+            else:
+                i += 1
+            exchanges.append(pair)
+        else:
+            exchanges.append([msg])
+            i += 1
+    return exchanges
+
+
+def _recent_exchange_messages(
+    messages: list[dict[str, str]],
+    exchange_limit: int,
+) -> list[dict[str, str]]:
+    """Return messages from the last `exchange_limit` exchanges, in order."""
+    if exchange_limit <= 0 or not messages:
+        return []
+    selected = _group_exchanges(messages)[-exchange_limit:]
+    return [msg for exchange in selected for msg in exchange]
+
+
+def _format_history(
+    messages: list[dict[str, str]],
+    exchange_limit: int | None = None,
+) -> str:
+    limit = (
+        settings.chat_history_exchanges if exchange_limit is None else exchange_limit
+    )
+    recent = _recent_exchange_messages(messages, limit)
     if not recent:
         return ""
     lines = [f"{msg['role'].upper()}: {msg['content']}" for msg in recent]
@@ -121,6 +163,8 @@ def _build_user_prompt(
     persona: UserPersona | None,
 ) -> tuple[str, bool]:
     sections = [_format_history(history), f"USER: {user_message}"]
+    if history:
+        sections.append(RECENT_FACT_REUSE_PROMPT)
     retrieved = False
 
     if chunks:
@@ -407,7 +451,11 @@ async def run_agent(
         coaching_preferences_set=bool(knobs.coaching_notes),
         structured_format_requested=knobs.structured_format,
         model=model,
-        history_turns=min(len(history), 6),
+        history_turns=len(
+            _group_exchanges(
+                _recent_exchange_messages(history, settings.chat_history_exchanges)
+            )
+        ),
         kb_chunks_in_prompt=len(chunks),
         anti_repeat=anti_repeat,
     )
