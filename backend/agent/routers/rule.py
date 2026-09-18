@@ -48,6 +48,95 @@ FIRST_PERSON_RISK = (
     r"self[-\s]?harm|want to die|shouldn'?t be here)",
 )
 
+# Near-term / preparatory / finality language the keyword list does not cover.
+# Prefer recall: ambiguous present risk should still match.
+ACUTE_CRISIS_PATTERNS = (
+    r"\b(?:do not|don'?t|won'?t) (?:intend to |want to |plan to )?wake up\b",
+    r"\bgoodbye (?:letters?|notes?|texts?|messages?)\b",
+    r"\bthis is goodbye\b",
+    r"\b(?:gave|giving) (?:away )?(?:the |my )?(?:things|stuff|belongings)\b",
+    r"\b(?:tonight is |this is )?my last night\b",
+    r"\bchosen how\b",
+    r"\b(?:will not|won'?t|not) be coming back\b",
+    r"\bgoing through with (?:it|this)\b",
+    r"\b(?:take|taking) my life\b",
+    r"\bplan(?:s|ning)? to die\b",
+    r"\boverdose\b",
+    r"\b(?:swallowed|took) poison\b",
+    r"\bpoison on purpose\b",
+    r"\b(?:can(?:not|'t)|could not) keep (?:my|her|him|them)?self safe\b",
+    r"\bkeep herself safe\b",
+    r"\bintend to jump\b",
+    r"\bthinking of jumping\b",
+    r"\babout to jump\b",
+    r"\bstanding on a (?:bridge|roof|ledge)\b",
+    r"\bon the (?:roof|bridge|ledge)\b.{0,60}\bjump",
+    r"\bjump.{0,40}\b(?:right now|tonight)\b",
+    r"\bpills ready\b",
+    r"\bintend to take them all\b",
+    r"\bthe means beside me\b",
+    r"\bmeans beside me\b",
+    r"\bhurt someone\b",
+    r"\bweapon\b.{0,60}\b(?:myself|tonight|beside me|on myself)\b",
+    r"\b(?:myself|tonight|beside me|alone with).{0,60}\bweapon\b",
+    r"\binjur(?:e|ing|ed) myself\b",
+    r"\bhurt(?:ing)? (?:her|him|them)self\b",
+    r"\bhurt(?:ing)? themselves\b",
+    r"\buse it on myself\b",
+    r"\bcommit(?:ting)? suicide\b",
+    r"\battempted to commit\b",
+)
+
+# Recovered history is suppressed only when past + present safety are both clear
+# and nothing in the message indicates current or near-term danger.
+HISTORICAL_PAST_ANCHOR = (
+    r"\b(?:\d+|a|one|two|three|four|five|several|many) (?:years?|months?|weeks?) ago\b",
+    r"\byears ago\b",
+    r"\bas a teenager\b",
+    r"\bused to\b",
+    r"\bin 20\d{2}\b",
+    r"\bfrom years ago\b",
+)
+
+PRESENT_SAFETY_RECOVERY = (
+    r"\bi(?:'m| am) safe(?: now| today)?\b",
+    r"\btoday i am safe\b",
+    r"\bno current urges\b",
+    r"\bproud of (?:my )?recovery\b",
+    r"\bhow far i(?:'ve| have) come\b",
+    r"\bmuch better place now\b",
+    r"\bis recovering\b",
+)
+
+# Present/near-term danger. Vocabulary of a past attempt is not enough.
+CURRENT_NEAR_TERM_DANGER = (
+    r"\btonight\b",
+    r"\bright now\b",
+    r"\bthis evening\b",
+    r"\bin minutes\b",
+    r"\babout to\b",
+    r"\bintend to\b",
+    r"\bgoing to (?:kill|hurt|end|jump|die|take)\b",
+    r"\bgoodbye (?:letters?|notes?|texts?|messages?)\b",
+    r"\b(?:do not|don'?t|won'?t) (?:intend to |want to |plan to )?wake up\b",
+    r"\b(?:tonight is |this is )?my last night\b",
+    r"\bgoing through with (?:it|this)\b",
+    r"\b(?:will not|won'?t|not) be coming back\b",
+    r"\boverdose\b",
+    r"\bpills ready\b",
+    r"\bthe means beside me\b",
+    r"\bkeep (?:my|her|him|them)?self safe\b",
+    r"\bstill (?:want to die|suicidal|self-harming)\b",
+)
+
+# Explicit denial of current self-risk. Other acute language in the same
+# message still wins.
+NEGATED_SELF_RISK = (
+    r"\b(?:do not|don'?t) want to die\b",
+    r"\bnot hurt myself\b",
+    r"\bnot (?:thinking of |going to )?harm(?:ing)? myself\b",
+)
+
 DOCUMENT_PATTERNS = (
     r"\b(?:i )?(?:uploaded|attached|sent you)\b",
     r"\b(?:the|my|this) (?:attached|uploaded) \w+",
@@ -149,23 +238,46 @@ def _normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
 
 
+def _is_historical_recovery(normalized: str) -> bool:
+    if not _matches_any(HISTORICAL_PAST_ANCHOR, normalized):
+        return False
+    if not _matches_any(PRESENT_SAFETY_RECOVERY, normalized):
+        return False
+    if _matches_any(CURRENT_NEAR_TERM_DANGER, normalized):
+        return False
+    return True
+
+
+def _strip_negated_self_risk(normalized: str) -> str:
+    text = normalized
+    for pattern in NEGATED_SELF_RISK:
+        text = re.sub(pattern, " ", text)
+    return _normalize(text)
+
+
 def _matches_crisis(text: str) -> bool:
     normalized = _normalize(text)
-    if any(re.search(pattern, normalized) for pattern in CRISIS_FALSE_FRIENDS):
+    if _matches_any(CRISIS_FALSE_FRIENDS, normalized):
+        return False
+    if _is_historical_recovery(normalized):
         return False
 
-    third_party = any(re.search(pattern, normalized) for pattern in THIRD_PARTY_SUICIDE)
-    first_person = any(re.search(pattern, normalized) for pattern in FIRST_PERSON_RISK)
+    working = _strip_negated_self_risk(normalized)
+    third_party = _matches_any(THIRD_PARTY_SUICIDE, working)
+    first_person = _matches_any(FIRST_PERSON_RISK, working)
 
     # "want to die of embarrassment" is idiom, not ideation.
-    if not re.search(r"\bwant to die of\b", normalized):
+    if not re.search(r"\bwant to die of\b", working):
         for keyword in CRISIS_KEYWORDS:
-            if not re.search(rf"\b{re.escape(keyword)}\b", normalized):
+            if not re.search(rf"\b{re.escape(keyword)}\b", working):
                 continue
             if keyword in ("suicide", "suicidal") and third_party and not first_person:
                 continue
             return True
-    return any(re.search(pattern, normalized) for pattern in CRISIS_PATTERNS)
+
+    if any(re.search(pattern, working) for pattern in CRISIS_PATTERNS):
+        return True
+    return _matches_any(ACUTE_CRISIS_PATTERNS, working)
 
 
 def _crisis_in_recent_history(history: list[dict[str, str]]) -> bool:
