@@ -160,8 +160,9 @@ UNSAFE_REPLY_FALLBACK = (
 
 CRISIS_RESPONSE = (
     "I'm really glad you told me that, and I'm concerned about your safety. "
-    "You deserve support right now. If you're in the U.S., you can call or text 988 "
-    "to reach the Suicide & Crisis Lifeline, or contact your local emergency services. "
-    "I'm here with you, but I'm not a crisis service — please reach out to someone "
-    "who can help keep you safe."
+    "You deserve support right now. If you're in immediate physical danger or need "
+    "urgent medical help, call 911 or your local emergency services. If you're in "
+    "emotional crisis or thinking about suicide or self-harm, you can call or text "
+    "988 (Suicide & Crisis Lifeline in the U.S.). I'm here with you, but I'm not a "
+    "crisis service — please reach out to the resource that fits your situation."
 )
