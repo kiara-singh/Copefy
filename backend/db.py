@@ -23,15 +23,36 @@ def get_supabase() -> Client | None:
     return create_client(settings.supabase_url, settings.supabase_service_key)
 
 
+def _pool_is_stale(loop: asyncio.AbstractEventLoop) -> bool:
+    if _pool is None:
+        return False
+    if _pool_loop is not loop:
+        return True
+    return bool(_pool_loop is not None and _pool_loop.is_closed())
+
+
+async def _discard_pool() -> None:
+    """Drop the cached pool. Terminate so a closed event loop cannot hang close()."""
+    global _pool, _pool_lock, _pool_loop
+    pool = _pool
+    _pool = None
+    _pool_lock = None
+    _pool_loop = None
+    if pool is None:
+        return
+    try:
+        pool.terminate()
+    except Exception:
+        pass
+
+
 async def get_pool() -> asyncpg.Pool:
     """Return a shared asyncpg pool for pgvector queries."""
     global _pool, _pool_lock, _pool_loop
 
     loop = asyncio.get_running_loop()
-    if _pool is not None and _pool_loop is not loop:
-        await _pool.close()
-        _pool = None
-        _pool_lock = None
+    if _pool_is_stale(loop):
+        await _discard_pool()
 
     if _pool is not None:
         return _pool
@@ -43,6 +64,8 @@ async def get_pool() -> asyncpg.Pool:
         _pool_lock = asyncio.Lock()
 
     async with _pool_lock:
+        if _pool_is_stale(loop):
+            await _discard_pool()
         if _pool is None:
             _pool = await asyncpg.create_pool(
                 dsn=settings.database_url,
@@ -57,9 +80,4 @@ async def get_pool() -> asyncpg.Pool:
 
 async def close_pool() -> None:
     """Close the asyncpg pool (for tests / shutdown)."""
-    global _pool, _pool_loop, _pool_lock
-    if _pool is not None:
-        await _pool.close()
-        _pool = None
-        _pool_loop = None
-        _pool_lock = None
+    await _discard_pool()

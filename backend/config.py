@@ -19,6 +19,9 @@ class Settings(BaseSettings):
         "gemini-3.5-flash-lite,gemini-flash-latest,gemini-3.6-flash,gemini-2.5-flash"
     )
     gemini_embed_model: str = "gemini-embedding-2"
+    # Audio journals: transcribe with generateContent, then reuse text embeddings.
+    # Chat already uses 3.5-flash-lite; this project 404s gemini-2.5-flash.
+    gemini_transcribe_model: str = "gemini-3.5-flash-lite"
 
     rag_debug: bool = False
     # When true, /chat always attaches a metadata-only trace. Retrieved snippet

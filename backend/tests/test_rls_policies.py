@@ -31,3 +31,15 @@ def test_rls_migration_enables_policies_for_user_owned_tables():
     assert "bucket_id = 'medical-documents'" in sql
     assert "split_part(name, '/', 1) = auth.uid()::text" in sql
     assert "service-role" in sql.lower() or "service role" in sql.lower()
+
+
+def test_journal_audio_migration_scopes_private_bucket():
+    sql = (ROOT / "database" / "migrations" / "003_journal_audio.sql").read_text(
+        encoding="utf-8"
+    )
+    assert "source_modality" in sql
+    assert "audio_storage_path" in sql
+    assert "transcription_status" in sql
+    assert "bucket_id = 'journal-audio'" in sql
+    assert "split_part(name, '/', 1) = auth.uid()::text" in sql
+    assert "journal_audio_select_own" in sql

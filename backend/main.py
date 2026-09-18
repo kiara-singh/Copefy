@@ -341,6 +341,28 @@ async def create_journal_entry(
     return {"status": "success"}
 
 
+@app.post("/journal/audio")
+async def create_audio_journal_entry(
+    file: UploadFile = File(...),
+    user_id: str = Depends(get_current_user),
+):
+    """Upload private audio, transcribe it, and ingest the transcript as a text journal."""
+    from rag.audio_journal import AudioJournalError, ingest_audio_journal
+
+    client = _require_supabase()
+    filename = file.filename or "journal.wav"
+    contents = await file.read()
+    try:
+        return await ingest_audio_journal(
+            client,
+            user_id,
+            filename,
+            file.content_type,
+            contents,
+        )
+    except AudioJournalError as err:
+        raise HTTPException(status_code=err.status_code, detail=str(err)) from err
+
 
 class PersonaPayload(BaseModel):
     name: str

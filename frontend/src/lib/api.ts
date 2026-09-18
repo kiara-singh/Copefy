@@ -254,6 +254,16 @@ export async function submit_journal(text: string): Promise<void> {
   await api_request<{ status: string }>("/journal", "POST", { text });
 }
 
+export async function submit_audio_journal(file: File): Promise<{
+  status: string;
+  journal_id?: string;
+  transcription_status?: string;
+}> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return await api_request("/journal/audio", "POST", formData);
+}
+
 export async function get_personas(): Promise<AIPersona[]> {
   return await api_request<AIPersona[]>("/personas", "GET");
 }
