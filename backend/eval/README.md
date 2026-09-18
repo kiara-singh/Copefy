@@ -42,8 +42,9 @@ These authored labels are not a clinically validated assessment instrument.
 `fixtures/synthetic.yaml` defines 109 dated journals / 109 initial chunks under two dedicated users:
 `copefy-baseline-v1-alpha@example.com` and `copefy-baseline-v1-beta@example.com`.
 No messages or email are sent. Admin creation uses random passwords that are never
-saved or printed. Trusted Auth app metadata marks the namespace; profiles are named
-`SYNTHETIC EVAL ...`. Existing manual-user IDs in older eval scripts are never used.
+saved or printed. Trusted Auth app metadata marks the namespace; `profiles.preferred_name`
+stays null so chat does not address the synthetic marker. Existing manual-user IDs in
+older eval scripts are never used.
 
 The seeder inserts raw journals under the marked synthetic accounts with deterministic IDs, then invokes the
 **same `ingest_journal_entry_asyncpg` function used by `/journal`**. Thus the real

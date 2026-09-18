@@ -112,8 +112,10 @@ async def seed(identifiers=None):
         await conn.execute("SELECT pg_advisory_lock(hashtext($1))",NAMESPACE)
         try:
             ids=await users(conn,create=True)
+            # Keep eval identity in app_metadata only. preferred_name is user-facing
+            # chat personalization — never seed the namespace marker into it.
             for alias,uid in ids.items():
-                await conn.execute('UPDATE profiles SET preferred_name=$1 WHERE id=$2::uuid',f'SYNTHETIC EVAL {NAMESPACE} {alias}',uid)
+                await conn.execute('UPDATE profiles SET preferred_name=$1 WHERE id=$2::uuid',None,uid)
             for fixture in chosen:
                 uid=ids[fixture['user']]; jid=entry_id(fixture['user'],fixture['id'])
                 content=fixture['content']; stamp=fingerprint(content,settings.gemini_embed_model)

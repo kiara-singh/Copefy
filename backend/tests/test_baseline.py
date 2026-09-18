@@ -111,7 +111,10 @@ def test_chunk_verification_rejects_wrong_owner_dimension_zero_and_missing():
     assert not valid_chunks([],'hello','u')
 
 class MemoryConnection:
-    def __init__(self): self.entries={}; self.chunks={}
+    def __init__(self):
+        self.entries={}
+        self.chunks={}
+        self.profile_updates=[]
     @asynccontextmanager
     async def transaction(self,**kw):
         before=copy.deepcopy((self.entries,self.chunks))
@@ -123,6 +126,8 @@ class MemoryConnection:
             jid,uid,content,created_at=args; self.entries[jid]={'user_id':uid,'content':content,'created_at':created_at}
         elif sql.startswith('UPDATE journal_entries SET created_at'):
             created_at,jid=args; self.entries[jid]['created_at']=created_at
+        elif 'UPDATE profiles SET preferred_name' in sql:
+            self.profile_updates.append(args)
     async def fetchrow(self,sql,jid): return self.entries.get(jid)
     async def fetch(self,sql,jid): return self.chunks.get(jid,[])
 
@@ -158,6 +163,16 @@ def test_seed_is_persistent_idempotent_and_reembeds_only_on_change(monkeypatch):
     asyncio.run(f.seed()); assert ingest.await_count==3
     fixture['created_at']='2026-07-03T12:00:00+00:00'
     asyncio.run(f.seed()); assert ingest.await_count==3
+
+def test_seed_sets_preferred_name_null_not_synthetic_marker(monkeypatch):
+    f,conn,fixture,ingest=setup_seed(monkeypatch)
+    asyncio.run(f.seed())
+    assert conn.profile_updates
+    assert all(name is None for name,_uid in conn.profile_updates)
+    assert not any(
+        isinstance(name,str) and 'SYNTHETIC EVAL' in name
+        for name,_uid in conn.profile_updates
+    )
 
 def test_seed_rolls_back_on_embedding_failure(monkeypatch):
     f,conn,fixture,ingest=setup_seed(monkeypatch)
