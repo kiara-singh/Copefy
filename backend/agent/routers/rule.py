@@ -185,7 +185,6 @@ JOURNAL_EXPLICIT_RECALL = (
     r"\bhave i (?:mentioned|said|written|logged|shared|talked about)\b",
     r"\b(?:what did i|did i|pull up what i|show what i|search my)\b.*\b(?:in|from) my (?:previous |past |last |prior )?(?:journal|entries|entry|notes|check-?ins?)\b",
     r"\bwhat (?:triggers? for my|did i share about|did i write in my|did i say in my)\b",
-    r"\bwhat was the presentation i gave\b",
     r"\bwhat did i (?:write|say) in my\b",
 )
 
@@ -218,14 +217,157 @@ CLINICAL_ADVICE_PATTERNS = (
 )
 
 
-def _has_journal_memory_signal(normalized: str) -> bool:
-    return _matches_any(JOURNAL_EXPLICIT_RECALL, normalized) or _matches_any(
-        JOURNAL_PAST_PATTERNS, normalized
+# Journals also when the user names a specific life thing we have not been
+# told in chat (my interview, this trip) — not symptom words (my anxiety).
+_CLINICAL_SELF_NOUNS = frozenset({
+    "anxiety", "anxious", "depression", "depressed", "ocd", "adhd", "ptsd",
+    "panic", "stress", "sleep", "sleeping", "insomnia", "mood", "feeling",
+    "feelings", "symptom", "symptoms", "therapy", "cbt", "grounding",
+    "breathing", "health", "heart", "thoughts", "thought", "mind", "body",
+    "energy", "appetite", "focus", "attention", "burnout", "overwhelm",
+    "sadness", "grief", "anger", "worry", "worries", "nervousness", "fear",
+    "fears", "distress", "trauma",
+})
+_THIS_THAT_THING = re.compile(
+    r"\b(?:i|i'm|i am)\b.{0,80}\b(?:this|that)\s+([a-z][a-z'-]{1,})"
+)
+_MY_THING = re.compile(r"\bmy\s+([a-z][a-z'-]{1,})")
+_UPCOMING_EVENT = re.compile(
+    r"\bi have\b.{0,40}\b(?:a|an|my|the)\s+[a-z][a-z'-]{1,}.{0,30}"
+    r"\b(?:tomorrow|today|tonight|this (?:week|weekend|morning|afternoon|evening))\b"
+)
+
+
+def _is_life_noun(word: str) -> bool:
+    token = word.lower().strip("'")
+    if token in _CLINICAL_SELF_NOUNS:
+        return False
+    if token.endswith("s") and token[:-1] in _CLINICAL_SELF_NOUNS:
+        return False
+    return True
+
+
+def _has_personal_situation_for_journal(normalized: str) -> bool:
+    if not _FIRST_PERSON.search(normalized):
+        return False
+    if _UPCOMING_EVENT.search(normalized):
+        return True
+    for match in _THIS_THAT_THING.finditer(normalized):
+        if _is_life_noun(match.group(1)):
+            return True
+    for match in _MY_THING.finditer(normalized):
+        if _is_life_noun(match.group(1)):
+            return True
+    return False
+
+
+# Unresolved personal fact: the reply needs an identifying detail that is not
+# already in this chat ("the person mentoring me" + "using their name").
+_FIRST_PERSON = re.compile(r"\b(?:i|i'm|i’ve|i've|me|my|myself)\b")
+_NAME_SLOT = re.compile(
+    r"\b(?:using|use|with)\s+(?:their|his|her)\s+name\b"
+    r"|\bstart (?:it|the (?:note|message|opening)) with the name\b"
+    r"|\b(?:their|his|her)\s+name\b"
+)
+_USING_DEFINITE_SLOT = re.compile(
+    r"\busing\s+the\s+(?:time|date|day|month|hours?|deadline|clinic|topic|"
+    r"place|role|one)\b"
+)
+_IDENTIFY_PLEASE = re.compile(
+    r"\bname (?:the|that)\b"
+    r"|\bsay which\b"
+)
+_UNNAMED_PERSON = re.compile(
+    r"\bthe person\b.{0,80}\b(?:me\b|i\b)"
+    r"|\bthe person i\b"
+    r"|\bwhoever is\b"
+)
+_HELP_WITH_CURRENT = re.compile(
+    r"\b(?:help me|draft|rehearse|using|suggest|plan)\b"
+)
+_DEFINITE_CURRENT = re.compile(
+    r"\b(?:the|that) [a-z][a-z'-]{1,}.{0,50}\b(?:now|current)\b"
+    r"|\bthe one that is\b"
+)
+_CALENDAR_WORDS = frozenset({
+    "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+    "january", "february", "march", "april", "may", "june", "july", "august",
+    "september", "october", "november", "december",
+})
+_PROPER_STOP = frozenset({
+    "can", "what", "the", "how", "could", "please", "i", "when", "where", "who",
+    "why", "yes", "okay", "ok", "and", "but", "for", "with", "from", "this",
+    "that", "they", "them", "she", "he", "his", "her", "their", "you", "your",
+}) | _CALENDAR_WORDS
+
+
+def _likely_person_names(*texts: str) -> bool:
+    for text in texts:
+        for match in re.finditer(r"\b[A-Z][a-z]{2,}\b", text or ""):
+            if match.group(0).lower() not in _PROPER_STOP:
+                return True
+    return False
+
+
+def _history_user_text(history: list[dict[str, str]] | None) -> str:
+    return " ".join(
+        entry.get("content", "")
+        for entry in (history or [])
+        if entry.get("role") == "user"
+    )
+
+
+def _has_unresolved_personal_fact(
+    normalized: str,
+    text: str,
+    history: list[dict[str, str]] | None,
+) -> bool:
+    if not _FIRST_PERSON.search(normalized):
+        return False
+    name_needed = bool(_NAME_SLOT.search(normalized))
+    if name_needed and _likely_person_names(text, _history_user_text(history)):
+        name_needed = False
+    if name_needed:
+        return True
+    if _USING_DEFINITE_SLOT.search(normalized):
+        return True
+    if _IDENTIFY_PLEASE.search(normalized):
+        return True
+    if _UNNAMED_PERSON.search(normalized):
+        return True
+    if _HELP_WITH_CURRENT.search(normalized) and _DEFINITE_CURRENT.search(normalized):
+        return True
+    return False
+
+
+def _has_journal_memory_signal(
+    normalized: str,
+    text: str = "",
+    history: list[dict[str, str]] | None = None,
+) -> bool:
+    return (
+        _matches_any(JOURNAL_EXPLICIT_RECALL, normalized)
+        or _matches_any(JOURNAL_PAST_PATTERNS, normalized)
+        or _has_unresolved_personal_fact(normalized, text, history)
+        or _has_personal_situation_for_journal(normalized)
     )
 
 
 def _has_clinical_advice_signal(normalized: str) -> bool:
     return _matches_any(CLINICAL_ADVICE_PATTERNS, normalized)
+
+
+def _is_affect_without_ask(normalized: str, text: str) -> bool:
+    if _looks_like_question(text):
+        return False
+    return bool(
+        re.search(
+            r"\b(?:i(?:'m| am)|i feel|i have been)\b.{0,60}"
+            r"\b(?:stressed|anxious|nervous|worried|dreading|annoyed|upset|overwhelmed)\b"
+            r".{0,40}\b(?:about|with|this|that|my)\b",
+            normalized,
+        )
+    )
 
 
 def _matches_any(patterns: tuple[str, ...], text: str) -> bool:
@@ -309,7 +451,10 @@ class RuleRouter:
         context = recent_user_context(history, text)
         clinical_content = has_clinical_content(context)
         clinical_advice = _has_clinical_advice_signal(normalized)
-        journal_signal = _has_journal_memory_signal(normalized)
+        journal_signal = _has_journal_memory_signal(normalized, text, history)
+
+        if not journal_signal and not clinical_advice and _is_affect_without_ask(normalized, text):
+            return self._direct("personal_affect_no_stored_fact")
 
         if not clinical_content and not clinical_advice and not journal_signal:
             return self._direct("no_clinical_content")
@@ -332,7 +477,7 @@ class RuleRouter:
                 path=Path.SEARCH_DATABASE,
                 reason="journal_memory_recall",
                 router=self.name,
-                search_query=plan.search_query or text,
+                search_query=text,
                 categories=(),
                 corpus="journal",
             )
