@@ -395,12 +395,37 @@ _UNNAMED_PERSON = re.compile(
     r"|\bwhoever is\b"
 )
 _HELP_WITH_CURRENT = re.compile(
-    r"\b(?:help me|draft|rehearse|using|suggest|plan)\b"
+    r"\b(?:help me|draft|rehearse|using|suggest|plan|reflect|decide|map)\b"
 )
 _DEFINITE_CURRENT = re.compile(
     r"\b(?:the|that) [a-z][a-z'-]{1,}.{0,50}\b(?:now|current)\b"
     r"|\bthe one that is\b"
 )
+# Help request that needs a concrete fact about the user's own life that is
+# treated as already known / updated (not generic emotional support).
+_STORED_DETAIL_ASK = re.compile(
+    r"\b(?:can you|could you|help me|reflect|suggest|draft|rehearse|plan|map|"
+    r"decide|start (?:it|the)|keeping|keep|using|uses|use)\b"
+)
+_STORED_PERSONAL_DETAIL = re.compile(
+    r"\bwhat i(?:'m| am)? actually\b"
+    r"|\b(?:name|date|day|month|time|deadline|clinic|amount|place|hall|"
+    r"apartment|instrument|partner|role|task|plan|visit)"
+    r".{0,50}\b(?:actually|settled on|confirmed|postponed|revised|updated|"
+    r"switched|current|changed)\b"
+    r"|\b(?:actually|settled on|confirmed|postponed(?: to)?|revised(?: to)?|"
+    r"updated(?: to)?|switched(?: to)?)\b.{0,50}"
+    r"\b(?:name|date|day|month|deadline|clinic|amount|place|hall|one)\b"
+    r"|\bkeeping (?:the )?(?:month|date|day|name|time|deadline|place)"
+    r".{0,40}in mind\b"
+    r"|\buses? the (?:date|day|month|name|time|deadline|amount|place)\b"
+    r"|\bnot the (?:first|old|earlier|original|previous) "
+    r"(?:one|date|name|plan|deadline)\b"
+    r"|\bthe name (?:we |i |they )?(?:actually )?(?:settled on|chose|picked)\b"
+    r"|\bthe (?:date|day|month) .{0,40}"
+    r"(?:confirmed|postponed|extended|revised|updated)\b"
+)
+
 _CALENDAR_WORDS = frozenset({
     "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
     "january", "february", "march", "april", "may", "june", "july", "august",
@@ -429,6 +454,15 @@ def _history_user_text(history: list[dict[str, str]] | None) -> str:
     )
 
 
+def _asks_for_stored_personal_detail(normalized: str) -> bool:
+    """True when the turn asks to use a concrete, already-known personal detail."""
+    if not _FIRST_PERSON.search(normalized):
+        return False
+    if not _STORED_DETAIL_ASK.search(normalized):
+        return False
+    return bool(_STORED_PERSONAL_DETAIL.search(normalized))
+
+
 def _has_unresolved_personal_fact(
     normalized: str,
     text: str,
@@ -448,6 +482,8 @@ def _has_unresolved_personal_fact(
     if _UNNAMED_PERSON.search(normalized):
         return True
     if _HELP_WITH_CURRENT.search(normalized) and _DEFINITE_CURRENT.search(normalized):
+        return True
+    if _asks_for_stored_personal_detail(normalized):
         return True
     return False
 

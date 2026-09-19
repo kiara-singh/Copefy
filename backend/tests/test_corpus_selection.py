@@ -119,3 +119,66 @@ async def test_unresolved_personal_fact_not_mere_affect():
         history=[{"role": "user", "content": "Helen is the person I go to now."}],
     )
     assert already_named.path is Path.DIRECT_ANSWER
+
+
+@pytest.mark.asyncio
+async def test_stored_personal_detail_routes_to_journal():
+    """Final asks for a concrete stored personal detail should search journals."""
+    router = get_router("rule")
+    cases = [
+        (
+            "I want to help without grabbing every task back. Can you reflect what I am "
+            "actually doing for Mom now and help me set a limit around it?",
+            "journal",
+            Path.SEARCH_DATABASE,
+        ),
+        (
+            "I want to write a little note about why the apartment feels different now. "
+            "Can you start it with the name we actually settled on?",
+            "journal",
+            Path.SEARCH_DATABASE,
+        ),
+        (
+            "I keep worrying dinner has to be perfect. Can you suggest a simple version "
+            "of what I am actually cooking for Nia after she asked to change it?",
+            "journal",
+            Path.SEARCH_DATABASE,
+        ),
+        (
+            "Could you help me decide what boundary to discuss before Dad comes, "
+            "keeping the month he postponed to in mind?",
+            "journal",
+            Path.SEARCH_DATABASE,
+        ),
+        (
+            "Could you help me draft a question about a gradual return that uses the "
+            "date HR actually confirmed, not the first one I was holding?",
+            "journal",
+            Path.SEARCH_DATABASE,
+        ),
+        # Generic support / affect without a stored-detail ask.
+        ("I'm feeling anxious today.", "none", Path.DIRECT_ANSWER),
+        (
+            "Can you help me draft a message because I feel small asking for feedback?",
+            "none",
+            Path.DIRECT_ANSWER,
+        ),
+        # Clinical knowledge question stays clinical.
+        ("What are some ways to manage anxiety?", "clinical", Path.SEARCH_DATABASE),
+        # Crisis still wins.
+        ("I am going to kill myself tonight.", "none", Path.CRISIS),
+    ]
+    for query, expected_corpus, expected_path in cases:
+        decision = await router.decide(query)
+        pred_path = decision.path
+        pred_corpus = (
+            decision.corpus or "clinical"
+            if decision.path is Path.SEARCH_DATABASE
+            else "none"
+        )
+        assert pred_path == expected_path, (
+            f"Path mismatch for '{query}': expected {expected_path}, got {pred_path}"
+        )
+        assert pred_corpus == expected_corpus, (
+            f"Corpus mismatch for '{query}': expected {expected_corpus}, got {pred_corpus}"
+        )
