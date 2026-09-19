@@ -9,7 +9,14 @@ import pytest
 from pathlib import Path
 import uuid
 
-from eval.baseline import cases, validate_suite, offline, selected_records, trace_retrieval
+from eval.baseline import (
+    cases,
+    memory_ground_truth,
+    offline,
+    selected_records,
+    trace_retrieval,
+    validate_suite,
+)
 from eval.baseline_fixtures import fingerprint, valid_chunks, entry_id, definitions
 from eval.baseline_runtime import Ledger, BudgetExceeded
 from eval.baseline_scoring import (
@@ -32,6 +39,21 @@ def tmp_path():
     path=Path(__file__).parents[1]/'eval'/'results'/'test-scratch'/uuid.uuid4().hex
     path.mkdir(parents=True)
     return path
+
+def test_memory_ground_truth_resolves_after_and_before_journals():
+    case=next(c for c in cases() if c['id']=='journal_exam')
+    ground=memory_ground_truth(case)
+    assert ground['current_fact']==case['current_fact']
+    assert ground['superseded_fact']==case['superseded_fact']
+    assert [e['id'] for e in ground['current_journal_entries']]==['exam_after']
+    assert [e['id'] for e in ground['stale_journal_entries']]==['exam_before']
+    assert 'August' in ground['current_journal_entries'][0]['content']
+    assert 'June' in ground['stale_journal_entries'][0]['content']
+    state=next(c for c in cases() if c['id']=='state_exam')
+    state_ground=memory_ground_truth(state)
+    assert state_ground['current_fact']==state['current_fact']
+    assert state_ground['current_journal_entries']==[]
+    assert memory_ground_truth({'id':'crisis_01','turns':['x']}) is None
 
 def test_suite_counts_and_no_state_journal_contamination():
     items=cases(); report=validate_suite(items)

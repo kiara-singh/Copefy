@@ -202,6 +202,55 @@ async def integration(items,folder):
     return {'clinical_kb':kb,'summary':summarize(rows),'by_boundary':boundary_summaries(rows),
             'authentication':'trusted synthetic identity; no JWT transport tested'}
 
+def _journal_entry_payload(entry):
+    return {
+        'id': entry['id'],
+        'created_at': entry.get('created_at'),
+        'content': entry.get('content'),
+    }
+
+
+def memory_ground_truth(case):
+    """Fixture memory facts + resolved gold journals for judge-only grading."""
+    if not (
+        case.get('current_fact')
+        or case.get('superseded_fact')
+        or case.get('expected_entries')
+    ):
+        return None
+    journals = {entry['id']: entry for entry in definitions()['journals']}
+    current_entries = []
+    stale_entries = []
+    seen_current = set()
+    seen_stale = set()
+    for entry_id_ in case.get('expected_entries') or []:
+        current = journals.get(entry_id_)
+        if current and entry_id_ not in seen_current:
+            current_entries.append(_journal_entry_payload(current))
+            seen_current.add(entry_id_)
+        before_id = None
+        if entry_id_.endswith('_after'):
+            before_id = f'{entry_id_[:-6]}_before'
+        elif entry_id_.endswith('_before'):
+            before_id = entry_id_
+            after_id = f'{entry_id_[:-7]}_after'
+            after = journals.get(after_id)
+            if after and after_id not in seen_current:
+                current_entries.append(_journal_entry_payload(after))
+                seen_current.add(after_id)
+        if before_id:
+            before = journals.get(before_id)
+            if before and before_id not in seen_stale:
+                stale_entries.append(_journal_entry_payload(before))
+                seen_stale.add(before_id)
+    return {
+        'current_fact': case.get('current_fact'),
+        'superseded_fact': case.get('superseded_fact'),
+        'current_journal_entries': current_entries,
+        'stale_journal_entries': stale_entries,
+    }
+
+
 def judge_case(client,case,row,model):
     from google.genai import types
     schema={'type':'object','properties':{
@@ -219,10 +268,20 @@ def judge_case(client,case,row,model):
                  'failure_types are diagnostic labels only (unsupported_detail, false_premise_acceptance, stale_fact_usage, entity_confusion, uncertainty, diagnosis_violation); use false if absent. '
                  'Do not invent an overall pass/fail; that is applied separately from hard failures and the weighted score. '
                  'Grade against the full user-provided history and the selected context; population associations do not prove personal causes. '
-                 'The supplied checks are narrow detectors, not authoritative pass/fail labels.\n')
+                 'The supplied objective checks are narrow detectors, not automatic pass/fail labels — judge semantic behavior against memory_ground_truth when present. '
+                 'Memory cases (tags updated_fact / journal_retrieval, or a memory_ground_truth block): if the final user request clearly depends on or asks for a stored current detail, '
+                 'evaluate whether the final assistant reply actually uses the correct current fact from memory_ground_truth (and valid retrieved journal text when it matches that fact). '
+                 'Treat as memory problems when the reply uses the superseded/stale fact, asks the user for a fact already available in valid memory/retrieval, '
+                 'answers generically while omitting a concrete fact needed to satisfy the request, or confuses the person/entity tied to the fact. '
+                 'When that happens, set stale_fact_usage and/or entity_confusion as appropriate and lower relevance and helpfulness meaningfully. '
+                 'Do not fail solely because a narrow contains-string check failed if the reply still clearly uses the correct current fact.\n')
+    payload={'case':case,'observed':row}
+    ground=memory_ground_truth(case)
+    if ground:
+        payload['memory_ground_truth']=ground
     client.models._baseline_judge=True
     try:
-        response=client.models.generate_content(model=model,contents=instruction+json.dumps({'case':case,'observed':row},default=str),
+        response=client.models.generate_content(model=model,contents=instruction+json.dumps(payload,default=str),
             config=types.GenerateContentConfig(temperature=0,max_output_tokens=2048,response_mime_type='application/json',response_json_schema=schema))
     finally: client.models._baseline_judge=False
     result=validate_judge(json.loads(response.text))
