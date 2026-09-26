@@ -25,8 +25,13 @@ function get_speech_recognition(): SpeechRecognition | null {
 }
 
 function HomePage() {
-  const { session_id, sessions, loading_list, refresh_sessions } =
-    useChatSession();
+  const {
+    session_id,
+    sessions,
+    loading_list,
+    refresh_sessions,
+    recover_session,
+  } = useChatSession();
   const [messages, set_messages] = useState<ChatMessage[]>([]);
   const [input, set_input] = useState("");
   const [is_sending, set_is_sending] = useState(false);
@@ -103,6 +108,10 @@ function HomePage() {
       })
       .catch((error) => {
         console.error("Failed to load chat messages", error);
+        const detail = error instanceof Error ? error.message : "";
+        if (!cancelled && detail.includes("Chat not found")) {
+          void recover_session();
+        }
       })
       .finally(() => {
         if (!cancelled) {
@@ -113,7 +122,7 @@ function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [session_id, loading_list]);
+  }, [session_id, loading_list, recover_session]);
 
   useEffect(() => {
     scroll_anchor_ref.current?.scrollIntoView({ behavior: "smooth" });
@@ -273,7 +282,19 @@ function HomePage() {
     set_speech_error("");
 
     try {
-      const data = await send_chat(session_id, trimmed);
+      let active_session = session_id;
+      let data;
+      try {
+        data = await send_chat(active_session, trimmed);
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : "";
+        if (!detail.includes("Chat not found")) {
+          throw error;
+        }
+        // Stale local session id — open a real chat and retry once.
+        active_session = await recover_session();
+        data = await send_chat(active_session, trimmed);
+      }
       set_messages((prev) => [
         ...prev,
         {
