@@ -37,6 +37,7 @@ function HomePage() {
   const scroll_anchor_ref = useRef<HTMLDivElement | null>(null);
   const sessions_ref = useRef(sessions);
   const recognition_ref = useRef<SpeechRecognition | null>(null);
+  const want_listening_ref = useRef(false);
   const base_input_ref = useRef("");
   sessions_ref.current = sessions;
 
@@ -48,6 +49,7 @@ function HomePage() {
 
   useEffect(() => {
     return () => {
+      want_listening_ref.current = false;
       recognition_ref.current?.abort();
       recognition_ref.current = null;
     };
@@ -118,7 +120,25 @@ function HomePage() {
   }, [messages]);
 
   const stop_listening = () => {
+    want_listening_ref.current = false;
     recognition_ref.current?.stop();
+  };
+
+  const speech_error_message = (code: string): string => {
+    switch (code) {
+      case "not-allowed":
+        return "Microphone permission is blocked. Allow it in the browser, then try again.";
+      case "audio-capture":
+        return "No microphone found. Plug one in or check system settings.";
+      case "network":
+        return "Voice input needs a network connection (browser speech service). Check your connection and try again.";
+      case "service-not-allowed":
+        return "Voice input is blocked in this browser. Try Chrome or Edge.";
+      case "language-not-supported":
+        return "This language is not supported for voice input. Try typing instead.";
+      default:
+        return "Voice input failed. You can keep typing instead.";
+    }
   };
 
   const toggle_listening = () => {
@@ -126,8 +146,16 @@ function HomePage() {
       return;
     }
 
-    if (is_listening) {
+    if (is_listening || want_listening_ref.current) {
       stop_listening();
+      set_is_listening(false);
+      return;
+    }
+
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      set_speech_error(
+        "Voice input needs a secure page (https or localhost). Open the app via localhost."
+      );
       return;
     }
 
@@ -151,10 +179,11 @@ function HomePage() {
     base_input_ref.current = input.trimEnd();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang =
+    const lang =
       typeof navigator !== "undefined" && navigator.language
         ? navigator.language
         : "en-US";
+    recognition.lang = lang.includes("-") ? lang : "en-US";
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let final_chunk = "";
@@ -170,7 +199,8 @@ function HomePage() {
       }
       if (final_chunk) {
         const prefix = base_input_ref.current;
-        base_input_ref.current = `${prefix}${prefix ? " " : ""}${final_chunk.trim()}`.trim();
+        base_input_ref.current =
+          `${prefix}${prefix ? " " : ""}${final_chunk.trim()}`.trim();
       }
       const draft = `${base_input_ref.current}${
         interim_chunk
@@ -181,32 +211,43 @@ function HomePage() {
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      // Chrome ends a session with no-speech after silence; onend restarts
+      // while the user still wants to listen.
       if (event.error === "aborted" || event.error === "no-speech") {
         return;
       }
-      if (event.error === "not-allowed") {
-        set_speech_error(
-          "Microphone permission is blocked. Allow it in the browser, then try again."
-        );
-      } else {
-        set_speech_error("Voice input failed. You can keep typing instead.");
-      }
+      want_listening_ref.current = false;
+      set_speech_error(speech_error_message(event.error));
       set_is_listening(false);
       recognition_ref.current = null;
     };
 
     recognition.onend = () => {
+      if (want_listening_ref.current && recognition_ref.current === recognition) {
+        try {
+          recognition.start();
+          return;
+        } catch (error) {
+          console.error("Failed to restart speech recognition", error);
+          want_listening_ref.current = false;
+          set_speech_error("Voice input failed. You can keep typing instead.");
+        }
+      }
       set_is_listening(false);
-      recognition_ref.current = null;
+      if (recognition_ref.current === recognition) {
+        recognition_ref.current = null;
+      }
       set_input((current) => current.trim());
     };
 
     try {
+      want_listening_ref.current = true;
       recognition_ref.current = recognition;
       recognition.start();
       set_is_listening(true);
     } catch (error) {
       console.error("Failed to start speech recognition", error);
+      want_listening_ref.current = false;
       set_speech_error("Voice input failed. You can keep typing instead.");
       set_is_listening(false);
       recognition_ref.current = null;
@@ -220,8 +261,9 @@ function HomePage() {
       return;
     }
 
-    if (is_listening) {
+    if (is_listening || want_listening_ref.current) {
       stop_listening();
+      set_is_listening(false);
     }
 
     const is_first_message = messages.length === 0;
@@ -310,7 +352,9 @@ function HomePage() {
                     {message.content}
                   </div>
                 </div>
-                {message.trace && <ChatTracePanel trace={message.trace} />}
+                {is_rag_debug_enabled && message.trace && (
+                  <ChatTracePanel trace={message.trace} />
+                )}
               </div>
             ))
           )}
@@ -342,7 +386,7 @@ function HomePage() {
               aria-label={mic_title}
               title={mic_title}
               aria-pressed={is_listening}
-              disabled={is_sending || !speech_supported}
+              disabled={is_sending}
               onClick={toggle_listening}
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                 is_listening
@@ -370,7 +414,13 @@ function HomePage() {
             <input
               type="text"
               value={input}
-              onChange={(event) => set_input(event.target.value)}
+              onChange={(event) => {
+                const value = event.target.value;
+                set_input(value);
+                if (want_listening_ref.current) {
+                  base_input_ref.current = value.trimEnd();
+                }
+              }}
               placeholder={
                 is_listening ? "Listening…" : "Type your message..."
               }
