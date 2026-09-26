@@ -131,7 +131,7 @@ function HomePage() {
       case "audio-capture":
         return "No microphone found. Plug one in or check system settings.";
       case "network":
-        return "Voice input needs a network connection (browser speech service). Check your connection and try again.";
+        return "Chrome could not reach its speech service (often VPN, firewall, Brave/Arc, or offline). Try Chrome or Edge with VPN off, then refresh.";
       case "service-not-allowed":
         return "Voice input is blocked in this browser. Try Chrome or Edge.";
       case "language-not-supported":
