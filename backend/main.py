@@ -113,9 +113,11 @@ def _require_session_access(
         .maybe_single()
         .execute()
     )
-    if not result.data or not result.data.get("user_id"):
+    # supabase-py maybe_single() returns None (not {data: None}) when 0 rows.
+    row = getattr(result, "data", None)
+    if not row or not row.get("user_id"):
         raise HTTPException(status_code=404, detail="Chat not found.")
-    owner_id = str(result.data["user_id"])
+    owner_id = str(row["user_id"])
     if auth_user_id and auth_user_id != owner_id:
         raise HTTPException(status_code=404, detail="Chat not found.")
     return owner_id

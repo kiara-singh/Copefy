@@ -83,6 +83,31 @@ class TestAuthEndpoints(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual("Chat not found.", res.json()["detail"])
 
+    @patch("main.get_supabase")
+    def test_chat_missing_session_maybe_single_none(self, mock_get_supabase):
+        """supabase-py maybe_single() returns None for 0 rows — must 404, not 500."""
+        mock_supabase = MagicMock()
+        mock_user = MagicMock()
+        mock_user.id = TEST_USER_ID
+        mock_user_res = MagicMock()
+        mock_user_res.user = mock_user
+        mock_supabase.auth.get_user.return_value = mock_user_res
+
+        mock_select = MagicMock()
+        mock_select.maybe_single.return_value.execute.return_value = None
+        mock_supabase.table("sessions").select.return_value.eq.return_value = mock_select
+
+        mock_get_supabase.return_value = mock_supabase
+
+        headers = {"Authorization": "Bearer valid_token"}
+        res = client.post(
+            "/chat",
+            json={"session_id": SESSION_ID, "message": "hello"},
+            headers=headers,
+        )
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual("Chat not found.", res.json()["detail"])
+
     @patch("main.load_user_persona")
     @patch("main.run_agent")
     @patch("main.get_supabase")
