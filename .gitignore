@@ -24,8 +24,22 @@ backend/eval/results/**
 !backend/eval/results/eval_stats.md
 backend/eval/cache/
 
-# Local interview notes; not part of the repo
+# Local interview notes, handoffs, and outdated audits. Kept on disk, not in Git.
 docs/KIARA_UPDATES.md
+docs/WORK_HANDOFF.md
+docs/LAYER1_HANDOFF.md
+docs/LAYER3_HANDOFF.md
+docs/LAYER4_HANDOFF.md
+docs/LAYER5_HANDOFF.md
+docs/ARCHITECTURE_AUDIT_2026-09-16.md
+docs/agentic_rag_testing_strategy_map.md
+docs/Agentic_RAG_Testing_Strategy_Map.docx
+docs/flowcharts/
+PROJECT_STATE.md
+.agents/
+
+# Local Cursor project state
+.cursor/
 
 # Logs
 *.log
