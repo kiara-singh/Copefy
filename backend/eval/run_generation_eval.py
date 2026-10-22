@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from eval.journal_retrieve import JOURNAL_EVAL_USER_ID, retrieve_production_journal
+from eval.journal_retrieve import configured_journal_eval_user_id, retrieve_production_journal
 from eval.load_golden import load_golden_cases, load_journal_eval_cases
 from eval.retrieval_scoring import is_labeled
 from eval.write_eval_summary import write_summary
@@ -350,6 +350,12 @@ def _summarize(rows: list[dict]) -> dict:
 
 
 async def _main_async(args: argparse.Namespace) -> int:
+    resolved_user = (args.user_id or "").strip() or configured_journal_eval_user_id()
+    if not resolved_user:
+        raise SystemExit(
+            "Pass --user-id or set JOURNAL_EVAL_USER_ID in backend/.env."
+        )
+    args.user_id = resolved_user
     try:
         from deepeval.test_case import LLMTestCase
     except ImportError as exc:
@@ -532,8 +538,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--user-id",
-        default=JOURNAL_EVAL_USER_ID,
-        help="Journal user UUID (production search_journal_chunks)",
+        default=None,
+        help="Journal user UUID (or set JOURNAL_EVAL_USER_ID in backend/.env)",
     )
     parser.add_argument(
         "--clinical",

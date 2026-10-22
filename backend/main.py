@@ -133,9 +133,6 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-DEV_USER_ID = "78b0cc86-0b60-4220-8127-4430b1f3cd9e"
-
-
 @app.post("/session")
 def create_session(
     user_id: str = Depends(get_current_user),

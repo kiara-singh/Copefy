@@ -24,7 +24,7 @@ from eval.judge import (
     summary_asdict,
 )
 from eval.journal_retrieve import (
-    JOURNAL_EVAL_USER_ID,
+    configured_journal_eval_user_id,
     JOURNAL_STRATEGY_SPECS,
     PROD_JOURNAL_STRATEGIES,
     count_journal_chunks,
@@ -171,7 +171,11 @@ async def _judge_journal(
     skip_judge: bool = False,
     source: str = "production",
 ) -> tuple[dict[str, dict], dict[str, dict[str, JudgeScore]], list[dict], dict]:
-    resolved_user = user_id or JOURNAL_EVAL_USER_ID
+    resolved_user = (user_id or "").strip() or configured_journal_eval_user_id()
+    if not resolved_user:
+        raise RuntimeError(
+            "Pass --user-id or set JOURNAL_EVAL_USER_ID in backend/.env."
+        )
     print("Loading journal_entries …")
     entries = await load_journal_entries(user_id=resolved_user)
     meta = describe_entries(entries)
@@ -423,7 +427,7 @@ async def _main_async(args: argparse.Namespace) -> int:
             strategies,
             cases,
             list_only=args.list_journal,
-            user_id=args.user_id or JOURNAL_EVAL_USER_ID,
+            user_id=args.user_id,
             skip_judge=args.skip_judge,
             source=args.source,
         )
@@ -554,8 +558,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--user-id",
-        default=JOURNAL_EVAL_USER_ID,
-        help="Journal user UUID (default: live seed corpus in journal_eval.yaml)",
+        default=None,
+        help="Journal user UUID (or set JOURNAL_EVAL_USER_ID in backend/.env)",
     )
     args = parser.parse_args()
     raise SystemExit(asyncio.run(_main_async(args)))

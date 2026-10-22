@@ -18,8 +18,6 @@ from rag.journal_ingestion import ingest_journal_entry_asyncpg
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-SYNTHETIC_TEST_USER_ID = "938c6dc2-bab8-44d9-b732-8bbd308fd838"
-
 DUMMY_JOURNAL_ENTRIES = [
     # 1. Exam Anxiety Series (Recurring)
     {
@@ -794,7 +792,18 @@ async def seed_synthetic_journals(user_id: str | None = None) -> tuple[str, list
                 target_user_id = str(row["id"])
 
         if not target_user_id:
-            target_user_id = SYNTHETIC_TEST_USER_ID
+            from config import settings
+
+            target_user_id = (
+                settings.seed_user_id or settings.journal_eval_user_id or ""
+            ).strip() or None
+
+        if not target_user_id:
+            raise RuntimeError(
+                "No profile to attach synthetic journals to. "
+                "Set SEED_USER_ID in backend/.env, or call "
+                "seed_synthetic_journals(user_id)."
+            )
 
         # Ensure user exists in profiles
         try:

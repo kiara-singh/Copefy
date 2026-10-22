@@ -46,6 +46,10 @@ class Settings(BaseSettings):
     # generateContent quotas are tiny, so a paid key here makes eval runs practical.
     agent_router_api_key: str = ""
 
+    # Eval and seed scripts only. Chat and auth always use the signed-in user.
+    journal_eval_user_id: str = ""
+    seed_user_id: str = ""
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

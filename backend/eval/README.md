@@ -43,8 +43,8 @@ These authored labels are not a clinically validated assessment instrument.
 `copefy-baseline-v1-alpha@example.com` and `copefy-baseline-v1-beta@example.com`.
 No messages or email are sent. Admin creation uses random passwords that are never
 saved or printed. Trusted Auth app metadata marks the namespace; `profiles.preferred_name`
-stays null so chat does not address the synthetic marker. Existing manual-user IDs in
-older eval scripts are never used.
+stays null so chat does not address the synthetic marker. This seeder creates those
+accounts itself. It does not read `JOURNAL_EVAL_USER_ID`.
 
 The seeder inserts raw journals under the marked synthetic accounts with deterministic IDs, then invokes the
 **same `ingest_journal_entry_asyncpg` function used by `/journal`**. Thus the real
@@ -159,7 +159,7 @@ share the ledger and must remain within $1 unless separately authorized and impl
 ## Rerun commands (PowerShell, from the repository)
 
 ```powershell
-Set-Location C:\Users\singh\Downloads\Copefy\backend
+Set-Location backend
 
 # Offline unit/regression checks, including the two formerly stale root auth tests
 .\venv\Scripts\python.exe -m pytest tests test_auth_endpoints.py -q -p no:cacheprovider
@@ -193,7 +193,7 @@ $caseIds = 'state_interview,state_friend,journal_mentor,journal_brother,missing_
 .\venv\Scripts\python.exe -m eval.baseline live --approved-stage live --ids $caseIds --judge --judge-model gemini-3.5-flash-lite --max-usd 1
 
 # Prefer this to add judging to an existing unjudged live run, without regenerating
-.\venv\Scripts\python.exe -m eval.baseline judge --approved-stage live --input-run 'C:\Users\singh\Downloads\Copefy\backend\eval\results\baseline\REPLACE_WITH_LIVE_RUN_DIRECTORY' --ids $caseIds --max-usd 1
+.\venv\Scripts\python.exe -m eval.baseline judge --approved-stage live --input-run 'eval/results/baseline/REPLACE_WITH_LIVE_RUN_DIRECTORY' --ids $caseIds --max-usd 1
 
 # Explicit destructive reset: ONLY the marked synthetic accounts and cascaded DB data
 .\venv\Scripts\python.exe -m eval.baseline reset --confirm-namespace copefy-baseline-v1
