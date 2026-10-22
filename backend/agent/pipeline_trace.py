@@ -56,17 +56,18 @@ class PipelineTrace:
         }
 
     def log_to_terminal(self) -> None:
+        # print() so lines show under uvicorn; logger.info alone often does not.
         for step in self.layers:
             extra = self._format_step(step)
-            logger.info(
-                "[pipeline] L%d %s → %s %s [%sms]",
-                step.layer,
-                step.name,
-                step.decision,
-                extra,
-                step.ms,
+            line = (
+                f"[pipeline] L{step.layer} {step.name} → {step.decision} "
+                f"{extra} [{step.ms}ms]"
             )
-        logger.info("[pipeline] total %sms", self.total_ms)
+            print(line, flush=True)
+            logger.info(line)
+        total = f"[pipeline] total {self.total_ms}ms"
+        print(total, flush=True)
+        logger.info(total)
 
     @staticmethod
     def _format_step(step: LayerStep) -> str:
