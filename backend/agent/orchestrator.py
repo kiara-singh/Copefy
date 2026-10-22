@@ -287,6 +287,8 @@ def _generate_reply(prompt: str, system_instruction: str) -> tuple[str, str | No
 
 
 def _corpus_reason(decision: RouteDecision) -> str:
+    if decision.path is not Path.SEARCH_DATABASE:
+        return "no retrieval on this path"
     if decision.corpus:
         return f"router selected {decision.corpus}"
     return "default clinical"
@@ -341,7 +343,10 @@ async def run_agent(
         reason=decision.reason,
     )
 
-    corpus = decision.corpus or "clinical"
+    if decision.path is Path.SEARCH_DATABASE:
+        corpus = decision.corpus or "clinical"
+    else:
+        corpus = "none"
     pipeline.add_timed(
         2,
         "corpus",
