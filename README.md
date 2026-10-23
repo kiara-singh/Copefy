@@ -6,7 +6,7 @@ Copefy is a personalized mental-health companion that utilizes a RAG pipeline. A
 
 <!-- Replace the link with the hosted walkthrough. -->
 
-[Watch the demo]([https://your-demo-video-url](https://www.youtube.com/watch?v=0Nwf5jQzqKY))
+[Watch the demo](https://www.youtube.com/watch?v=0Nwf5jQzqKY)
 
 ## Features
 
