@@ -78,6 +78,8 @@ python -m rag.ingest --max-embeds 500
 
 The first command samples source URLs and does not call Gemini. The second crawls public sources and stores 768-dimensional embeddings in `kb_chunks` until `--max-embeds` embedding calls have been made. If `GEMINI_INGEST_API_KEY` is set, that key is used and `--max-embeds` is required.
 
+Crawl4AI needs a browser install once, after the Python packages are installed. With the virtualenv active, run `crawl4ai-setup`. If that browser is missing, HTML fetches use the plain HTTP fallback.
+
 ## Safety
 
 Copefy is a portfolio project, not a medical device, clinician, or crisis service. If you are in immediate danger, call your local emergency number; in the United States, call or text 988.
