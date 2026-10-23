@@ -1,12 +1,12 @@
 # Copefy
 
-Copefy is a mental-health companion you can run locally. A person signs in, keeps a journal, and talks with an assistant that can look back at those notes. When a message looks like a current crisis, the app skips the model and returns a fixed message that points to emergency services and the U.S. 988 Suicide & Crisis Lifeline.
+Copefy is a personalized mental-health companion that utilizes a RAG pipeline. A person signs in, keeps a journal, and talks with an assistant that can look back at those notes. When a message looks like a current crisis, the app skips the model and returns a fixed message that points to emergency services and the U.S. 988 Suicide & Crisis Lifeline.
 
 ## Demo
 
 <!-- Replace the link with the hosted walkthrough. -->
 
-[Watch the demo](https://your-demo-video-url)
+[Watch the demo]([https://your-demo-video-url](https://www.youtube.com/watch?v=0Nwf5jQzqKY))
 
 ## Features
 
