@@ -72,6 +72,12 @@ CREATE TABLE journal_entries (
     content TEXT NOT NULL,
     tags VARCHAR(50)[],
     embedding vector(768), -- Dimension size (768) configured for Gemini embeddings
+    source_modality VARCHAR(20) NOT NULL DEFAULT 'text', -- 'text', 'audio', or 'video'
+    audio_storage_path TEXT, -- private journal-audio object: {user_id}/{uuid}_{filename}
+    audio_filename VARCHAR(255),
+    video_storage_path TEXT, -- private journal-video object: {user_id}/{uuid}_{filename}
+    video_filename VARCHAR(255),
+    transcription_status VARCHAR(32) NOT NULL DEFAULT 'not_applicable',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -115,3 +121,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Row-level security for user-owned tables lives in
+-- database/migrations/002_rls_user_owned.sql (apply in Supabase).

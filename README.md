@@ -1,133 +1,85 @@
 # Copefy
 
-Copefy is an AI mental health and wellness companion. It leverages multimodal AI
-and a Retrieval-Augmented Generation (RAG) architecture to provide supportive,
-context-aware conversations.
+Copefy is a mental-health companion you can run locally. A person signs in, keeps a journal, and talks with an assistant that can look back at those notes. When a message looks like a current crisis, the app skips the model and returns a fixed message that points to emergency services and the U.S. 988 Suicide & Crisis Lifeline.
 
-> This repo is an early scaffold. The three frontend pages currently render only
-> their names, and the backend exposes basic health endpoints. Auth, the RAG
-> pipeline, and multimodal features come later.
+## Demo
+
+<!-- Replace the link with the hosted walkthrough. -->
+
+[Watch the demo](https://your-demo-video-url)
+
+## Features
+
+- Email and password sign-up, onboarding (preferred name, communication style, wellness goal), settings, and custom personas.
+- Multi-session chat, with history stored for the signed-in account.
+- Text journals, plus audio (wav, mp3, m4a, ogg, webm, flac, up to 10 MB) and video (mp4, mov, webm, up to 25 MB). Media stays in private storage. Search uses the transcript. Video journals need ffmpeg on the server `PATH`; frames are not sent to the model.
+- Browser speech input on the chat composer. It types into the message box and needs Chrome, Edge, or Safari on localhost or https.
+- Private PDF uploads in Settings (`.pdf`, up to 10 MB), stored under that account.
+- Clinical answers from a shared knowledge base (ADHD, depression, anxiety, OCD, and PTSD) after that base is ingested.
+
+## Architecture
+
+The browser is a React app. It signs in with Supabase Auth and sends each chat turn to a FastAPI backend with the user's access token. The API checks that token, then:
+
+1. **Routing.** The default router is a rule set. An optional model router can be selected with `AGENT_ROUTER=ai`. A crisis route returns the fixed helpline text and does not call Gemini.
+2. **Journal retrieval.** Journal questions embed the message with Gemini and search that user's rows in `journal_chunks` through pgvector. Dated snippets are passed into the prompt as untrusted context, along with recent exchanges from the same chat.
+3. **Reply.** Gemini writes the reply. A narrow check replaces text that claims a diagnosis or a therapist identity. The user and assistant messages are stored on the session.
+
+Clinical lookup calls `match_kb_chunks` and reads `kb_documents`. Both are created by `database/setup.sql`. The tables stay empty until the ingest command below has run.
+
+Vector search uses a direct Postgres connection. Auth, sessions, profiles, storage, and row inserts use the Supabase client. The browser holds only the anon key, so the row-level security policies in `database/setup.sql` apply to those reads and writes.
 
 ## Tech stack
 
-- **Frontend:** React + TypeScript (Vite), Tailwind CSS, React Router
-- **Backend:** FastAPI (Python)
-- **Database / Vector store:** Supabase (Postgres) + pgvector
+- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, React Router
+- **Backend:** Python, FastAPI, Gemini for chat, embeddings, and transcription
+- **Data:** Supabase Auth, Postgres with pgvector, Supabase Storage
 
-## Repo layout
+## Run locally
 
-```
-Copefy/
-  frontend/   # React + TypeScript app (Vite + Tailwind)
-  backend/    # FastAPI app
-  README.md
-  .gitignore
-```
+1. Create a project at [supabase.com](https://supabase.com/).
+2. In the Supabase SQL editor, run `database/setup.sql`. It creates the app tables, row-level security, three private storage buckets (`medical-documents`, `journal-audio`, `journal-video`), and the clinical knowledge-base tables. `database/db.sql` and `database/schema_rag.sql` are older scratch schemas; leave them unused.
 
-## Prerequisites
+3. Copy the env examples and fill in the values they ask for. Both files are gitignored once copied.
 
-Install these before you start:
-
-- [Node.js](https://nodejs.org/) LTS (v18+) and npm
-- [Python](https://www.python.org/) 3.11+ and pip
-- [git](https://git-scm.com/)
-- A [Supabase](https://supabase.com/) account and project (for env values below)
-
-## First-time setup
-
-After cloning the repo, set up each app once.
-
-```bash
-git clone <your-repo-url>
-cd Copefy
+```powershell
+copy frontend\.env.example frontend\.env
+copy backend\.env.example backend\.env
 ```
 
-### 1. Frontend
+4. Install dependencies and start the two processes. The frontend lockfile expects Node.js 18 or newer. The backend needs Python 3.10 or newer.
 
-```bash
-cd frontend
+From `frontend/`:
+
+```powershell
 npm install
-cp .env.example .env      # Windows PowerShell: copy .env.example .env
-```
-
-Then open `.env` and fill in your Supabase values (see [Environment variables](#environment-variables)).
-
-### 2. Backend
-
-```bash
-cd backend
-
-# Create and activate a virtual environment
-python -m venv venv
-
-# Activate it:
-#   Windows (PowerShell):   .\venv\Scripts\Activate.ps1
-#   Windows (cmd):          venv\Scripts\activate.bat
-#   macOS / Linux:          source venv/bin/activate
-
-pip install -r requirements.txt
-cp .env.example .env      # Windows PowerShell: copy .env.example .env
-```
-
-Then open `.env` and fill in your Supabase values.
-
-## Running in development
-
-Run the frontend and backend in **two separate terminals**.
-
-### Frontend
-
-```bash
-cd frontend
 npm run dev
 ```
 
-Serves on http://localhost:5173
+From `backend/`, in a second terminal:
 
-### Backend
-
-```bash
-cd backend
-# activate your venv first (see setup above)
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-Serves on http://localhost:8000 — interactive API docs at http://localhost:8000/docs
+On macOS or Linux, activate with `source venv/bin/activate`. Run uvicorn from `backend/` so `main:app` resolves.
 
-## Environment variables
+Sign up in the browser, finish onboarding, then open chat or the journal.
 
-`.env` files are gitignored and must **never** be committed. Each app ships an
-`.env.example` documenting the required keys; copy it to `.env` and fill in the
-values.
+Clinical search needs documents in the knowledge base. From `backend/`, with the virtualenv active:
 
-Find these in your Supabase dashboard under **Project Settings -> API** and
-**Project Settings -> Database**.
+```powershell
+python -m rag.ingest --discover-only --limit 20
+python -m rag.ingest --max-embeds 500
+```
 
-### `frontend/.env`
+The first command samples source URLs and does not call Gemini. The second crawls public sources and stores 768-dimensional embeddings in `kb_chunks` until `--max-embeds` embedding calls have been made. If `GEMINI_INGEST_API_KEY` is set, that key is used and `--max-embeds` is required.
 
-| Variable                 | Description                                            |
-| ------------------------ | ------------------------------------------------------ |
-| `VITE_SUPABASE_URL`      | Supabase project URL (e.g. `https://xxxx.supabase.co`) |
-| `VITE_SUPABASE_ANON_KEY` | Public anon key (safe for the browser)                 |
+Crawl4AI needs a browser install once, after the Python packages are installed. With the virtualenv active, run `crawl4ai-setup`. If that browser is missing, HTML fetches use the plain HTTP fallback.
 
-### `backend/.env`
+## Safety
 
-| Variable               | Description                                                   |
-| ---------------------- | ------------------------------------------------------------ |
-| `SUPABASE_URL`         | Supabase project URL                                         |
-| `SUPABASE_SERVICE_KEY` | Service role key (server-side only, keep secret)             |
-| `DATABASE_URL`         | Direct Postgres connection string (used for pgvector / RAG)  |
-| `CORS_ORIGINS`         | Comma-separated allowed frontend origins (default dev value) |
-
-## Conventions
-
-- Use `snake_case` for file names, variables, and functions across the codebase.
-  (React component identifiers stay `PascalCase`, as required by JSX.)
-
-## Common gotchas
-
-- Run the frontend and backend in separate terminals.
-- Activate the Python virtual environment before running the backend.
-- Make sure you're on Python 3.11+.
-- If the frontend can't reach the backend, confirm the backend origin is listed
-  in `CORS_ORIGINS`.
+Copefy is a portfolio project, not a medical device, clinician, or crisis service. If you are in immediate danger, call your local emergency number; in the United States, call or text 988.

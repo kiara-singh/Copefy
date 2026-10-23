@@ -12,7 +12,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 
-from eval.journal_retrieve import JOURNAL_EVAL_USER_ID, load_journal_entries
+from eval.journal_retrieve import configured_journal_eval_user_id, load_journal_entries
 from rag.journal_ingestion import ingest_journal_entry
 
 
@@ -29,9 +29,18 @@ async def reingest(user_id: str) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Re-embed journal_entries into journal_chunks")
-    parser.add_argument("--user-id", default=JOURNAL_EVAL_USER_ID)
+    parser.add_argument(
+        "--user-id",
+        default=None,
+        help="Journal user UUID (or set JOURNAL_EVAL_USER_ID in backend/.env)",
+    )
     args = parser.parse_args()
-    asyncio.run(reingest(args.user_id))
+    user_id = (args.user_id or "").strip() or configured_journal_eval_user_id()
+    if not user_id:
+        raise SystemExit(
+            "Pass --user-id or set JOURNAL_EVAL_USER_ID in backend/.env."
+        )
+    asyncio.run(reingest(user_id))
 
 
 if __name__ == "__main__":

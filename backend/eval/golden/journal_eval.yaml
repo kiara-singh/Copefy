@@ -1,4 +1,5 @@
-# Chat-like queries over live journal_entries (user 938c6dc2-bab8-44d9-b732-8bbd308fd838).
+# Chat-like queries over live journal_entries.
+# Set JOURNAL_EVAL_USER_ID to the Supabase auth user that holds that diary.
 # Do not paste diary text here. expected_contains is the gold label.
 # kind: callback | paraphrase | negative | mood_trap
 

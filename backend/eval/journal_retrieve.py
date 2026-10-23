@@ -22,9 +22,6 @@ from rag.strategies.pipeline import apply_min_similarity, hits_to_chunks, mmr_re
 from rag.strategies.threshold import THRESHOLD_CONFIG
 from rag.strategies.wide_then_narrow import WIDE_CONFIG
 
-DEV_USER_ID = "78b0cc86-0b60-4220-8127-4430b1f3cd9e"
-# Live seed diary corpus used by journal_eval.yaml.
-JOURNAL_EVAL_USER_ID = "938c6dc2-bab8-44d9-b732-8bbd308fd838"
 EMBED_CACHE_PATH = Path(__file__).resolve().parent / "cache" / "journal_embeddings.json"
 PROD_JOURNAL_STRATEGIES = ("journal_mmr", "both")
 
@@ -43,6 +40,18 @@ class JournalEntry:
     created_at: str | None = None
     char_len: int = 0
     embedding: list[float] | None = None
+
+
+def configured_journal_eval_user_id() -> str | None:
+    """Auth user for journal eval scripts.
+
+    Set JOURNAL_EVAL_USER_ID in backend/.env. There is no built-in account.
+    Chat and login do not read this value.
+    """
+    from config import settings
+
+    value = (settings.journal_eval_user_id or "").strip()
+    return value or None
 
 
 def cosine_similarity(left: list[float], right: list[float]) -> float:
@@ -311,13 +320,13 @@ async def load_journal_entries(
 ) -> list[JournalEntry]:
     """Fetch journal rows. Logs ids/dates/lengths only — not body text.
 
-    If the requested user has no rows, fall back to the user with the most entries
-    (the live seed set is not under DEV_USER_ID).
+    With no user id, keep the account that has the most entries. If a requested
+    user has no rows, fall back to every row and leave that mix in place.
     """
     from db import get_pool
 
     pool = await get_pool()
-    requested = user_id or DEV_USER_ID
+    requested = (user_id or "").strip() or None
     async with pool.acquire() as conn:
         columns = await conn.fetch(
             """
@@ -620,9 +629,10 @@ async def retrieve_production_journal(
             f"Use one of: {', '.join(PROD_JOURNAL_STRATEGIES)}"
         )
 
+    journal_query = (query or "").strip()
     search_query = _search_query(query, history)
     if strategy_name == "journal_mmr":
-        chunks = await search_journal_chunks(user_id, search_query, top_k=3)
+        chunks = await search_journal_chunks(user_id, journal_query, top_k=3)
     else:
         plan = RetrievalPlan(
             search_query=search_query,
@@ -630,7 +640,7 @@ async def retrieve_production_journal(
             reason="journal_eval_both",
         )
         kb_task = retrieve_with_strategy(query, history=history or [], plan=plan)
-        journal_task = search_journal_chunks(user_id, search_query, top_k=3)
+        journal_task = search_journal_chunks(user_id, journal_query, top_k=3)
         (_, kb_chunks, _), journal_chunks = await asyncio.gather(kb_task, journal_task)
         chunks = kb_chunks[:2] + journal_chunks[:2]
     return chunks, entry_ids_from_chunks(chunks)

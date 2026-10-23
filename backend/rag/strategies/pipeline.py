@@ -112,6 +112,7 @@ def hits_to_chunks(hits: list[KBChunkHit], inject_k: int) -> list[RetrievedChunk
             category=hit.category,
             similarity=hit.similarity,
             document_id=hit.document_id,
+            chunk_id=hit.id,
         )
         for hit in hits[:inject_k]
     ]

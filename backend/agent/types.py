@@ -7,6 +7,22 @@ from typing import Any
 
 from agent.pipeline_trace import PipelineTrace
 
+_RETRIEVED_TEXT_KEYS = frozenset({"preview", "excerpt", "content", "text", "body"})
+
+
+def strip_retrieved_text(value: Any) -> Any:
+    """Drop raw retrieved snippet fields from a debug payload."""
+    if isinstance(value, list):
+        return [strip_retrieved_text(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+    cleaned: dict[str, Any] = {}
+    for key, item in value.items():
+        if key in _RETRIEVED_TEXT_KEYS:
+            continue
+        cleaned[key] = strip_retrieved_text(item)
+    return cleaned
+
 
 @dataclass
 class AgentResult:
@@ -24,7 +40,7 @@ class AgentResult:
     communication_style: str | None = None
     pipeline: PipelineTrace | None = None
 
-    def to_debug_dict(self) -> dict[str, Any]:
+    def to_debug_dict(self, *, include_retrieved_text: bool = True) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "path": self.path,
             "router": self.router,
@@ -42,4 +58,10 @@ class AgentResult:
             payload["communication_style"] = self.communication_style
         if self.pipeline is not None:
             payload["pipeline"] = self.pipeline.to_dict()
-        return payload
+        if include_retrieved_text:
+            return payload
+        return strip_retrieved_text(payload)
+
+    def to_public_debug_dict(self) -> dict[str, Any]:
+        """Metadata-only trace safe to return over HTTP."""
+        return self.to_debug_dict(include_retrieved_text=False)

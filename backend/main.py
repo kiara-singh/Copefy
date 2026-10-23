@@ -38,7 +38,10 @@ class ChatRequest(BaseModel):
     message: str
     debug: bool = Field(
         default=False,
-        description="If true, include KB retrieval trace in the response.",
+        description=(
+            "If true, include a metadata-only retrieval trace. Never includes "
+            "raw journal or clinical snippet text."
+        ),
     )
 
 
@@ -110,9 +113,11 @@ def _require_session_access(
         .maybe_single()
         .execute()
     )
-    if not result.data or not result.data.get("user_id"):
+    # supabase-py maybe_single() returns None (not {data: None}) when 0 rows.
+    row = getattr(result, "data", None)
+    if not row or not row.get("user_id"):
         raise HTTPException(status_code=404, detail="Chat not found.")
-    owner_id = str(result.data["user_id"])
+    owner_id = str(row["user_id"])
     if auth_user_id and auth_user_id != owner_id:
         raise HTTPException(status_code=404, detail="Chat not found.")
     return owner_id
@@ -126,9 +131,6 @@ def root() -> dict[str, str]:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
-
-
-DEV_USER_ID = "78b0cc86-0b60-4220-8127-4430b1f3cd9e"
 
 
 @app.post("/session")
@@ -303,8 +305,10 @@ async def chat(
     )
 
     body: dict = {"response": result.response}
+    # Client debug and server RAG_DEBUG may attach metadata. Raw retrieved
+    # text never leaves this HTTP response.
     if payload.debug or settings.rag_debug:
-        body["trace"] = result.to_debug_dict()
+        body["trace"] = result.to_public_debug_dict()
     return body
 
 
@@ -335,6 +339,52 @@ async def create_journal_entry(
 
     return {"status": "success"}
 
+
+@app.post("/journal/audio")
+async def create_audio_journal_entry(
+    file: UploadFile = File(...),
+    user_id: str = Depends(get_current_user),
+):
+    """Upload private audio, transcribe it, and ingest the transcript as a text journal."""
+    from rag.audio_journal import AudioJournalError, ingest_audio_journal
+
+    client = _require_supabase()
+    filename = file.filename or "journal.wav"
+    contents = await file.read()
+    try:
+        return await ingest_audio_journal(
+            client,
+            user_id,
+            filename,
+            file.content_type,
+            contents,
+        )
+    except AudioJournalError as err:
+        raise HTTPException(status_code=err.status_code, detail=str(err)) from err
+
+
+@app.post("/journal/video")
+async def create_video_journal_entry(
+    file: UploadFile = File(...),
+    user_id: str = Depends(get_current_user),
+):
+    """Upload private video, extract audio locally, transcribe, ingest as text journal."""
+    from rag.media_journal import MediaJournalError
+    from rag.video_journal import ingest_video_journal
+
+    client = _require_supabase()
+    filename = file.filename or "journal.mp4"
+    contents = await file.read()
+    try:
+        return await ingest_video_journal(
+            client,
+            user_id,
+            filename,
+            file.content_type,
+            contents,
+        )
+    except MediaJournalError as err:
+        raise HTTPException(status_code=err.status_code, detail=str(err)) from err
 
 
 class PersonaPayload(BaseModel):

@@ -21,7 +21,13 @@ from agent.persona import (
 )
 from agent.pipeline_trace import PipelineTrace
 from agent.preference_extract import extract_preference_knobs
-from agent.prompts import CRISIS_RESPONSE, SAFETY_SANDWICH, UNSAFE_REPLY_FALLBACK
+from agent.prompts import (
+    CRISIS_RESPONSE,
+    RECENT_FACT_REUSE_PROMPT,
+    RETRIEVED_UNTRUSTED_NOTICE,
+    SAFETY_SANDWICH,
+    UNSAFE_REPLY_FALLBACK,
+)
 from agent.routers import Path, get_router
 from agent.routers.base import RouteDecision
 from agent.tools.extract_docs import extract_unstructured
@@ -75,8 +81,49 @@ def _chat_models() -> list[str]:
     return ordered
 
 
-def _format_history(messages: list[dict[str, str]], limit: int = 6) -> str:
-    recent = messages[-limit:]
+def _group_exchanges(messages: list[dict[str, str]]) -> list[list[dict[str, str]]]:
+    """Split history into user/assistant exchanges, preserving order.
+
+    An exchange is a user message plus the following assistant reply when present.
+    A leading orphan assistant message is its own exchange.
+    """
+    exchanges: list[list[dict[str, str]]] = []
+    i = 0
+    while i < len(messages):
+        msg = messages[i]
+        if msg.get("role") == "user":
+            pair = [msg]
+            if i + 1 < len(messages) and messages[i + 1].get("role") == "assistant":
+                pair.append(messages[i + 1])
+                i += 2
+            else:
+                i += 1
+            exchanges.append(pair)
+        else:
+            exchanges.append([msg])
+            i += 1
+    return exchanges
+
+
+def _recent_exchange_messages(
+    messages: list[dict[str, str]],
+    exchange_limit: int,
+) -> list[dict[str, str]]:
+    """Return messages from the last `exchange_limit` exchanges, in order."""
+    if exchange_limit <= 0 or not messages:
+        return []
+    selected = _group_exchanges(messages)[-exchange_limit:]
+    return [msg for exchange in selected for msg in exchange]
+
+
+def _format_history(
+    messages: list[dict[str, str]],
+    exchange_limit: int | None = None,
+) -> str:
+    limit = (
+        settings.chat_history_exchanges if exchange_limit is None else exchange_limit
+    )
+    recent = _recent_exchange_messages(messages, limit)
     if not recent:
         return ""
     lines = [f"{msg['role'].upper()}: {msg['content']}" for msg in recent]
@@ -84,17 +131,28 @@ def _format_history(messages: list[dict[str, str]], limit: int = 6) -> str:
 
 
 def _chunks_to_sources(chunks: list[RetrievedChunk]) -> list[dict]:
+    """Internal/eval source records. HTTP responses must strip retrieved text."""
     return [
         {
+            "chunk_id": chunk.chunk_id,
+            "document_id": chunk.document_id,
             "title": chunk.title,
             "source_url": chunk.source_url,
             "category": chunk.category,
             "similarity": round(chunk.similarity, 4),
+            "created_at": chunk.created_at,
             "preview": chunk.content[:200].strip(),
             "excerpt": chunk.content[:400].strip(),
         }
         for chunk in chunks
     ]
+
+
+def _retrieved_prompt_block(tag: str, heading: str, chunks: list[RetrievedChunk]) -> str:
+    body = format_chunks_for_prompt(chunks)
+    return (
+        f"<{tag}>\n{RETRIEVED_UNTRUSTED_NOTICE}\n{heading}\n{body}\n</{tag}>"
+    )
 
 
 def _build_user_prompt(
@@ -105,22 +163,36 @@ def _build_user_prompt(
     persona: UserPersona | None,
 ) -> tuple[str, bool]:
     sections = [_format_history(history), f"USER: {user_message}"]
+    if history:
+        sections.append(RECENT_FACT_REUSE_PROMPT)
+    retrieved = False
 
     if chunks:
         clinical_chunks = [c for c in chunks if c.category != "journal"]
         journal_chunks = [c for c in chunks if c.category == "journal"]
 
         if clinical_chunks:
+            retrieved = True
             sections.append(
-                "Background reference (generic — not about this user):\n"
-                + format_chunks_for_prompt(clinical_chunks)
+                _retrieved_prompt_block(
+                    "retrieved_clinical",
+                    "Background reference (generic — not about this user):",
+                    clinical_chunks,
+                )
             )
 
         if journal_chunks:
+            retrieved = True
             sections.append(
-                "User's past journal entries (personal memory):\n"
-                + format_chunks_for_prompt(journal_chunks)
+                _retrieved_prompt_block(
+                    "retrieved_journal",
+                    "User's past journal entries (personal memory):",
+                    journal_chunks,
+                )
             )
+
+        if retrieved:
+            sections.append(SAFETY_SANDWICH)
 
     if tool_note:
         sections.append(f"Tool note: {tool_note}")
@@ -215,6 +287,8 @@ def _generate_reply(prompt: str, system_instruction: str) -> tuple[str, str | No
 
 
 def _corpus_reason(decision: RouteDecision) -> str:
+    if decision.path is not Path.SEARCH_DATABASE:
+        return "no retrieval on this path"
     if decision.corpus:
         return f"router selected {decision.corpus}"
     return "default clinical"
@@ -269,7 +343,10 @@ async def run_agent(
         reason=decision.reason,
     )
 
-    corpus = decision.corpus or "clinical"
+    if decision.path is Path.SEARCH_DATABASE:
+        corpus = decision.corpus or "clinical"
+    else:
+        corpus = "none"
     pipeline.add_timed(
         2,
         "corpus",
@@ -301,7 +378,7 @@ async def run_agent(
 
         if corpus == "journal":
             tools_used.append("search_journal_entries")
-            query = decision.search_query or user_message
+            query = user_message
             chunks = await search_journal_chunks(user_id, query, top_k=3)
             retrieval_meta = {"strategy": "journal_mmr", "candidates": len(chunks)}
         elif corpus == "both":
@@ -311,9 +388,8 @@ async def run_agent(
                 categories=decision.categories,
                 reason=decision.reason,
             )
-            query = decision.search_query or user_message
             kb_task = retrieve_with_strategy(user_message, history=history, plan=plan)
-            j_task = search_journal_chunks(user_id, query, top_k=3)
+            j_task = search_journal_chunks(user_id, user_message, top_k=3)
             (_, kb_chunks, retrieval_meta), journal_chunks = await asyncio.gather(kb_task, j_task)
             chunks = kb_chunks[:2] + journal_chunks[:2]
         else:  # "clinical"
@@ -329,13 +405,19 @@ async def run_agent(
             chunks = all_chunks[:3]
 
         top_similarity = round(chunks[0].similarity, 4) if chunks else None
+        if corpus in ("journal", "both"):
+            traced_query = user_message
+        else:
+            traced_query = decision.search_query or (
+                plan.search_query if "plan" in locals() else user_message
+            )
         pipeline.add_timed(
             3,
             "retrieval",
             retrieval_meta.get("strategy", settings.rag_strategy),
             l3_start,
             strategy=retrieval_meta.get("strategy", settings.rag_strategy),
-            search_query=decision.search_query or (plan.search_query if "plan" in locals() else user_message),
+            search_query=traced_query,
             categories=list(decision.categories),
             candidates=retrieval_meta.get("candidates", 0),
             returned=len(chunks),
@@ -348,7 +430,10 @@ async def run_agent(
         tool_note = tool_result["message"]
         tool_status = tool_result["status"]
 
-    system_instruction = build_system_instruction(persona)
+    journal_memories = any(chunk.category == "journal" for chunk in chunks)
+    system_instruction = build_system_instruction(
+        persona, journal_memories=journal_memories
+    )
     prompt, anti_repeat = _build_user_prompt(
         user_message, history, chunks, tool_note, persona
     )
@@ -371,7 +456,11 @@ async def run_agent(
         coaching_preferences_set=bool(knobs.coaching_notes),
         structured_format_requested=knobs.structured_format,
         model=model,
-        history_turns=min(len(history), 6),
+        history_turns=len(
+            _group_exchanges(
+                _recent_exchange_messages(history, settings.chat_history_exchanges)
+            )
+        ),
         kb_chunks_in_prompt=len(chunks),
         anti_repeat=anti_repeat,
     )

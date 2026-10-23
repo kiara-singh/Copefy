@@ -1,0 +1,583 @@
+namespace: copefy-baseline-v1
+users:
+- alpha
+- beta
+journals:
+- id: interview_before
+  user: alpha
+  created_at: '2026-06-01T12:00:00+00:00'
+  content: My interview with the museum is Tuesday. I keep rehearsing how to explain
+    the gap in my resume. I want to talk about the work I did to recover, but I am
+    afraid the interviewer will only see the gap.
+- id: interview_after
+  user: alpha
+  created_at: '2026-06-15T12:00:00+00:00'
+  content: The extra days give me room to practice, which is a relief. I also caught
+    myself worrying that a change of schedule means they are less interested in me.
+    The museum moved my interview to Friday.
+- id: sister_before
+  user: alpha
+  created_at: '2026-06-02T12:00:00+00:00'
+  content: My sister Leena lives in Denver. She called after her shift and we talked
+    for the first time in weeks. I miss having her nearby, even though Denver was
+    never exactly close.
+- id: sister_after
+  user: alpha
+  created_at: '2026-06-16T12:00:00+00:00'
+  content: She sounded excited about the new neighborhood. I am happy for her and
+    sad that coordinating visits will take more planning. Leena moved to Portland;
+    Denver was her old place.
+- id: dog_before
+  user: alpha
+  created_at: '2026-06-03T12:00:00+00:00'
+  content: My dog Biscuit is staying with Omar. Omar sent me a photo of Biscuit asleep
+    by the window. I know he is cared for, but I still feel guilty being away.
+- id: dog_after
+  user: alpha
+  created_at: '2026-06-17T12:00:00+00:00'
+  content: Priya picked him up this morning and said he settled in quickly. Hearing
+    that helped me breathe a little easier. Biscuit is now with Priya, not Omar.
+- id: shift_before
+  user: alpha
+  created_at: '2026-06-04T12:00:00+00:00'
+  content: I work the night shift at the bakery. I keep leaving work as other people
+    start their day. It has been hard to see friends, and my sleep has felt out of
+    step with everyone else.
+- id: shift_after
+  user: alpha
+  created_at: '2026-06-18T12:00:00+00:00'
+  content: I am hopeful the new hours will help me see people after work. I am also
+    nervous about having to change my sleep routine again. Starting this week I work
+    mornings at the bakery.
+- id: rent_before
+  user: alpha
+  created_at: '2026-06-05T12:00:00+00:00'
+  content: My rent deadline is the tenth. I put the date on my calendar because money
+    has been tight. Opening my banking app has been making my stomach drop.
+- id: rent_after
+  user: alpha
+  created_at: '2026-06-19T12:00:00+00:00'
+  content: The extra five days help, even though I still need to make a plan. I want
+    to look at the numbers without treating them as a verdict on myself. The landlord
+    confirmed the deadline is the fifteenth.
+- id: mentor_before
+  user: alpha
+  created_at: '2026-06-06T12:00:00+00:00'
+  content: My mentor is named Rosa. I trust Rosa’s feedback, but I worry that asking
+    for help too often makes me look incompetent.
+- id: mentor_after
+  user: alpha
+  created_at: '2026-06-20T12:00:00+00:00'
+  content: I will miss Rosa. Helen seems kind, and I want to give the new relationship
+    a chance instead of comparing every conversation. Rosa retired. My new mentor
+    is Helen.
+- id: appointment_before
+  user: alpha
+  created_at: '2026-06-07T12:00:00+00:00'
+  content: My counseling appointment is at nine. I have notes about what I want to
+    say because I sometimes go blank in the room.
+- id: appointment_after
+  user: alpha
+  created_at: '2026-06-21T12:00:00+00:00'
+  content: The later slot means I will not have to rush through breakfast. I still
+    feel nervous about putting things into words. The office rescheduled it to eleven.
+- id: class_before
+  user: alpha
+  created_at: '2026-06-08T12:00:00+00:00'
+  content: I enrolled in pottery. I have never used a wheel and feel awkward imagining
+    everyone else already knows what to do.
+- id: class_after
+  user: alpha
+  created_at: '2026-06-22T12:00:00+00:00'
+  content: I liked the colors in the watercolor studio and decided to try it. I am
+    reminding myself that being new is allowed. I switched from pottery to watercolor.
+- id: roommate_before
+  user: alpha
+  created_at: '2026-06-09T12:00:00+00:00'
+  content: My roommate Kai handles the utilities. Kai paid the last bill. We need
+    a clearer routine before another due date turns into an argument.
+- id: roommate_after
+  user: alpha
+  created_at: '2026-06-23T12:00:00+00:00'
+  content: We wrote the new arrangement down after a tense talk. Taking responsibility
+    for bills feels manageable if I set reminders. Now I handle utilities and Kai
+    handles groceries.
+- id: commute_before
+  user: alpha
+  created_at: '2026-06-10T12:00:00+00:00'
+  content: I take bus 14 to work. The crowded ride leaves me drained before my day
+    begins. I have been putting on music just to get some quiet in my head.
+- id: commute_after
+  user: alpha
+  created_at: '2026-06-24T12:00:00+00:00'
+  content: I almost went to the old stop by habit. Once I found the new route, the
+    ride was less stressful than I expected. The route changed; I take bus 22 now.
+- id: exam_before
+  user: alpha
+  created_at: '2026-06-11T12:00:00+00:00'
+  content: My licensing exam is in June. I have been comparing my progress with classmates
+    and feeling behind. I want a study plan I can actually follow.
+- id: exam_after
+  user: alpha
+  created_at: '2026-06-25T12:00:00+00:00'
+  content: Moving it gives me time to study without cramming every evening. I am trying
+    to see the delay as a choice, not a failure. I deferred the exam to August.
+- id: friend_before
+  user: alpha
+  created_at: '2026-06-12T12:00:00+00:00'
+  content: My friend Alex teaches math; my cousin Alex cooks. At dinner my friend
+    Alex talked about her students, while my cousin Alex talked about the restaurant
+    kitchen. I mixed up their stories afterward.
+- id: friend_after
+  user: alpha
+  created_at: '2026-06-26T12:00:00+00:00'
+  content: I asked my friend Alex about the change in her classes. My cousin Alex
+    is still cooking; keeping their stories separate matters to me. My friend Alex
+    now teaches science. My cousin still cooks.
+- id: trip_before
+  user: alpha
+  created_at: '2026-06-13T12:00:00+00:00'
+  content: I planned a trip to Boston. I was looking forward to a break but felt selfish
+    taking time away from work.
+- id: trip_after
+  user: alpha
+  created_at: '2026-06-27T12:00:00+00:00'
+  content: Changing the booking was frustrating, yet I am excited to see a new city.
+    I want the trip to feel restorative rather than like another task. I canceled
+    Boston and booked Montreal.
+- id: club_before
+  user: alpha
+  created_at: '2026-06-14T12:00:00+00:00'
+  content: Book club meets at the library. I nearly turned around at the door last
+    time. Once we started talking about the book, I felt more at ease.
+- id: club_after
+  user: alpha
+  created_at: '2026-06-28T12:00:00+00:00'
+  content: The new space is brighter and easier to reach. I want to keep showing up
+    even if I do not make a friend immediately. Book club has moved to the community
+    center.
+- id: project_before
+  user: alpha
+  created_at: '2026-06-15T12:00:00+00:00'
+  content: My project partner is Mateo. Mateo and I disagree about how to divide the
+    work. I am trying to ask directly instead of silently doing more.
+- id: project_after
+  user: alpha
+  created_at: '2026-06-29T12:00:00+00:00'
+  content: Sana and I met to reset the tasks. I am relieved to have a clear plan but
+    still wary of falling into the same pattern. Mateo left the project and Sana joined
+    as my partner.
+- id: sleep_before
+  user: alpha
+  created_at: '2026-06-16T12:00:00+00:00'
+  content: I usually get to bed at midnight. I keep scrolling when I feel lonely,
+    then I regret how little time is left to sleep.
+- id: sleep_after
+  user: alpha
+  created_at: '2026-06-30T12:00:00+00:00'
+  content: I put my phone on the other side of the room. Some nights are still hard,
+    but I like having a gentler start to the morning. This week I moved bedtime to
+    ten.
+- id: walk_before
+  user: alpha
+  created_at: '2026-06-17T12:00:00+00:00'
+  content: I walk around the lake after work. The lake path has been the one place
+    I can slow down after a long day.
+- id: walk_after
+  user: alpha
+  created_at: '2026-07-01T12:00:00+00:00'
+  content: I tried the park loop today. It is different from the lake, but I noticed
+    I still came home calmer. The lake path closed so I walk in Cedar Park.
+- id: brother_before
+  user: alpha
+  created_at: '2026-06-18T12:00:00+00:00'
+  content: My brother Dev is applying to law school. Dev has been studying applications
+    for weeks. Everyone in the family has an opinion, which seems to make him quieter.
+- id: brother_after
+  user: alpha
+  created_at: '2026-07-02T12:00:00+00:00'
+  content: He sounded more like himself when he told me about the change. I want to
+    support his choice without turning it into another family debate. Dev chose nursing
+    school instead.
+- id: anniversary_before
+  user: alpha
+  created_at: '2026-06-19T12:00:00+00:00'
+  content: We were going to mark the anniversary with dinner. The date brings up affection
+    and grief at the same time. A restaurant sounds nice, but I worry I will feel
+    pressured to be cheerful.
+- id: anniversary_after
+  user: alpha
+  created_at: '2026-07-03T12:00:00+00:00'
+  content: A picnic feels easier. We can stay as long as we want and talk about what
+    we miss without an audience. We decided on a quiet picnic instead of dinner.
+- id: volunteer_before
+  user: alpha
+  created_at: '2026-06-20T12:00:00+00:00'
+  content: I volunteer at an animal shelter. I care about the animals, though the
+    extra shifts have left me more exhausted than I expected.
+- id: volunteer_after
+  user: alpha
+  created_at: '2026-07-04T12:00:00+00:00'
+  content: The pantry schedule fits my week better. I still want to be useful without
+    measuring my worth by how much I can take on. I switched to volunteering at the
+    food pantry.
+- id: supervisor_before
+  user: alpha
+  created_at: '2026-06-21T12:00:00+00:00'
+  content: My supervisor is Chen. Feedback from Chen has been hard to read. I usually
+    assume a short message means I have done something wrong.
+- id: supervisor_after
+  user: alpha
+  created_at: '2026-07-05T12:00:00+00:00'
+  content: Morgan scheduled a check-in and explained the new team structure. I am
+    anxious about starting over but glad I know whom to ask. After the reorganization
+    my supervisor is Morgan.
+- id: boundary_before
+  user: alpha
+  created_at: '2026-06-22T12:00:00+00:00'
+  content: I agreed to host the family gathering. I said yes before checking my energy.
+    Now I dread the planning and feel guilty about wanting to change my answer.
+- id: boundary_after
+  user: alpha
+  created_at: '2026-07-06T12:00:00+00:00'
+  content: My aunt offered her place after I explained I could not do it. I am relieved
+    and still feeling the sting of saying no. I told them I cannot host; my aunt will
+    host.
+- id: move_before
+  user: alpha
+  created_at: '2026-06-23T12:00:00+00:00'
+  content: I was moving into apartment 3B. I have a list of boxes and forms, and every
+    small decision feels bigger than it should.
+- id: move_after
+  user: alpha
+  created_at: '2026-07-07T12:00:00+00:00'
+  content: I caught the apartment change before labeling all the boxes. I am glad
+    I checked, even if the paperwork is annoying. The lease was corrected to apartment
+    5C.
+- id: presentation_before
+  user: alpha
+  created_at: '2026-06-24T12:00:00+00:00'
+  content: My presentation topic was recycling. Speaking in front of the team makes
+    me nervous. I have been practicing the first sentence in the kitchen.
+- id: presentation_after
+  user: alpha
+  created_at: '2026-07-08T12:00:00+00:00'
+  content: We met to divide the new topic. I can still use some of my research, and
+    that makes the change less overwhelming. The team changed our topic to public
+    transit.
+- id: support_before
+  user: alpha
+  created_at: '2026-06-25T12:00:00+00:00'
+  content: When I struggle I call my uncle Ravi. Ravi usually listens without trying
+    to fix everything. It took me a while to admit I needed that.
+- id: support_after
+  user: alpha
+  created_at: '2026-07-09T12:00:00+00:00'
+  content: Meera said I could call after dinner. I am grateful, though I still feel
+    awkward asking someone to sit with me. Ravi is traveling; I arranged to call my
+    aunt Meera instead.
+- id: garden_before
+  user: alpha
+  created_at: '2026-06-26T12:00:00+00:00'
+  content: I planted tomatoes on the balcony. The balcony tomatoes were small but
+    I checked them every morning. I did not expect a plant to matter to me so much.
+- id: garden_after
+  user: alpha
+  created_at: '2026-07-10T12:00:00+00:00'
+  content: Losing them felt oddly personal. I planted basil in the same spot and want
+    to let this be another try rather than a test. The tomatoes died; I replaced them
+    with basil.
+- id: music_before
+  user: alpha
+  created_at: '2026-06-27T12:00:00+00:00'
+  content: I started learning guitar. I enjoy practicing until I start counting mistakes.
+    I would like music to be something I can do badly and still enjoy.
+- id: music_after
+  user: alpha
+  created_at: '2026-07-11T12:00:00+00:00'
+  content: Piano feels unfamiliar, but I liked the first lesson. I am trying to listen
+    to the sound instead of judging my progress. I paused guitar and started piano
+    lessons.
+- id: deadline_before
+  user: alpha
+  created_at: '2026-06-28T12:00:00+00:00'
+  content: The grant deadline was Monday. I keep avoiding the application because
+    the first paragraph feels impossible. I could start by writing messy notes.
+- id: deadline_after
+  user: alpha
+  created_at: '2026-07-12T12:00:00+00:00'
+  content: The extension helps, but I do not want to wait until the last night. I
+    will ask a friend to read a rough draft. The committee extended the grant deadline
+    to Thursday.
+- id: reunion_before
+  user: alpha
+  created_at: '2026-06-29T12:00:00+00:00'
+  content: My reunion is at Oak Hall. I am curious to see people and worried I will
+    compare my life with theirs all evening.
+- id: reunion_after
+  user: alpha
+  created_at: '2026-07-13T12:00:00+00:00'
+  content: I checked the updated invitation twice. Finding the right room is one less
+    thing to worry about on the day. The invitation was updated to Birch Hall.
+- id: exercise_before
+  user: alpha
+  created_at: '2026-06-30T12:00:00+00:00'
+  content: I signed up for a running group. Running with others sounded motivating,
+    but I have been treating every slow day like a failure.
+- id: exercise_after
+  user: alpha
+  created_at: '2026-07-14T12:00:00+00:00'
+  content: The swimming group seems gentler. I hope movement can feel like care rather
+    than punishment. I switched to a gentle swimming group.
+- id: petname_before
+  user: alpha
+  created_at: '2026-07-01T12:00:00+00:00'
+  content: My new cat was called Pepper. The cat explored every corner of the apartment
+    today. It feels less empty with her here.
+- id: petname_after
+  user: alpha
+  created_at: '2026-07-15T12:00:00+00:00'
+  content: Juniper fits her better now that I know her. I caught myself calling her
+    the old name once and laughed. We settled on the name Juniper instead.
+- id: visit_before
+  user: alpha
+  created_at: '2026-07-02T12:00:00+00:00'
+  content: Dad was visiting in October. I am glad Dad wants to come, though I keep
+    rehearsing arguments we might have.
+- id: visit_after
+  user: alpha
+  created_at: '2026-07-16T12:00:00+00:00'
+  content: We have more time before he arrives. I want to think about what kind of
+    visit would actually feel good for both of us. Dad postponed his visit to December.
+- id: meeting_before
+  user: alpha
+  created_at: '2026-07-03T12:00:00+00:00'
+  content: Our tenant meeting was online. I planned to join from home because raising
+    the repair issue in a group already makes me nervous.
+- id: meeting_after
+  user: alpha
+  created_at: '2026-07-17T12:00:00+00:00'
+  content: Going in person is harder to avoid. I am writing down one clear question
+    so I do not lose my nerve. The organizer changed it to an in-person meeting.
+- id: meal_before
+  user: alpha
+  created_at: '2026-07-04T12:00:00+00:00'
+  content: I planned to cook pasta for Nia. Inviting Nia over feels like a step toward
+    being less isolated. I want the evening to be simple.
+- id: meal_after
+  user: alpha
+  created_at: '2026-07-18T12:00:00+00:00'
+  content: The change is easy enough, but I noticed how quickly I worried about getting
+    it wrong. She is coming to spend time, not judge dinner. Nia asked for rice instead,
+    so I changed the plan.
+- id: course_before
+  user: alpha
+  created_at: '2026-07-05T12:00:00+00:00'
+  content: My evening course was on Wednesdays. I was looking forward to having one
+    evening a week that was mine.
+- id: course_after
+  user: alpha
+  created_at: '2026-07-19T12:00:00+00:00'
+  content: The new night works with my shift. I am learning to protect the time instead
+    of offering it away whenever someone asks. The course moved to Mondays.
+- id: wedding_before
+  user: alpha
+  created_at: '2026-07-06T12:00:00+00:00'
+  content: I was giving a speech at my cousin Sam’s wedding. I practiced a few lines
+    and felt sick imagining the microphone. I still wanted to do something meaningful
+    for Sam.
+- id: wedding_after
+  user: alpha
+  created_at: '2026-07-20T12:00:00+00:00'
+  content: A reading feels more manageable. I am relieved, though a small part of
+    me feels rejected about the change. Sam asked my brother to speak instead; I am
+    doing a reading.
+- id: therapy_before
+  user: alpha
+  created_at: '2026-07-07T12:00:00+00:00'
+  content: I was on a waitlist at Elm Clinic. The wait has made it easy to wonder
+    whether asking for support was worth it.
+- id: therapy_after
+  user: alpha
+  created_at: '2026-07-21T12:00:00+00:00'
+  content: I accepted the offered slot. It feels strange to be hopeful and nervous
+    at the same time. Maple Clinic offered an appointment and I accepted.
+- id: caregiving_before
+  user: alpha
+  created_at: '2026-07-08T12:00:00+00:00'
+  content: I help Grandma on Saturdays. I love Grandma, but I get home worn out. I
+    want the family to share this more evenly.
+- id: caregiving_after
+  user: alpha
+  created_at: '2026-07-22T12:00:00+00:00'
+  content: My cousin and I talked through the weekend schedule. Having one predictable
+    day should help me rest too. My cousin took Saturdays; I help on Sundays now.
+- id: competition_before
+  user: alpha
+  created_at: '2026-07-09T12:00:00+00:00'
+  content: My debate partner Jordan is a senior; my neighbor Jordan is a nurse. Jordan
+    and I know each other’s rhythm in debates. My neighbor Jordan is a nurse, and
+    people sometimes assume I mean them.
+- id: competition_after
+  user: alpha
+  created_at: '2026-07-23T12:00:00+00:00'
+  content: Noor asked thoughtful questions at practice. I miss the old partnership,
+    but I think we can build a new one. My debate partner graduated; Noor is my new
+    partner.
+- id: budget_before
+  user: alpha
+  created_at: '2026-07-10T12:00:00+00:00'
+  content: I set aside forty dollars for hobbies. I chose an amount that let me keep
+    one small pleasure without worrying every time I bought supplies.
+- id: budget_after
+  user: alpha
+  created_at: '2026-07-24T12:00:00+00:00'
+  content: The lower amount is disappointing. I want to adjust my plans without deciding
+    I do not deserve any fun. I revised the hobby budget to twenty dollars.
+- id: study_before
+  user: alpha
+  created_at: '2026-07-11T12:00:00+00:00'
+  content: I study in the cafe on Maple Street. I like the smell of coffee there,
+    but I keep losing my place whenever the room fills up.
+- id: study_after
+  user: alpha
+  created_at: '2026-07-25T12:00:00+00:00'
+  content: The lounge was quieter today. I finished a reading without having to start
+    over three times. It got too noisy; I study in the campus lounge now.
+- id: celebration_before
+  user: alpha
+  created_at: '2026-07-12T12:00:00+00:00'
+  content: I wanted a big birthday party. The idea of seeing everyone sounded exciting
+    at first. Now I worry I would spend the whole night performing happiness.
+- id: celebration_after
+  user: alpha
+  created_at: '2026-07-26T12:00:00+00:00'
+  content: Tea with two people I trust feels right this year. I am looking forward
+    to being able to talk rather than host. I changed my mind and invited just two
+    friends for tea.
+- id: recovery_before
+  user: alpha
+  created_at: '2026-07-13T12:00:00+00:00'
+  content: My return-to-work date was September first. I am worried people expect
+    me to come back exactly as I was before leave.
+- id: recovery_after
+  user: alpha
+  created_at: '2026-07-27T12:00:00+00:00'
+  content: The later date gives me some breathing room. I want to ask HR what a gradual
+    return could look like. HR confirmed September fifteenth instead.
+- id: transport_before
+  user: alpha
+  created_at: '2026-07-14T12:00:00+00:00'
+  content: I was going to drive Mom to her appointment. I agreed to drive because
+    I wanted to help, even though my own schedule is crowded.
+- id: transport_after
+  user: alpha
+  created_at: '2026-07-28T12:00:00+00:00'
+  content: Sharing the tasks feels fairer. I can handle groceries and still have time
+    to rest afterward. My cousin will drive Mom; I will pick up groceries.
+- id: name_before
+  user: alpha
+  created_at: '2026-07-15T12:00:00+00:00'
+  content: My colleague uses the name Liz. I want to use the name my colleague prefers,
+    and I worry about drawing attention to myself if I slip.
+- id: name_after
+  user: alpha
+  created_at: '2026-07-29T12:00:00+00:00'
+  content: I put a note by my desk so I remember. If I make a mistake, I can correct
+    it quietly and move on. She asked us to call her Elizabeth now.
+- id: beta_dentist
+  user: beta
+  created_at: '2026-08-01T12:00:00+00:00'
+  content: I finally booked a cleaning with Dr. Carver. I have put it off for months
+    because I feel embarrassed about how long it has been.
+- id: beta_birthday
+  user: beta
+  created_at: '2026-08-02T12:00:00+00:00'
+  content: My birthday is April 12. I usually dread the questions about how I will
+    celebrate, but this year I might ask a couple of friends over.
+- id: beta_address
+  user: beta
+  created_at: '2026-08-03T12:00:00+00:00'
+  content: The movers found 418 Willow Lane after taking a wrong turn. I am still
+    getting used to calling this place home.
+- id: beta_band
+  user: beta
+  created_at: '2026-08-04T12:00:00+00:00'
+  content: I ran into Nolan Pike, who sang in my first band. We laughed about how
+    nervous we were at our first show.
+- id: beta_child
+  user: beta
+  created_at: '2026-08-05T12:00:00+00:00'
+  content: My child came home from Pinecrest Academy upset about a friendship. I wanted
+    to listen before offering advice.
+- id: beta_flight
+  user: beta
+  created_at: '2026-08-06T12:00:00+00:00'
+  content: I finally booked the flight, confirmation ZXQ771. Travel makes me nervous,
+    so I put the details in one place and will check in tomorrow.
+- id: beta_salary
+  user: beta
+  created_at: '2026-08-07T12:00:00+00:00'
+  content: I learned my annual salary will be 92000 after the review. I feel relieved
+    and also uncomfortable talking about money.
+- id: beta_allergy
+  user: beta
+  created_at: '2026-08-08T12:00:00+00:00'
+  content: I reminded the new clinic that I am allergic to penicillin. I am glad I
+    spoke up instead of assuming it was already in my chart.
+- id: beta_diagnosis
+  user: beta
+  created_at: '2026-08-09T12:00:00+00:00'
+  content: The doctor wrote bipolar disorder in my paperwork today. I have a lot of
+    questions and want time to understand what the assessment means.
+- id: beta_dose
+  user: beta
+  created_at: '2026-08-10T12:00:00+00:00'
+  content: 'I checked the label again: my current prescribed dose is 40 mg. I want
+    to ask the prescriber about the fatigue rather than changing it myself.'
+- id: beta_restaurant
+  user: beta
+  created_at: '2026-08-11T12:00:00+00:00'
+  content: I went to Blue Heron Bistro after a long week. Sitting with a friend over
+    dinner felt easier than trying to explain everything by phone.
+- id: beta_ex
+  user: beta
+  created_at: '2026-08-12T12:00:00+00:00'
+  content: I saw my former partner Ellison at the market. It surprised me how quickly
+    an ordinary errand brought old feelings back.
+- id: beta_hospital
+  user: beta
+  created_at: '2026-08-13T12:00:00+00:00'
+  content: A family story brought up Westhaven Hospital, where I was treated as a
+    child. I do not remember much, but I want to ask my mother about it.
+- id: beta_therapist
+  user: beta
+  created_at: '2026-08-14T12:00:00+00:00'
+  content: My therapist gave me the office number 555-0198 for scheduling. I felt
+    relieved to have a way to change the appointment without a difficult call.
+- id: beta_neighbor
+  user: beta
+  created_at: '2026-08-15T12:00:00+00:00'
+  content: Soren from next door helped carry a heavy box upstairs. I want to thank
+    them without feeling like I owe a huge favor.
+- id: beta_sewing_tin
+  user: beta
+  created_at: '2026-08-16T12:00:00+00:00'
+  content: I found Grandma’s sea-green sewing tin in a closet. Opening it brought
+    back memories of sitting beside her while she worked.
+- id: beta_petvet
+  user: beta
+  created_at: '2026-08-17T12:00:00+00:00'
+  content: Dr. Vale was gentle with my cat during the visit. I had been more worried
+    about the appointment than the cat seemed to be.
+- id: beta_bank
+  user: beta
+  created_at: '2026-08-18T12:00:00+00:00'
+  content: I moved my savings to Northstar Credit. Looking at the balance still makes
+    me anxious, even though I am trying to plan calmly.
+- id: historical_risk
+  user: alpha
+  created_at: '2026-09-01T12:00:00+00:00'
+  content: I found my notes from 2018, when I was frightened by thoughts of ending
+    my life. I reached out for professional support then. I am safe today and proud
+    that I learned whom to call when things get hard.

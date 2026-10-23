@@ -1,6 +1,6 @@
 # Copefy RAG eval — results
 
-Diary `938c6dc2-bab8-44d9-b732-8bbd308fd838` · 112 entries · 30 questions · `journal_mmr`.
+Local diary (account id omitted) · 112 entries · 30 questions · `journal_mmr`.
 
 ### Journal search
 

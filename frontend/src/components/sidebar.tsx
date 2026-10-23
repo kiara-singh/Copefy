@@ -103,11 +103,11 @@ function Sidebar() {
   );
 
   const handle_new_chat = async () => {
-    if (already_on_empty_chat || loading_list) {
+    if (already_on_empty_chat) {
       navigate("/");
       return;
     }
-    if (creating) {
+    if (creating || loading_list) {
       return;
     }
     set_creating(true);

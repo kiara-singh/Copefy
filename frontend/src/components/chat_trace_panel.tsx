@@ -63,8 +63,13 @@ function layer_details(layer: PipelineLayer) {
                 </p>
                 <p className="text-slate-500">
                   {source.category ?? "uncategorized"} · similarity {source.similarity}
+                  {source.created_at ? ` · ${source.created_at}` : ""}
                 </p>
-                <p className="mt-1 whitespace-pre-wrap text-slate-600">{source.excerpt}</p>
+                {(source.chunk_id || source.document_id) && (
+                  <p className="mt-1 font-mono text-xs text-slate-500">
+                    {source.chunk_id ?? source.document_id}
+                  </p>
+                )}
               </div>
             ))}
           </div>
@@ -208,8 +213,13 @@ function ChatTracePanel({ trace }: ChatTracePanelProps) {
               </p>
               <p className="text-slate-500">
                 {source.category ?? "uncategorized"} · similarity {source.similarity}
+                {source.created_at ? ` · ${source.created_at}` : ""}
               </p>
-              <p className="mt-1 whitespace-pre-wrap text-slate-600">{source.excerpt}</p>
+              {(source.chunk_id || source.document_id) && (
+                <p className="mt-1 font-mono text-xs text-slate-500">
+                  {source.chunk_id ?? source.document_id}
+                </p>
+              )}
             </div>
           ))}
         </div>

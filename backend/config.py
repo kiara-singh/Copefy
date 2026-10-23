@@ -12,15 +12,29 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     # Optional paid/ingest project. Generation eval prefers this over GEMINI_API_KEY.
     gemini_ingest_api_key: str = ""
-    gemini_chat_model: str = "gemini-2.5-flash"
+    gemini_chat_model: str = "gemini-3.5-flash-lite"
     # Comma-separated fallbacks tried in order when the primary model is unavailable.
+    # 2.5-flash is last: this project 404s it, and a failed first try still burns eval budget.
     gemini_chat_model_fallbacks: str = (
-        "gemini-2.5-flash,gemini-3.5-flash-lite,gemini-flash-latest,gemini-3.6-flash"
+        "gemini-3.5-flash-lite,gemini-flash-latest,gemini-3.6-flash,gemini-2.5-flash"
     )
     gemini_embed_model: str = "gemini-embedding-2"
+    # Audio journals: transcribe with generateContent, then reuse text embeddings.
+    # Chat already uses 3.5-flash-lite; this project 404s gemini-2.5-flash.
+    gemini_transcribe_model: str = "gemini-3.5-flash-lite"
 
     rag_debug: bool = False
+    # When true, /chat always attaches a metadata-only trace. Retrieved snippet
+    # text is never included in HTTP responses.
     rag_strategy: str = "mmr"
+    # Journal path only. Calibrated junk reduction on synthetic no-memory
+    # searches; not a guarantee that a kept chunk is the right memory.
+    journal_min_similarity: float = 0.70
+    # Generation prompt only: prior user/assistant exchanges to keep (current user
+    # message stays separate). Journal retrieval is unaffected. 6 still drops the
+    # in-chat update on long 11-turn state_* fixtures (update at turn 4 of 10 prior);
+    # 8 covers those while staying exchange-based.
+    chat_history_exchanges: int = 8
 
     agent_router: str = "rule"
     agent_router_model: str = "gemini-flash-latest"
@@ -31,6 +45,29 @@ class Settings(BaseSettings):
     # Optional: bill routing to a different project than chat/embeddings. Free-tier
     # generateContent quotas are tiny, so a paid key here makes eval runs practical.
     agent_router_api_key: str = ""
+
+    # Eval and seed scripts only. Chat and auth always use the signed-in user.
+    journal_eval_user_id: str = ""
+    seed_user_id: str = ""
+
+    # Clinical KB ingest (`python -m rag.ingest`). Embeddings use gemini_embed_model
+    # at the same 768 dimensions as query-time search.
+    ingest_concurrency: int = 1
+    embed_batch_size: int = 8
+    embed_delay_seconds: float = 2.0
+    embed_concurrency: int = 1
+    chunk_max_chars: int = 800
+    chunk_overlap: int = 120
+    chunk_min_chars: int = 200
+    max_chunks_per_doc: int = 40
+    max_source_chars: int = 24000
+    max_source_chars_pmc: int = 60000
+    discovery_bfs_max_depth: int = 6
+    discovery_bfs_max_pages: int = 30000
+    pmc_max_per_category: int = 1200
+    crawl_user_agent: str = (
+        "CopefyBot/0.2 (+https://copefy.local; health-education ingest)"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
