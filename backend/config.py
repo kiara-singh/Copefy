@@ -50,6 +50,25 @@ class Settings(BaseSettings):
     journal_eval_user_id: str = ""
     seed_user_id: str = ""
 
+    # Clinical KB ingest (`python -m rag.ingest`). Embeddings use gemini_embed_model
+    # at the same 768 dimensions as query-time search.
+    ingest_concurrency: int = 1
+    embed_batch_size: int = 8
+    embed_delay_seconds: float = 2.0
+    embed_concurrency: int = 1
+    chunk_max_chars: int = 800
+    chunk_overlap: int = 120
+    chunk_min_chars: int = 200
+    max_chunks_per_doc: int = 40
+    max_source_chars: int = 24000
+    max_source_chars_pmc: int = 60000
+    discovery_bfs_max_depth: int = 6
+    discovery_bfs_max_pages: int = 30000
+    pmc_max_per_category: int = 1200
+    crawl_user_agent: str = (
+        "CopefyBot/0.2 (+https://copefy.local; health-education ingest)"
+    )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
