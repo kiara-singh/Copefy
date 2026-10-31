@@ -8,7 +8,7 @@ export interface ChatSource {
   title: string | null;
   source_url: string | null;
   category: string | null;
-  similarity: number;
+  similarity?: number;
   created_at?: string | null;
   chunk_id?: string | null;
   document_id?: string | null;
@@ -64,6 +64,7 @@ export interface ChatTrace {
 
 export interface ChatResponse {
   response: string;
+  sources?: ChatSource[];
   trace?: ChatTrace;
 }
 
@@ -241,11 +242,13 @@ export async function get_session_messages(
 
 export async function send_chat(
   session_id: string,
-  message: string
+  message: string,
+  persona_id?: string | null
 ): Promise<ChatResponse> {
   return await api_request<ChatResponse>("/chat", "POST", {
     session_id,
     message,
+    persona_id: persona_id ?? null,
     debug: RAG_DEBUG,
   });
 }

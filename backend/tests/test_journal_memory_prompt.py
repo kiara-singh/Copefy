@@ -153,7 +153,7 @@ def test_user_prompt_journal_block_is_dated():
         created_at="2026-07-02T12:00:00+00:00",
     )
     prompt, _ = _build_user_prompt("help me ask about the program", [], [chunk], None, None)
-    assert "User's past journal entries" in prompt
+    assert "User's historical journal context" in prompt
     assert "2026-07-02" in prompt
     assert "<retrieved_journal>" in prompt
     assert "untrusted reference data" in prompt

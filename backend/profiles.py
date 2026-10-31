@@ -28,7 +28,11 @@ def load_user_persona(user_id: str) -> UserPersona:
         return UserPersona()
 
     raw_style = row.get("communication_style")
-    style = raw_style.strip() if isinstance(raw_style, str) and raw_style.strip() else DEFAULT_COMMUNICATION_STYLE
+    style = (
+        raw_style.strip()
+        if isinstance(raw_style, str) and raw_style.strip()
+        else DEFAULT_COMMUNICATION_STYLE
+    )
 
     return UserPersona(
         communication_style=style,

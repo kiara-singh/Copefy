@@ -18,10 +18,22 @@ class Settings(BaseSettings):
     gemini_chat_model_fallbacks: str = (
         "gemini-3.5-flash-lite,gemini-flash-latest,gemini-3.6-flash,gemini-2.5-flash"
     )
+    # Dedicated paid credential for grounded search. Never falls back to the
+    # normal chat key, so billing remains isolated to Path.WEB_SEARCH.
+    gemini_web_search_api_key: str = ""
+    gemini_web_search_model: str = "gemini-3.1-flash-lite"
+    gemini_web_search_enabled: bool = True
+    # Google bills Gemini 3 grounding per internal search query and may issue
+    # several queries for one request. Reserve ten queries per request and stop
+    # below the 5,000-query included monthly allowance.
+    gemini_web_search_monthly_query_budget: int = 4500
+    gemini_web_search_query_reservation: int = 10
+    gemini_web_search_usage_db: str = ".web_search_usage.sqlite3"
     gemini_embed_model: str = "gemini-embedding-2"
     # Audio journals: transcribe with generateContent, then reuse text embeddings.
     # Chat already uses 3.5-flash-lite; this project 404s gemini-2.5-flash.
     gemini_transcribe_model: str = "gemini-3.5-flash-lite"
+    system_prompt_version: str = "v1"
 
     rag_debug: bool = False
     # When true, /chat always attaches a metadata-only trace. Retrieved snippet

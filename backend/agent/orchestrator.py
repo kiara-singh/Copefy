@@ -14,6 +14,7 @@ from google.genai.errors import APIError
 from agent.injection_filter import reply_violates_safety
 from agent.persona import (
     UserPersona,
+    build_active_persona_data_block,
     build_profile_data_block,
     build_system_instruction,
     closing_instruction,
@@ -25,6 +26,7 @@ from agent.prompts import (
     CRISIS_RESPONSE,
     RECENT_FACT_REUSE_PROMPT,
     RETRIEVED_UNTRUSTED_NOTICE,
+    CONTEXT_DATA_REMINDER,
     SAFETY_SANDWICH,
     UNSAFE_REPLY_FALLBACK,
 )
@@ -33,7 +35,12 @@ from agent.routers.base import RouteDecision
 from agent.tools.extract_docs import extract_unstructured
 from agent.tools.semantic_search import format_chunks_for_prompt
 from agent.tools.structured_db import query_structured_db
-from agent.tools.web_search import web_search
+from agent.tools.web_search import (
+    WEB_SEARCH_UNAVAILABLE_RESPONSE,
+    MonthlyWebSearchBudget,
+    WebSearchError,
+    web_search,
+)
 from agent.types import AgentResult
 from config import settings
 from rag.journal_retrieve import search_journal_chunks
@@ -67,6 +74,25 @@ def _client() -> genai.Client:
     return genai.Client(api_key=settings.gemini_api_key)
 
 
+@lru_cache
+def _web_search_client() -> genai.Client:
+    """Return the paid client dedicated exclusively to Path.WEB_SEARCH."""
+    if not settings.gemini_web_search_enabled:
+        raise WebSearchError("Grounded web search is disabled")
+    if not settings.gemini_web_search_api_key:
+        raise WebSearchError("GEMINI_WEB_SEARCH_API_KEY is required for web search")
+    return genai.Client(api_key=settings.gemini_web_search_api_key)
+
+
+@lru_cache
+def _web_search_usage_budget() -> MonthlyWebSearchBudget:
+    return MonthlyWebSearchBudget(
+        settings.gemini_web_search_usage_db,
+        monthly_query_budget=settings.gemini_web_search_monthly_query_budget,
+        query_reservation=settings.gemini_web_search_query_reservation,
+    )
+
+
 def _chat_models() -> list[str]:
     models = [
         settings.gemini_chat_model,
@@ -79,6 +105,11 @@ def _chat_models() -> list[str]:
             seen.add(model)
             ordered.append(model)
     return ordered
+
+
+def _context_data_block(kind: str, content: str, nonce: str) -> str:
+    tag = f"{kind}_data_{nonce}"
+    return f"<{tag}>\n{content}\n</{tag}>"
 
 
 def _group_exchanges(messages: list[dict[str, str]]) -> list[list[dict[str, str]]]:
@@ -119,6 +150,7 @@ def _recent_exchange_messages(
 def _format_history(
     messages: list[dict[str, str]],
     exchange_limit: int | None = None,
+    *, nonce: str = "context",
 ) -> str:
     limit = (
         settings.chat_history_exchanges if exchange_limit is None else exchange_limit
@@ -127,7 +159,11 @@ def _format_history(
     if not recent:
         return ""
     lines = [f"{msg['role'].upper()}: {msg['content']}" for msg in recent]
-    return "Recent conversation:\n" + "\n".join(lines)
+    return _context_data_block(
+        "conversation_history",
+        "Previous conversation:\n" + "\n".join(lines),
+        nonce,
+    )
 
 
 def _chunks_to_sources(chunks: list[RetrievedChunk]) -> list[dict]:
@@ -161,12 +197,17 @@ def _build_user_prompt(
     chunks: list[RetrievedChunk],
     tool_note: str | None,
     persona: UserPersona | None,
+    *,
+    context_nonce: str | None = None,
 ) -> tuple[str, bool]:
-    sections = [_format_history(history), f"USER: {user_message}"]
+    context_nonce = context_nonce or new_profile_nonce()
+    history_block = _format_history(history, nonce=context_nonce)
+    sections = [history_block, f"CURRENT USER REQUEST:\n{user_message}"]
+    has_context_data = bool(history_block)
     if history:
         sections.append(RECENT_FACT_REUSE_PROMPT)
-    retrieved = False
 
+    retrieved = False
     if chunks:
         clinical_chunks = [c for c in chunks if c.category != "journal"]
         journal_chunks = [c for c in chunks if c.category == "journal"]
@@ -174,22 +215,35 @@ def _build_user_prompt(
         if clinical_chunks:
             retrieved = True
             sections.append(
-                _retrieved_prompt_block(
-                    "retrieved_clinical",
-                    "Background reference (generic — not about this user):",
-                    clinical_chunks,
+                _context_data_block(
+                    "clinical_kb",
+                    _retrieved_prompt_block(
+                        "retrieved_clinical",
+                        "Generic Clinical KB reference — not facts about this user:",
+                        clinical_chunks,
+                    ),
+                    context_nonce,
                 )
             )
+            has_context_data = True
 
         if journal_chunks:
             retrieved = True
             sections.append(
-                _retrieved_prompt_block(
-                    "retrieved_journal",
-                    "User's past journal entries (personal memory):",
-                    journal_chunks,
+                _context_data_block(
+                    "journal",
+                    _retrieved_prompt_block(
+                        "retrieved_journal",
+                        "User's historical journal context — do not assume it is current:",
+                        journal_chunks,
+                    ),
+                    context_nonce,
                 )
             )
+            has_context_data = True
+
+    if has_context_data:
+        sections.append(CONTEXT_DATA_REMINDER)
 
         if retrieved:
             sections.append(SAFETY_SANDWICH)
@@ -210,9 +264,12 @@ def _build_user_prompt(
                 "Use a different opening and structure — do not repeat the same pattern."
             )
 
-    profile_block = build_profile_data_block(persona, nonce=new_profile_nonce())
-    if profile_block:
-        sections.append(profile_block)
+    personalization_blocks = [
+        build_profile_data_block(persona, nonce=context_nonce),
+        build_active_persona_data_block(persona, nonce=context_nonce),
+    ]
+    if any(personalization_blocks):
+        sections.extend(block for block in personalization_blocks if block)
         sections.append(SAFETY_SANDWICH)
 
     sections.append(closing_instruction(persona))
@@ -312,8 +369,6 @@ def _log_pipeline(result: AgentResult) -> None:
 
 
 async def _run_stub_tool(decision: RouteDecision, user_message: str) -> dict:
-    if decision.path is Path.WEB_SEARCH:
-        return await web_search(decision.web_query or user_message)
     if decision.path is Path.STRUCTURED_QUERY:
         return await query_structured_db(user_message)
     return await extract_unstructured(user_message)
@@ -371,6 +426,7 @@ async def run_agent(
     tool_status: str | None = None
     tools_used: list[str] = []
     retrieval_meta: dict = {}
+    web_sources: list[dict] = []
 
     if decision.path is Path.SEARCH_DATABASE:
         l3_start = time.perf_counter()
@@ -424,22 +480,47 @@ async def run_agent(
             top_similarity=top_similarity,
             sources=_chunks_to_sources(chunks),
         )
+    elif decision.path is Path.WEB_SEARCH:
+        tools_used.append("web_search")
     elif decision.path is not Path.DIRECT_ANSWER:
         tools_used.append(decision.path.value)
         tool_result = await _run_stub_tool(decision, user_message)
         tool_note = tool_result["message"]
         tool_status = tool_result["status"]
 
+    prompt_version = settings.system_prompt_version
     journal_memories = any(chunk.category == "journal" for chunk in chunks)
     system_instruction = build_system_instruction(
-        persona, journal_memories=journal_memories
+        persona, version=prompt_version, journal_memories=journal_memories
     )
     prompt, anti_repeat = _build_user_prompt(
         user_message, history, chunks, tool_note, persona
     )
 
     l4_start = time.perf_counter()
-    reply, model = await asyncio.to_thread(_generate_reply, prompt, system_instruction)
+    if decision.path is Path.WEB_SEARCH:
+        try:
+            grounded = await asyncio.to_thread(
+                web_search,
+                client=_web_search_client(),
+                model=settings.gemini_web_search_model,
+                query=decision.web_query or user_message,
+                prompt=prompt,
+                system_instruction=system_instruction,
+                usage_budget=_web_search_usage_budget(),
+            )
+        except WebSearchError as exc:
+            logger.warning("grounded web search unavailable: %s", exc)
+            reply = WEB_SEARCH_UNAVAILABLE_RESPONSE
+            model = None
+            tool_status = "unavailable"
+        else:
+            reply = grounded.response
+            model = grounded.model
+            web_sources = grounded.sources
+            tool_status = "success"
+    else:
+        reply, model = await asyncio.to_thread(_generate_reply, prompt, system_instruction)
     if reply_violates_safety(reply):
         logger.warning("blocked unsafe generated reply")
         reply = UNSAFE_REPLY_FALLBACK
@@ -450,6 +531,7 @@ async def run_agent(
         "generation",
         style,
         l4_start,
+        system_prompt_version=prompt_version,
         communication_style=style,
         preferred_name_set=bool(knobs.preferred_name),
         wellness_goal_set=bool(knobs.wellness_goal),
@@ -472,9 +554,10 @@ async def run_agent(
         route_reason=decision.reason,
         kb_used=bool(chunks),
         categories=list(decision.categories),
-        sources=_chunks_to_sources(chunks),
+        sources=web_sources or _chunks_to_sources(chunks),
         tools_used=tools_used,
-        search_query=decision.search_query or None,
+        search_query=(decision.web_query if decision.path is Path.WEB_SEARCH else decision.search_query)
+        or None,
         model=model,
         tool_status=tool_status,
         communication_style=style,

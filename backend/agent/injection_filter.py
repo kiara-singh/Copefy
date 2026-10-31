@@ -1,7 +1,7 @@
 """Instruction-overwrite filtering for user-authored persona fields.
 
-Strips sentences that try to replace Copefy's role or safety rules.
-Leaves ordinary preference text (tone, goals, format) intact.
+Strips sentences that try to replace Copefy's role or safety rules while
+leaving ordinary preference text (tone, goals, and format) intact.
 """
 
 from __future__ import annotations
@@ -9,17 +9,11 @@ from __future__ import annotations
 import re
 import unicodedata
 
-# Zero-width / tag characters used to hide override phrases.
-_STRIP_CHARS = dict.fromkeys(
-    map(
-        ord,
-        "\u200b\u200c\u200d\u2060\ufeff\u00ad",
-    )
+_STRIP_CHARS = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff\u00ad"))
+_DELIMITER_RE = re.compile(
+    r"</?(?:user_profile|active_persona)[^>]*>", re.IGNORECASE
 )
 
-_DELIMITER_RE = re.compile(r"</?user_profile[^>]*>", re.IGNORECASE)
-
-# After lowercase + whitespace collapse. Intentionally phrase-level, not a single word.
 _OVERRIDE_PATTERNS = (
     re.compile(r"\bignore (all |any |the )?(previous |prior |above |your )?(instructions?|prompts?|rules)\b"),
     re.compile(r"\bdisregard (all |any |the )?(previous |prior |above |your )?(instructions?|prompts?|rules)\b"),
@@ -48,10 +42,14 @@ STYLE_MAX_CHARS = 200
 GOAL_MAX_CHARS = 300
 COACHING_MAX_CHARS = 500
 NAME_MAX_CHARS = 50
+PERSONA_NAME_MAX_CHARS = 80
+PERSONA_ROLE_MAX_CHARS = 100
+PERSONA_TRAITS_MAX_CHARS = 300
+PERSONA_INSTRUCTIONS_MAX_CHARS = 500
 
 
 def normalize_untrusted(text: str) -> str:
-    """NFKC, drop zero-width chars, collapse whitespace. Used for matching only."""
+    """Normalize untrusted text for matching without changing benign meaning."""
     cleaned = unicodedata.normalize("NFKC", text).translate(_STRIP_CHARS)
     cleaned = "".join(ch for ch in cleaned if ch.isprintable() or ch in "\n\t")
     return " ".join(cleaned.split())
@@ -59,9 +57,7 @@ def normalize_untrusted(text: str) -> str:
 
 def _is_override_sentence(sentence: str) -> bool:
     collapsed = normalize_untrusted(sentence).lower()
-    if not collapsed:
-        return False
-    return any(pattern.search(collapsed) for pattern in _OVERRIDE_PATTERNS)
+    return bool(collapsed) and any(pattern.search(collapsed) for pattern in _OVERRIDE_PATTERNS)
 
 
 def strip_delimiter_spoof(text: str) -> str:
@@ -69,7 +65,7 @@ def strip_delimiter_spoof(text: str) -> str:
 
 
 def filter_instruction_overwrites(text: str | None, *, max_chars: int) -> str | None:
-    """Drop override sentences, cap length. Returns None if nothing usable remains."""
+    """Drop override sentences and cap length; preserve benign sentences."""
     if not text or not text.strip():
         return None
     stripped = strip_delimiter_spoof(text)
@@ -79,18 +75,14 @@ def filter_instruction_overwrites(text: str | None, *, max_chars: int) -> str | 
     kept = [part for part in parts if not _is_override_sentence(part)]
     if not kept:
         return None
-    joined = " ".join(kept)
-    joined = " ".join(joined.split())
-    if len(joined) > max_chars:
-        joined = joined[:max_chars].rstrip()
-    return joined or None
+    joined = " ".join(" ".join(kept).split())
+    return joined[:max_chars].rstrip() or None
 
 
 def filter_preferred_name(name: str | None) -> str | None:
     if not name or not name.strip():
         return None
-    cleaned = strip_delimiter_spoof(name)
-    cleaned = " ".join(cleaned.split())
+    cleaned = " ".join(strip_delimiter_spoof(name).split())
     if _is_override_sentence(cleaned):
         return None
     return cleaned[:NAME_MAX_CHARS] or None
@@ -108,7 +100,5 @@ _UNSAFE_REPLY_PATTERNS = (
 
 
 def reply_violates_safety(text: str) -> bool:
-    """True if a generated reply claims therapist identity or a clinical diagnosis."""
-    if not text:
-        return False
-    return any(pattern.search(text) for pattern in _UNSAFE_REPLY_PATTERNS)
+    """Detect the narrow unsafe reply classes covered by the partner gate."""
+    return bool(text) and any(pattern.search(text) for pattern in _UNSAFE_REPLY_PATTERNS)
