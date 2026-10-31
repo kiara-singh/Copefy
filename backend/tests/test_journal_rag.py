@@ -67,13 +67,33 @@ def test_vector_literal_formatting():
     assert literal == "[0.10000000,0.20000000,0.30000000]"
 
 
-def test_unknown_user_gets_no_journal_chunks():
+def test_unknown_user_gets_no_journal_chunks(monkeypatch):
     """A UUID with no rows must not receive someone else's journals.
 
     Do not call seed_synthetic_journals from tests. Mocked embed_query there
     wrote identical [0.01] vectors into the live journal_chunks table.
     """
     import asyncio
+    from unittest.mock import AsyncMock
+
+    class FakeConnection:
+        async def fetch(self, query, literal, user_id, match_count):
+            assert user_id == other_user_id
+            assert "WHERE jc.user_id = $2::uuid" in query
+            return []
+
+    class FakeAcquire:
+        async def __aenter__(self):
+            return FakeConnection()
+
+        async def __aexit__(self, *_args):
+            return None
+
+    class FakePool:
+        def acquire(self):
+            return FakeAcquire()
+
+    monkeypatch.setattr("db.get_pool", AsyncMock(return_value=FakePool()))
 
     other_user_id = "00000000-0000-0000-0000-000000000000"
 

@@ -3,16 +3,22 @@ import ChatTracePanel from "../components/chat_trace_panel";
 import { useChatSession } from "../contexts/chat_session_context";
 import {
   get_session_messages,
+  get_personas,
   is_rag_debug_enabled,
   send_chat,
+  type ChatSource,
   type ChatTrace,
+  type AIPersona,
 } from "../lib/api";
+
+const PERSONA_STORAGE_KEY = "copefy_active_persona_id";
 
 type ChatRole = "user" | "assistant";
 
 interface ChatMessage {
   role: ChatRole;
   content: string;
+  sources?: ChatSource[];
   trace?: ChatTrace;
 }
 
@@ -39,6 +45,8 @@ function HomePage() {
   const [is_listening, set_is_listening] = useState(false);
   const [speech_supported, set_speech_supported] = useState(true);
   const [speech_error, set_speech_error] = useState("");
+  const [personas, set_personas] = useState<AIPersona[]>([]);
+  const [selected_persona_id, set_selected_persona_id] = useState("");
   const scroll_anchor_ref = useRef<HTMLDivElement | null>(null);
   const sessions_ref = useRef(sessions);
   const recognition_ref = useRef<SpeechRecognition | null>(null);
@@ -123,6 +131,22 @@ function HomePage() {
       cancelled = true;
     };
   }, [session_id, loading_list, recover_session]);
+
+  useEffect(() => {
+    get_personas()
+      .then((available) => {
+        set_personas(available);
+        const saved = localStorage.getItem(PERSONA_STORAGE_KEY) ?? "";
+        if (available.some((persona) => persona.id === saved)) {
+          set_selected_persona_id(saved);
+        } else {
+          localStorage.removeItem(PERSONA_STORAGE_KEY);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load personas", error);
+      });
+  }, []);
 
   useEffect(() => {
     scroll_anchor_ref.current?.scrollIntoView({ behavior: "smooth" });
@@ -285,7 +309,7 @@ function HomePage() {
       let active_session = session_id;
       let data;
       try {
-        data = await send_chat(active_session, trimmed);
+        data = await send_chat(active_session, trimmed, selected_persona_id || null);
       } catch (error) {
         const detail = error instanceof Error ? error.message : "";
         if (!detail.includes("Chat not found")) {
@@ -293,13 +317,14 @@ function HomePage() {
         }
         // Stale local session id — open a real chat and retry once.
         active_session = await recover_session();
-        data = await send_chat(active_session, trimmed);
+        data = await send_chat(active_session, trimmed, selected_persona_id || null);
       }
       set_messages((prev) => [
         ...prev,
         {
           role: "assistant",
           content: data.response,
+          sources: data.sources,
           trace: data.trace,
         },
       ]);
@@ -335,11 +360,38 @@ function HomePage() {
     <div className="flex h-full flex-col">
       <header className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
         <span className="text-sm font-semibold text-slate-800">Chat</span>
-        {is_rag_debug_enabled && (
-          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-            Trace on
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-xs text-slate-600">
+            <span>Persona</span>
+            <select
+              aria-label="Active chat persona"
+              value={selected_persona_id}
+              onChange={(event) => {
+                const id = event.target.value;
+                set_selected_persona_id(id);
+                if (id) {
+                  localStorage.setItem(PERSONA_STORAGE_KEY, id);
+                } else {
+                  localStorage.removeItem(PERSONA_STORAGE_KEY);
+                }
+              }}
+              disabled={is_sending}
+              className="max-w-52 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:opacity-60"
+            >
+              <option value="">Default Copefy</option>
+              {personas.map((persona) => (
+                <option key={persona.id} value={persona.id}>
+                  {persona.name} · {persona.role_type}
+                </option>
+              ))}
+            </select>
+          </label>
+          {is_rag_debug_enabled && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+              Trace on
+            </span>
+          )}
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
@@ -373,6 +425,29 @@ function HomePage() {
                     {message.content}
                   </div>
                 </div>
+                {message.role === "assistant" && message.sources?.length ? (
+                  <div className="mt-2 max-w-[80%] rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+                    <p className="mb-1 font-medium text-slate-700">Sources</p>
+                    <ul className="space-y-1">
+                      {message.sources.map((source, sourceIndex) => (
+                        <li key={`${source.source_url ?? "source"}-${sourceIndex}`}>
+                          {source.source_url ? (
+                            <a
+                              href={source.source_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-indigo-600 underline hover:text-indigo-800"
+                            >
+                              {source.title ?? source.source_url}
+                            </a>
+                          ) : (
+                            source.title ?? `Source ${sourceIndex + 1}`
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 {is_rag_debug_enabled && message.trace && (
                   <ChatTracePanel trace={message.trace} />
                 )}

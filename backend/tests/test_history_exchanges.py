@@ -80,12 +80,12 @@ def test_current_user_message_stays_separate():
         None,
         None,
     )
-    assert prompt.index("Recent conversation:") < prompt.index(
-        "USER: use the bedtime I switched to"
+    assert prompt.index("<conversation_history_data_") < prompt.index(
+        "CURRENT USER REQUEST:\nuse the bedtime I switched to"
     )
     assert RECENT_FACT_REUSE_PROMPT in prompt
     # History block should not duplicate the current user line.
-    history_block = prompt.split("USER: use the bedtime I switched to")[0]
+    history_block = prompt.split("CURRENT USER REQUEST:\nuse the bedtime I switched to")[0]
     assert "use the bedtime I switched to" not in history_block
 
 

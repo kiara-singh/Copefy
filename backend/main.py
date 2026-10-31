@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import uuid
+from dataclasses import replace
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +13,7 @@ from auth import resolve_user_id
 from chat_history import summarize_sessions
 from config import settings
 from db import get_supabase
+from agent.persona import ActiveAIPersona
 from profiles import load_user_persona
 
 logger = logging.getLogger(__name__)
@@ -36,6 +38,7 @@ security = HTTPBearer()
 class ChatRequest(BaseModel):
     session_id: str
     message: str
+    persona_id: str | None = None
     debug: bool = Field(
         default=False,
         description=(
@@ -121,6 +124,29 @@ def _require_session_access(
     if auth_user_id and auth_user_id != owner_id:
         raise HTTPException(status_code=404, detail="Chat not found.")
     return owner_id
+
+
+def _load_owned_ai_persona(
+    client, persona_id: str, auth_user_id: str
+) -> ActiveAIPersona:
+    """Load a selected persona without disclosing another user's records."""
+    result = (
+        client.table("ai_personas")
+        .select("name, role_type, base_personality, custom_instructions")
+        .eq("id", persona_id)
+        .eq("user_id", auth_user_id)
+        .maybe_single()
+        .execute()
+    )
+    row = getattr(result, "data", None)
+    if not row or not isinstance(row, dict):
+        raise HTTPException(status_code=404, detail="Persona not found.")
+    return ActiveAIPersona(
+        name=row.get("name"),
+        role_type=row.get("role_type"),
+        base_personality=row.get("base_personality"),
+        custom_instructions=row.get("custom_instructions"),
+    )
 
 
 @app.get("/")
@@ -244,6 +270,11 @@ async def chat(
         _require_session_access, client, payload.session_id, user_id
     )
     persona = await asyncio.to_thread(load_user_persona, user_id)
+    if payload.persona_id:
+        active_persona = await asyncio.to_thread(
+            _load_owned_ai_persona, client, payload.persona_id, user_id
+        )
+        persona = replace(persona, active_persona=active_persona)
 
     await asyncio.to_thread(
         _insert_message, client, payload.session_id, "user", payload.message
@@ -307,6 +338,8 @@ async def chat(
     body: dict = {"response": result.response}
     # Client debug and server RAG_DEBUG may attach metadata. Raw retrieved
     # text never leaves this HTTP response.
+    if result.path == "web_search" and result.sources:
+        body["sources"] = result.sources
     if payload.debug or settings.rag_debug:
         body["trace"] = result.to_public_debug_dict()
     return body

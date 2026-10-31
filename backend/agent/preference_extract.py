@@ -1,8 +1,4 @@
-"""Map filtered persona text onto knobs Copefy is allowed to honor.
-
-Malicious instructions have no slot here. Remaining free text is quoted as
-description-only data, never as commands.
-"""
+"""Map filtered persona text onto personalization knobs Copefy may honor."""
 
 from __future__ import annotations
 
@@ -13,6 +9,10 @@ from agent.injection_filter import (
     COACHING_MAX_CHARS,
     GOAL_MAX_CHARS,
     STYLE_MAX_CHARS,
+    PERSONA_INSTRUCTIONS_MAX_CHARS,
+    PERSONA_NAME_MAX_CHARS,
+    PERSONA_ROLE_MAX_CHARS,
+    PERSONA_TRAITS_MAX_CHARS,
     filter_instruction_overwrites,
     filter_preferred_name,
 )
@@ -36,6 +36,35 @@ class PreferenceKnobs:
         return self.style_preset or DEFAULT_COMMUNICATION_STYLE
 
 
+@dataclass(frozen=True)
+class ActivePersonaKnobs:
+    name: str | None
+    role_type: str | None
+    personality: str | None
+    custom_guidance: str | None
+
+
+def extract_active_persona(persona: UserPersona | None) -> ActivePersonaKnobs:
+    """Filter every user-authored field of the selected AI persona."""
+    selected = persona.active_persona if persona else None
+    if selected is None:
+        return ActivePersonaKnobs(None, None, None, None)
+    return ActivePersonaKnobs(
+        name=filter_instruction_overwrites(
+            selected.name, max_chars=PERSONA_NAME_MAX_CHARS
+        ),
+        role_type=filter_instruction_overwrites(
+            selected.role_type, max_chars=PERSONA_ROLE_MAX_CHARS
+        ),
+        personality=filter_instruction_overwrites(
+            selected.base_personality, max_chars=PERSONA_TRAITS_MAX_CHARS
+        ),
+        custom_guidance=filter_instruction_overwrites(
+            selected.custom_instructions, max_chars=PERSONA_INSTRUCTIONS_MAX_CHARS
+        ),
+    )
+
+
 def extract_preference_knobs(persona: UserPersona | None) -> PreferenceKnobs:
     """Sanitize persona fields and keep only allowlisted personalization knobs."""
     from agent.persona import (
@@ -57,9 +86,8 @@ def extract_preference_knobs(persona: UserPersona | None) -> PreferenceKnobs:
 
     primary, _ = parse_wellness_fields(persona.wellness_goal)
     wellness_goal = filter_instruction_overwrites(primary, max_chars=GOAL_MAX_CHARS)
-    coaching_raw = resolve_coaching_preferences(persona)
     coaching_notes = filter_instruction_overwrites(
-        coaching_raw, max_chars=COACHING_MAX_CHARS
+        resolve_coaching_preferences(persona), max_chars=COACHING_MAX_CHARS
     )
     return PreferenceKnobs(
         preferred_name=filter_preferred_name(persona.preferred_name),

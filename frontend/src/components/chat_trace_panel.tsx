@@ -62,7 +62,7 @@ function layer_details(layer: PipelineLayer) {
                   {source.title ?? source.category ?? `Source ${index + 1}`}
                 </p>
                 <p className="text-slate-500">
-                  {source.category ?? "uncategorized"} · similarity {source.similarity}
+                  {source.category ?? "uncategorized"}{source.similarity !== undefined && ` · similarity ${source.similarity}`}
                   {source.created_at ? ` · ${source.created_at}` : ""}
                 </p>
                 {(source.chunk_id || source.document_id) && (
@@ -212,7 +212,7 @@ function ChatTracePanel({ trace }: ChatTracePanelProps) {
                 {source.title ?? source.category ?? `Source ${index + 1}`}
               </p>
               <p className="text-slate-500">
-                {source.category ?? "uncategorized"} · similarity {source.similarity}
+                {source.category ?? "uncategorized"}{source.similarity !== undefined && ` · similarity ${source.similarity}`}
                 {source.created_at ? ` · ${source.created_at}` : ""}
               </p>
               {(source.chunk_id || source.document_id) && (
