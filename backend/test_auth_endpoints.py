@@ -58,8 +58,8 @@ class TestAuthEndpoints(unittest.TestCase):
         self.assertEqual(inserted_data["user_id"], TEST_USER_ID)
 
     @patch("main.get_supabase")
-    def test_chat_unowned_session_forbidden(self, mock_get_supabase):
-        """Sending a message to a session owned by another user returns 403 Forbidden."""
+    def test_chat_unowned_session_is_not_disclosed(self, mock_get_supabase):
+        """An unowned session is reported like a missing chat to prevent enumeration."""
         mock_supabase = MagicMock()
         mock_user = MagicMock()
         mock_user.id = TEST_USER_ID
@@ -69,7 +69,9 @@ class TestAuthEndpoints(unittest.TestCase):
 
         # Mock session ownership check returning OTHER_USER_ID
         mock_select = MagicMock()
-        mock_select.execute.return_value = MagicMock(data=[{"user_id": OTHER_USER_ID}])
+        mock_select.maybe_single.return_value.execute.return_value = MagicMock(
+            data={"user_id": OTHER_USER_ID}
+        )
         mock_supabase.table("sessions").select.return_value.eq.return_value = mock_select
 
         mock_get_supabase.return_value = mock_supabase
@@ -80,8 +82,8 @@ class TestAuthEndpoints(unittest.TestCase):
             json={"session_id": SESSION_ID, "message": "hello"},
             headers=headers,
         )
-        self.assertEqual(res.status_code, 403)
-        self.assertIn("Access denied", res.json()["detail"])
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.json()["detail"], "Chat not found.")
 
     @patch("main.run_agent")
     @patch("main.get_supabase")
@@ -105,7 +107,9 @@ class TestAuthEndpoints(unittest.TestCase):
 
         # Mock session ownership check returning TEST_USER_ID
         mock_select = MagicMock()
-        mock_select.execute.return_value = MagicMock(data=[{"user_id": TEST_USER_ID}])
+        mock_select.maybe_single.return_value.execute.return_value = MagicMock(
+            data={"user_id": TEST_USER_ID}
+        )
         mock_supabase.table("sessions").select.return_value.eq.return_value = mock_select
 
         mock_get_supabase.return_value = mock_supabase

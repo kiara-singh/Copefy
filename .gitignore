@@ -18,6 +18,8 @@ venv/
 env/
 .pytest_cache/
 pytest-cache-files*/
+backend/.web_search_usage.sqlite3
+backend/.web_search_usage.sqlite3-*
 
 # Layer 3 bake-off dumps (summaries live in docs/)
 backend/eval/results/

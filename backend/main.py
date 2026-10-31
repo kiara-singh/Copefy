@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import uuid
+from dataclasses import replace
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +12,7 @@ from agent.orchestrator import run_agent
 from auth import resolve_user_id
 from config import settings
 from db import get_supabase
+from agent.persona import ActiveAIPersona
 from profiles import load_user_persona
 
 logger = logging.getLogger(__name__)
@@ -35,6 +37,7 @@ security = HTTPBearer()
 class ChatRequest(BaseModel):
     session_id: str
     message: str
+    persona_id: str | None = None
     debug: bool = Field(
         default=False,
         description="If true, include KB retrieval trace in the response.",
@@ -96,7 +99,8 @@ def _load_session_history(client, session_id: str) -> list[dict[str, str]]:
     return [{"role": row["role"], "content": row["content"]} for row in result.data]
 
 
-def _get_session_user_id(client, session_id: str) -> str:
+def _require_session_access(client, session_id: str, auth_user_id: str) -> str:
+    """Return the session owner without revealing whether another user's session exists."""
     result = (
         client.table("sessions")
         .select("user_id")
@@ -104,9 +108,35 @@ def _get_session_user_id(client, session_id: str) -> str:
         .maybe_single()
         .execute()
     )
-    if result.data and result.data.get("user_id"):
-        return str(result.data["user_id"])
-    return DEV_USER_ID
+    if not result.data or not result.data.get("user_id"):
+        raise HTTPException(status_code=404, detail="Chat not found.")
+    owner_id = str(result.data["user_id"])
+    if owner_id != auth_user_id:
+        raise HTTPException(status_code=404, detail="Chat not found.")
+    return owner_id
+
+
+def _load_owned_ai_persona(
+    client, persona_id: str, auth_user_id: str
+) -> ActiveAIPersona:
+    """Load a selected persona without disclosing another user's records."""
+    result = (
+        client.table("ai_personas")
+        .select("name, role_type, base_personality, custom_instructions")
+        .eq("id", persona_id)
+        .eq("user_id", auth_user_id)
+        .maybe_single()
+        .execute()
+    )
+    row = getattr(result, "data", None)
+    if not row or not isinstance(row, dict):
+        raise HTTPException(status_code=404, detail="Persona not found.")
+    return ActiveAIPersona(
+        name=row.get("name"),
+        role_type=row.get("role_type"),
+        base_personality=row.get("base_personality"),
+        custom_instructions=row.get("custom_instructions"),
+    )
 
 
 @app.get("/")
@@ -159,28 +189,16 @@ async def chat(
     logger.info("chat start session=%s user_id=%s", payload.session_id, user_id)
     client = _require_supabase()
 
-    # Verify session ownership
-    session_res = (
-        client.table("sessions")
-        .select("user_id")
-        .eq("id", payload.session_id)
-        .execute()
+    await asyncio.to_thread(
+        _require_session_access, client, payload.session_id, user_id
     )
 
-    if not session_res.data:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session not found.",
-        )
-
-    session_owner = str(session_res.data[0]["user_id"])
-    if session_owner != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied: You do not own this chat session.",
-        )
-
     persona = await asyncio.to_thread(load_user_persona, user_id)
+    if payload.persona_id:
+        active_persona = await asyncio.to_thread(
+            _load_owned_ai_persona, client, payload.persona_id, user_id
+        )
+        persona = replace(persona, active_persona=active_persona)
 
     await asyncio.to_thread(
         _insert_message, client, payload.session_id, "user", payload.message
@@ -242,6 +260,8 @@ async def chat(
     )
 
     body: dict = {"response": result.response}
+    if result.path == "web_search" and result.sources:
+        body["sources"] = result.sources
     if payload.debug or settings.rag_debug:
         body["trace"] = result.to_debug_dict()
     return body

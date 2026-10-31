@@ -1,6 +1,6 @@
 # Project State: Copefy
 
-This document captures the current implementation state of the Copefy repository as of August 2026. It serves as an accurate map of the codebase for engineers and AI subagents without relying on planned functionality or design specifications.
+This document captures the current implementation state of the Copefy repository as of September 2026. It serves as an accurate map of the codebase for engineers and AI subagents without relying on planned functionality or design specifications.
 
 ---
 
@@ -17,6 +17,7 @@ Copefy is an early-stage web application scaffold for an AI mental health and we
   - **Layer 3 Clinical KB Retrieval**: Production default `RAG_STRATEGY=mmr` diversity-reranked vector search over 1,123 clinical KB documents using 768-dimensional Gemini embeddings (`gemini-embedding-2` / `text-embedding-004`).
   - **Layer 2 User Journal Corpus**: Derived RAG retrieval system (`journal_chunks` table) using structure-aware paragraph/sentence-boundary chunking, 768-dim Gemini embeddings, idempotent ingestion, strict database-level user isolation (`WHERE user_id = authenticated_user_id`), MMR reranking, synthetic dataset seeder, and multi-corpus orchestration (`clinical`, `journal`, and `both`).
 - **Prompt Architecture**: Versioned Core System Prompt registry (`backend/agent/prompts.py`) separating the static system instruction baseline (`CORE_SYSTEM_PROMPT_V1`) from dynamic runtime user personalization context (`backend/agent/persona.py`). Dynamically assembled via `build_system_instruction(persona, version=settings.system_prompt_version)` with deprecated backward-compatibility aliases preserved.
+- **Prompt Safety Boundaries**: Profile/settings text is normalized, length-capped, filtered for common instruction-overwrite phrases, and mapped to allowlisted preference knobs. Free-form personalization, conversation history, Clinical KB excerpts, and journal excerpts are placed in nonce-delimited data blocks with explicit instructions not to execute embedded instructions. Generated replies receive a narrow deterministic post-check for therapist impersonation and explicit diagnosis claims.
 - A single-session React chat interface communicating with FastAPI backend `/chat`. Requests are authenticated via Bearer tokens, checking session ownership and storing messages in Supabase.
 - A journal entry form submitting text under the authenticated user's ID to Supabase with automatic structure-aware chunking and vector embedding ingestion.
 
@@ -39,7 +40,9 @@ Copefy/
 │   │   ├── routers/                         # Rule-based router (rule.py) and AI router (ai.py)
 │   │   ├── tools/                           # Tools: semantic_search.py, journal_search.py, web_search.py, etc.
 │   │   ├── orchestrator.py                  # Agent orchestrator running Layer 1 routing, tool execution, and reply generation
+│   │   ├── injection_filter.py              # Profile instruction-overwrite filtering and narrow output safety check
 │   │   ├── persona.py                       # User persona prompt builder and communication style formatter
+│   │   ├── preference_extract.py            # Filtered, allowlisted personalization knob extraction
 │   │   ├── prompts.py                       # Versioned Core System Prompts (V1), prompt registry, and crisis response templates
 │   │   └── types.py                         # AgentResult data model and trace serialization
 │   ├── config.py                            # Pydantic BaseSettings loading environment variables
@@ -60,6 +63,8 @@ Copefy/
 │   │   └── seed_dummy_journals.py           # Real-path synthetic dataset seeder (10 entries across topics)
 │   ├── tests/                               # Backend pytest test suite
 │   │   ├── test_journal_rag.py              # Journal chunking, embedding, user isolation, and smoke tests (5/5 PASS)
+│   │   ├── test_injection_filter.py          # Profile injection filtering and output-gate tests
+│   │   ├── test_safety_pipeline.py           # Deterministic end-to-end crisis, trust-boundary, and output-gate tests
 │   │   ├── test_retrieval_scoring.py        # Retrieval scoring tests
 │   │   └── test_retrieval_subdecisions.py   # Retrieval subdecision tests
 │   ├── test_auth_endpoints.py               # Unit test suite verifying JWT auth, session ownership, persona CRUD & medical document CRUD (15/15 PASS)
@@ -131,12 +136,14 @@ Copefy/
 | **Layer 2 Journal Corpus** | **Implemented** | Structure-aware paragraph/sentence-boundary chunking (`journal_chunking.py`), 768-dim Gemini embeddings (`embed.py`), idempotent ingestion (`journal_ingestion.py`), strict user-isolated pgvector search (`WHERE user_id = authenticated_user_id`), MMR reranking (`journal_retrieve.py`), synthetic dataset seeder (`seed_dummy_journals.py`), and `clinical`/`journal`/`both` multi-corpus orchestration (`orchestrator.py`). |
 | **V1 Journal Chunking Approach** | **Implemented** | V1 structure-aware boundary chunking (preserves paragraph boundaries `\n\n` and sentence integrity without mid-sentence splits or arbitrary length cuts). *Note: Sophisticated model-based semantic chunking has NOT yet been implemented.* |
 | **Medical Document RAG** | Not Implemented | PDF documents are stored in private Supabase Storage. Text extraction, OCR, document chunking, and medical RAG retrieval are explicitly NOT implemented yet. |
+| **Generation Safety Boundary** | **Implemented (narrow)** | Core System Prompt V1 remains authoritative; filtered personalization and retrieved/history context are nonce-delimited as untrusted data. A local post-generation gate blocks only covered therapist-impersonation and explicit-diagnosis patterns. Broad moderation, PII masking, and NeMo Guardrails are not implemented. |
 
 ---
 
 ## 7. Verification & Test Suite
 
-- **Backend Pytest Suite**: 37/37 passing (`tests/test_corpus_selection.py`, `tests/test_journal_rag.py`, `tests/test_retrieval_scoring.py`, `tests/test_retrieval_subdecisions.py`, `test_auth_endpoints.py`).
+- **Backend Pytest Suite**: 102/102 passing across `backend/tests` and `backend/test_auth_endpoints.py`.
+- **Focused Safety / Prompt / Auth Suite**: 62/62 passing, including deterministic crisis bypass, recent-history crisis continuation, figurative-language traps, profile injection, retrieved-context trust boundaries, narrow output blocking, journal isolation, and System Prompt V1 evaluation-harness checks.
 - **Layer 1 Golden Eval Suite**: 529/529 cases passing (100.0% overall accuracy, 100.0% crisis recall, 0 false positives).
 - **Layer 2 Corpus Selection Suite**: 36/36 cases passing (100.0% accuracy across clinical, journal, both, none).
 - **Synthetic Dataset**: 112 unique synthetic journal entries across 12 realistic life themes and timeline spreads, ingested into `journal_entries` and `journal_chunks` (114 chunks) with real 768-dimensional Gemini embeddings (`gemini-embedding-2`).

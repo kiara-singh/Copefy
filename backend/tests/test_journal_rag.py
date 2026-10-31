@@ -67,45 +67,18 @@ def test_vector_literal_formatting():
     assert literal == "[0.10000000,0.20000000,0.30000000]"
 
 
-@pytest.mark.asyncio
-async def test_user_isolation_and_smoke_queries():
-    """Requirements 5-10: Test ingestion, user isolation, and smoke query retrieval with mocked embeddings."""
-    mock_vector = [0.01] * 768
+def test_unknown_user_gets_no_journal_chunks():
+    """A UUID with no rows must not receive someone else's journals.
 
-    with patch("rag.embed.embed_query", return_value=mock_vector), \
-         patch("rag.journal_retrieve.embed_query", return_value=mock_vector):
+    Do not call seed_synthetic_journals from tests. Mocked embed_query there
+    wrote identical [0.01] vectors into the live journal_chunks table.
+    """
+    import asyncio
 
-        from scripts.seed_dummy_journals import seed_synthetic_journals
+    other_user_id = "00000000-0000-0000-0000-000000000000"
 
-        # Ensure synthetic dataset is seeded
-        seeded_user_id, _ = await seed_synthetic_journals()
+    async def _run():
+        with patch("rag.journal_retrieve.embed_query", return_value=[0.01] * 768):
+            return await search_journal_chunks(other_user_id, "exam anxiety", top_k=5)
 
-        # 1. User Isolation: Query for an unseeded random user UUID must return 0 chunks
-        other_user_id = "00000000-0000-0000-0000-000000000000"
-        other_results = await search_journal_chunks(other_user_id, "exam anxiety", top_k=5)
-        assert len(other_results) == 0, "User A retrieval returned chunks for unauthenticated User B!"
-
-        # 2. Smoke Query 1: Exam anxiety
-        exam_hits = await search_journal_chunks(seeded_user_id, "I'm nervous about my exam again.", top_k=3)
-        assert len(exam_hits) > 0
-        assert exam_hits[0].category == "journal"
-
-        # 3. Smoke Query 2: Presentation anxiety
-        pres_hits = await search_journal_chunks(seeded_user_id, "Presentations always make me anxious.", top_k=3)
-        assert len(pres_hits) > 0
-        assert pres_hits[0].category == "journal"
-
-        # 4. Smoke Query 3: Roommate conflict
-        roommate_hits = await search_journal_chunks(seeded_user_id, "What did I say about my roommate?", top_k=3)
-        assert len(roommate_hits) > 0
-        assert roommate_hits[0].category == "journal"
-
-        # 5. Smoke Query 4: Difficulty sleeping
-        sleep_hits = await search_journal_chunks(seeded_user_id, "I've been having trouble sleeping again.", top_k=3)
-        assert len(sleep_hits) > 0
-        assert sleep_hits[0].category == "journal"
-
-        # 6. Smoke Query 5: Exercise mood boost
-        exercise_hits = await search_journal_chunks(seeded_user_id, "Exercise seemed to help me before.", top_k=3)
-        assert len(exercise_hits) > 0
-        assert exercise_hits[0].category == "journal"
+    assert asyncio.run(_run()) == []

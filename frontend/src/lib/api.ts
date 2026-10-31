@@ -8,9 +8,9 @@ export interface ChatSource {
   title: string | null;
   source_url: string | null;
   category: string | null;
-  similarity: number;
-  preview: string;
-  excerpt: string;
+  similarity?: number;
+  preview?: string;
+  excerpt?: string;
 }
 
 export interface PipelineLayer {
@@ -61,6 +61,7 @@ export interface ChatTrace {
 
 export interface ChatResponse {
   response: string;
+  sources?: ChatSource[];
   trace?: ChatTrace;
 }
 
@@ -175,11 +176,13 @@ export async function create_session(): Promise<string> {
 
 export async function send_chat(
   session_id: string,
-  message: string
+  message: string,
+  persona_id?: string | null
 ): Promise<ChatResponse> {
   return await api_request<ChatResponse>("/chat", "POST", {
     session_id,
     message,
+    persona_id: persona_id ?? null,
     debug: RAG_DEBUG,
   });
 }
